@@ -91,7 +91,7 @@
         </table>
     }
 *@
-@using (Html.BeginForm("BasicContentEditold", "Variant", new { variantId = Model.VariantId }, FormMethod.Post, new { encType = "multipart/form-data", name = "myform" }))
+@using (Html.BeginForm("BasicContentEditold", "Variant", new { variantId = Model.VariantId }, FormMethod.Post, null, new { encType = "multipart/form-data", name = "myform" }))
 {
     @Html.AntiForgeryToken()
     <div class="form-horizontal">

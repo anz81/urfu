@@ -8,16 +8,16 @@
 @if (ViewBag.SecurityMessage != null)
 {
     <h4>@ViewBag.SecurityMessage</h4>
-    if (Request.UrlReferrer != null)
+    if (Context.Request.Headers["Referer"].ToString() != null)
     {
-        <a href="@Html.Encode(Request.UrlReferrer)">Вернуться назад</a>
+        <a href="@Html.Encode(Context.Request.Headers["Referer"].ToString())">Вернуться назад</a>
     }
 }
 
 <div class="row">
     <div class="col-md-8">
         <section id="loginForm">
-            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
             {
                 @Html.AntiForgeryToken()
                 if (ViewBag.SecurityMessage == null)
@@ -74,5 +74,5 @@
     </div>*@
 </div>
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-}
+    <script src="~/bundles/jqueryval"></script>
+            }

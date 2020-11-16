@@ -40,6 +40,7 @@ namespace Urfu.Its.Web.Controllers
     {
         private ApplicationUserManager _userManager;
         private IDataProtector _protector;
+        public SignInManager<ApplicationUser> _signinmanager;
 
         public AccountController()
         {
@@ -48,12 +49,30 @@ namespace Urfu.Its.Web.Controllers
         public AccountController(ApplicationUserManager userManager)
         {
             UserManager = userManager;
+            _signinmanager = new SignInManager<ApplicationUser>(userManager, null, null, null, null, null, null);
+        }
+        public AccountController(ApplicationUserManager userManager, IHttpContextAccessor ca, IUserClaimsPrincipalFactory<ApplicationUser> claim, Microsoft.Extensions.Options.IOptions<IdentityOptions> io,
+            Microsoft.Extensions.Logging.ILogger<SignInManager<ApplicationUser>> log, Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider scheme, IUserConfirmation<ApplicationUser> confirm)
+        {
+            UserManager = userManager;
+            _signinmanager = new SignInManager<ApplicationUser>(userManager, ca, claim, io, log, scheme, confirm);
         }
         public AccountController(IDataProtectionProvider provider)
         {
             _protector = provider.CreateProtector("AccountController");
         }
-
+        public SignInManager<ApplicationUser> SignInM
+        {
+            get
+            {
+                return _signinmanager ?? HttpContext.RequestServices.GetRequiredService<SignInManager<ApplicationUser>>();
+            }
+            set
+            {
+                _signinmanager = value;
+            }
+        }
+        
         public ApplicationUserManager UserManager
         {
             get
@@ -984,8 +1003,8 @@ namespace Urfu.Its.Web.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> ExternalLoginCallback(string returnUrl)
         {
-            var sim = new SignInManager<ApplicationUser>(UserManager, null, null, null, null, null, null);
-            var loginInfo = await sim.GetExternalLoginInfoAsync();
+            
+            var loginInfo = await _signinmanager.GetExternalLoginInfoAsync();
             if (loginInfo == null)
             {
                 return RedirectToAction("Login");
@@ -1016,13 +1035,21 @@ namespace Urfu.Its.Web.Controllers
             // Request a redirect to the external login provider to link a login for the current user
             return new ChallengeResult(provider, Url.Action("LinkLoginCallback", "Account"), User.Identity.Name);
         }
-
+        [AllowAnonymous]
+        public async Task<IEnumerable<AuthenticationScheme>> AskAuthScheme()
+        {
+            //var sim = new SignInManager<ApplicationUser>(UserManager, null, null, null, null, null, null);
+            var loginInfo = await _signinmanager.GetExternalAuthenticationSchemesAsync();
+            //var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync(XsrfKey, User.Identity.Name);
+            
+            return loginInfo;
+        }
         //
         // GET: /Account/LinkLoginCallback
         public async Task<ActionResult> LinkLoginCallback()
         {
-            var sim = new SignInManager<ApplicationUser>(UserManager, null, null, null, null, null, null);
-            var loginInfo = await sim.GetExternalLoginInfoAsync();
+            //var sim = new SignInManager<ApplicationUser>(UserManager, null, null, null, null, null, null);
+            var loginInfo = await _signinmanager.GetExternalLoginInfoAsync();
             //var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync(XsrfKey, User.Identity.Name);
             if (loginInfo == null)
             {
@@ -1052,8 +1079,8 @@ namespace Urfu.Its.Web.Controllers
             if (ModelState.IsValid)
             {
                 // Get the information about the user from the external login provider
-                var sim = new SignInManager<ApplicationUser>(UserManager, null, null, null, null, null, null);
-                var info = await sim.GetExternalLoginInfoAsync();
+                //var sim = new SignInManager<ApplicationUser>(UserManager, null, null, null, null, null, null);
+                var info = await _signinmanager.GetExternalLoginInfoAsync();
                 if (info == null)
                 {
                     return View("ExternalLoginFailure");

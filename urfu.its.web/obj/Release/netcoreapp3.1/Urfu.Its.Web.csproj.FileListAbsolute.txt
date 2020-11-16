@@ -1,0 +1,6 @@
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web\obj\Release\netcoreapp3.1\Urfu.Its.Web.csprojAssemblyReference.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web\obj\Release\netcoreapp3.1\Urfu.Its.Web.AssemblyInfoInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web\obj\Release\netcoreapp3.1\Urfu.Its.Web.AssemblyInfo.cs
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web\obj\Release\netcoreapp3.1\Urfu.Its.Web.csproj.CoreCompileInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web\obj\Release\netcoreapp3.1\Urfu.Its.Web.RazorAssemblyInfo.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web\obj\Release\netcoreapp3.1\Urfu.Its.Web.RazorAssemblyInfo.cs

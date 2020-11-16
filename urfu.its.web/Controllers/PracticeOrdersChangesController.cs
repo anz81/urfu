@@ -229,7 +229,7 @@ namespace Urfu.Its.Web.Controllers
                     case PtraciceDecreeStatus.Revision:
                         {
                             var model = PracticeOrdersHelper.GetModel(decree);
-                            var he = new HostingEnvironment();
+                            var he = Startup._enviroment;
 
                             var fullName = Path.Combine(he.ContentRootPath, @"PracticeChangedOrder.docx");
 
@@ -284,7 +284,7 @@ namespace Urfu.Its.Web.Controllers
                 }
 
                 var model = PracticeOrdersHelper.GetModel(decree);
-                var he = new HostingEnvironment();
+                var he = Startup._enviroment;
 
                 var fullName = Path.Combine(he.ContentRootPath, @"PracticeChangedOrder.docx");
 

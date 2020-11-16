@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Autofac.Integration.AspNetCore.Multitenant</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.AspNetCore.Hosting.AutofacMultitenantServiceCollectionExtensions">
+            <summary>
+            Extension methods for the <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> interface.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.Hosting.AutofacMultitenantServiceCollectionExtensions.AddAutofacMultitenantRequestServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds the multitenant Autofac request services middleware, which ensures request lifetimes spawn from the container
+            rather than a pre-resolved tenant lifetime scope. This allows tenant identification to occur at the time of request
+            scope generation.
+            </summary>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> instance being configured.</param>
+            <returns>The existing <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> instance.</returns>
+            <exception cref="T:System.ArgumentNullException">
+            Thrown if <paramref name="services" /> is <see langword="null" />.
+            </exception>
+        </member>
+        <member name="T:Microsoft.AspNetCore.Hosting.AutofacMultitenantServiceProviderFactory">
+            <summary>
+            A factory for creating a <see cref="T:Autofac.ContainerBuilder"/> and an <see cref="T:System.IServiceProvider" /> for usage with a <see cref="T:Autofac.Multitenant.MultitenantContainer" /> in ASP.NET Core.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.Hosting.AutofacMultitenantServiceProviderFactory.#ctor(System.Func{Autofac.IContainer,Autofac.Multitenant.MultitenantContainer},System.Action{Autofac.ContainerBuilder})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.AspNetCore.Hosting.AutofacMultitenantServiceProviderFactory"/> class.
+            </summary>
+            <param name="multitenantContainerAccessor">A function that will access the multitenant container from which request lifetimes should be generated.</param>
+            <param name="configurationAction">Action on a <see cref="T:Autofac.ContainerBuilder"/> that adds component registrations to the conatiner.</param>
+            <exception cref="T:System.ArgumentNullException"></exception>
+            Thrown if <paramref name="multitenantContainerAccessor" /> is <see langword="null" />.
+        </member>
+        <member name="M:Microsoft.AspNetCore.Hosting.AutofacMultitenantServiceProviderFactory.CreateBuilder(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Creates a container builder from an <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" />.
+            </summary>
+            <param name="services">The collection of services.</param>
+            <returns>A container builder that can be used to create an <see cref="T:System.IServiceProvider" />.</returns>
+        </member>
+        <member name="M:Microsoft.AspNetCore.Hosting.AutofacMultitenantServiceProviderFactory.CreateServiceProvider(Autofac.ContainerBuilder)">
+            <summary>
+            Creates an <see cref="T:System.IServiceProvider" /> from the container builder.
+            </summary>
+            <param name="containerBuilder">The container builder.</param>
+            <returns>An <see cref="T:System.IServiceProvider" />.</returns>
+        </member>
+        <member name="T:Microsoft.AspNetCore.Hosting.AutofacMultitenantWebHostBuilderExtensions">
+            <summary>
+            Extension methods for the <see cref="T:Microsoft.AspNetCore.Hosting.IWebHostBuilder"/> interface.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.Hosting.AutofacMultitenantWebHostBuilderExtensions.UseAutofacMultitenantRequestServices(Microsoft.AspNetCore.Hosting.IWebHostBuilder)">
+            <summary>
+            Adds the multitenant Autofac request services middleware, which ensures request lifetimes spawn from the container
+            rather than a pre-resolved tenant lifetime scope. This allows tenant identification to occur at the time of request
+            scope generation.
+            </summary>
+            <param name="builder">The <see cref="T:Microsoft.AspNetCore.Hosting.IWebHostBuilder"/> instance being configured.</param>
+            <returns>The existing <see cref="T:Microsoft.AspNetCore.Hosting.IWebHostBuilder"/> instance.</returns>
+            <exception cref="T:System.ArgumentNullException">
+            Thrown if <paramref name="builder" /> is <see langword="null" />.
+            </exception>
+        </member>
+        <member name="T:Autofac.Integration.AspNetCore.Multitenant.AutofacMultitenantServiceProvider">
+            <summary>
+            Autofac implementation of the ASP.NET Core <see cref="T:System.IServiceProvider"/> for a <see cref="T:Autofac.Multitenant.MultitenantContainer" />.
+            </summary>
+            <seealso cref="T:System.IServiceProvider" />
+        </member>
+        <member name="M:Autofac.Integration.AspNetCore.Multitenant.AutofacMultitenantServiceProvider.#ctor(Autofac.Multitenant.MultitenantContainer)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Autofac.Integration.AspNetCore.Multitenant.AutofacMultitenantServiceProvider"/> class.
+            </summary>
+            <param name="multitenantContainer">The <see cref="T:Autofac.Multitenant.MultitenantContainer"/>.</param>
+        </member>
+        <member name="T:Autofac.Integration.AspNetCore.Multitenant.AutofacMultitenantServiceProviderExtensions">
+            <summary>
+            Extension methods for use with the <see cref="T:Autofac.Integration.AspNetCore.Multitenant.AutofacMultitenantServiceProvider"/>.
+            </summary>
+        </member>
+        <member name="M:Autofac.Integration.AspNetCore.Multitenant.AutofacMultitenantServiceProviderExtensions.GetAutofacMultitenantRoot(System.IServiceProvider)">
+            <summary>
+            Tries to cast the instance of <see cref="T:Autofac.Multitenant.MultitenantContainer"/> from <see cref="T:Autofac.Integration.AspNetCore.Multitenant.AutofacMultitenantServiceProvider"/> when possible.
+            </summary>
+            <param name="serviceProvider">The instance of <see cref="T:System.IServiceProvider"/>.</param>
+            <returns>Returns the instance of <see cref="T:Autofac.Multitenant.MultitenantContainer"/> exposed by <see cref="T:Autofac.Integration.AspNetCore.Multitenant.AutofacMultitenantServiceProvider"/> when it can be casted down from <see cref="T:Autofac.ILifetimeScope"/>.</returns>
+            <exception cref="T:System.InvalidOperationException">
+            Thrown if <paramref name="serviceProvider" /> can't be casted to <see cref="T:Autofac.Multitenant.MultitenantContainer"/>.
+            </exception>.
+        </member>
+        <member name="T:Autofac.Integration.AspNetCore.Multitenant.MultitenantRequestServicesMiddleware">
+            <summary>
+            Middleware that forces the request lifetime scope to be created from the multitenant container
+            directly to avoid inadvertent incorrect tenant identification.
+            </summary>
+        </member>
+        <member name="M:Autofac.Integration.AspNetCore.Multitenant.MultitenantRequestServicesMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate,Microsoft.AspNetCore.Http.IHttpContextAccessor,System.IServiceProvider)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Autofac.Integration.AspNetCore.Multitenant.MultitenantRequestServicesMiddleware"/> class.
+            </summary>
+            <param name="next">The next step in the request pipeline.</param>
+            <param name="contextAccessor">The <see cref="T:Microsoft.AspNetCore.Http.IHttpContextAccessor"/> to set up with the current request context.</param>
+            <param name="serviceProvider">The <see cref="T:System.IServiceProvider"/> to retrieve the <see cref="T:Autofac.Multitenant.MultitenantContainer"/> registered through <see cref="T:Autofac.Integration.AspNetCore.Multitenant.AutofacMultitenantServiceProvider"/>.</param>
+        </member>
+        <member name="M:Autofac.Integration.AspNetCore.Multitenant.MultitenantRequestServicesMiddleware.Invoke(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Invokes the middleware using the specified context.
+            </summary>
+            <param name="context">
+            The request context to process through the middleware.
+            </param>
+            <returns>
+            A <see cref="T:System.Threading.Tasks.Task"/> to await for completion of the operation.
+            </returns>
+        </member>
+        <member name="T:Autofac.Integration.AspNetCore.Multitenant.MultitenantRequestServicesStartupFilter">
+            <summary>
+            ASP.NET startup filter that adds the <see cref="T:Autofac.Integration.AspNetCore.Multitenant.MultitenantRequestServicesMiddleware"/>
+            to the request pipeline. Ensure this runs before all other startup filters
+            or the multitenant request services may not happen until after the standard
+            request services middleware has already run.
+            </summary>
+            <seealso cref="T:Microsoft.AspNetCore.Hosting.IStartupFilter" />
+        </member>
+        <member name="M:Autofac.Integration.AspNetCore.Multitenant.MultitenantRequestServicesStartupFilter.Configure(System.Action{Microsoft.AspNetCore.Builder.IApplicationBuilder})">
+            <summary>
+            Adds the multitenant request services middleware to the app pipeline.
+            </summary>
+            <param name="next">
+            The next middleware registration method that should execute.
+            </param>
+            <returns>
+            The <see cref="T:System.Action`1"/> for continued configuration or execution.
+            </returns>
+        </member>
+        <member name="T:Autofac.Integration.AspNetCore.Multitenant.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Autofac.Integration.AspNetCore.Multitenant.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Autofac.Integration.AspNetCore.Multitenant.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Autofac.Integration.AspNetCore.Multitenant.Properties.Resources.NoMultitenantContainerAvailable">
+            <summary>
+              Looks up a localized string similar to The multitenant container accessor didn&apos;t provide a multitenant container. Check your UseAutofacMultitenantRequestServices method call to ensure the container accessor is correctly set up..
+            </summary>
+        </member>
+        <member name="P:Autofac.Integration.AspNetCore.Multitenant.Properties.Resources.NoSupportedRequestServicesConstructorFound">
+            <summary>
+              Looks up a localized string similar to Unable to find a RequestServicesFeature constructor that is supported..
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,4 +1,5 @@
 ﻿@using Urfu.Its.Common
+@using Microsoft.AspNetCore.Routing
 @using Urfu.Its.Web.DataContext
 @model Urfu.Its.VersionedDocs.ViewModels.DocumentViewModel
 
@@ -11,11 +12,11 @@
     <h1>@ViewBag.Title</h1>
 </div>
 
-<a class="btn btn-default" href="@Url.Action("Print", new RouteValueDictionary(Request.QueryStringToRouteValueDictionary()) { { "id", Model.DocumentId }, { "format", "docx"} })" download>Печатная форма (docx)</a>
+<a class="btn btn-default" href="@Url.Action("Print", new RouteValueDictionary(Context.Request.RouteValues) { { "id", Model.DocumentId }, { "format", "docx"} })" download>Печатная форма (docx)</a>
 
 @if (Model.DocumentType == VersionedDocumentType.BasicCharacteristicOP)
 {
-    <a class="btn btn-default" href="@Url.Action("Archive", new RouteValueDictionary(Request.QueryStringToRouteValueDictionary()) { { "id", Model.DocumentId } })" download>Архив (zip)</a>
+    <a class="btn btn-default" href="@Url.Action("Archive", new RouteValueDictionary(Context.Request.RouteValues) { { "id", Model.DocumentId } })" download>Архив (zip)</a>
 }
 
 @if (new []
@@ -36,7 +37,7 @@
     <ul class="list-group" style="margin-top: 30px">
         @foreach (var s in Model.Sections)
         {
-            <li class="list-group-item"><a href="@Url.Action("Section", new RouteValueDictionary(Request.QueryStringToRouteValueDictionary()) {{"id", Model.DocumentId}, {"section", s.SystemName}})">@s.DisplayName</a></li>
+            <li class="list-group-item"><a href="@Url.Action("Section", new RouteValueDictionary(Context.Request.RouteValues) {{"id", Model.DocumentId}, {"section", s.SystemName}})">@s.DisplayName</a></li>
         }
     </ul>
 }

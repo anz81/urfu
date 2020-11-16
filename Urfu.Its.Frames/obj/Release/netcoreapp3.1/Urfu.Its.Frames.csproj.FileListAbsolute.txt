@@ -1,0 +1,6 @@
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Frames\obj\Release\netcoreapp3.1\Urfu.Its.Frames.csprojAssemblyReference.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Frames\obj\Release\netcoreapp3.1\Urfu.Its.Frames.AssemblyInfoInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Frames\obj\Release\netcoreapp3.1\Urfu.Its.Frames.AssemblyInfo.cs
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Frames\obj\Release\netcoreapp3.1\Urfu.Its.Frames.csproj.CoreCompileInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Frames\obj\Release\netcoreapp3.1\Urfu.Its.Frames.RazorAssemblyInfo.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Frames\obj\Release\netcoreapp3.1\Urfu.Its.Frames.RazorAssemblyInfo.cs

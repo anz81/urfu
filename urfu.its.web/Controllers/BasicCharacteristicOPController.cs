@@ -573,7 +573,7 @@ namespace Urfu.Its.Web.Controllers
             try
             {
                 var model = JsonConvert.DeserializeObject<ApprovalActTemplateModel>(act);
-                var he = new HostingEnvironment();
+                var he = Startup._enviroment;
 
                 var fullName = Path.Combine(he.ContentRootPath, @"ApprovalAct.docx");
 

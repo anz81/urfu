@@ -30,7 +30,7 @@ namespace Urfu.Its.Web.Excel
 
         public Stream Export(object obj, string templateFile, List<ReportDynamicColumn> dynColumns = null)
         {
-            var he = new HostingEnvironment();
+            var he = Urfu.Its.Web.Startup._enviroment;
             using (var fileStream = File.Open(he.ContentRootPath + templateFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (var package = new ExcelPackage(fileStream))
             {

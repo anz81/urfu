@@ -2,7 +2,7 @@
 @model Urfu.Its.Web.DataContext.VariantContent
 
 @{
-    ViewBag.Title = ViewBag.IsBase ? "Редактирование модуля в версии ОП": "Редактирование модуля в траектории";
+    ViewBag.Title = ViewBag.IsBase ? "Редактирование модуля в версии ОП" : "Редактирование модуля в траектории";
 }
 
 <h2>@ViewBag.Title</h2>
@@ -11,7 +11,7 @@
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    
+
     <div class="form-horizontal">
         <hr />
         @Html.ValidationSummary(true)
@@ -27,7 +27,7 @@
             </div>
         </div>
 
-        <div class="form-group"> 
+        <div class="form-group">
             @Html.LabelFor(model => model.Selectable, new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.EditorFor(model => model.Selectable)
@@ -36,12 +36,12 @@
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.RequirmentsIds, "Пререквизиты", new {@class = "control-label col-md-2"})
+            @Html.LabelFor(model => model.RequirmentsIds, "Пререквизиты", new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.ListBox("RequirmentsIds", null, new { size = 15, style = "max-width: 600px;" })
                 @*@Html.ListBoxFor(x => x.Requirments,
-          new MultiSelectList(Model.PrecursosrAvailable, "Id", "Module.title", Model.Requirments),
-                 new { Multiple = "multiple" })  *@
+                    new MultiSelectList(Model.PrecursosrAvailable, "Id", "Module.title", Model.Requirments),
+                           new { Multiple = "multiple" })  *@
                 @Html.ValidationMessageFor(model => model.RequirmentsIds)
             </div>
         </div>
@@ -88,28 +88,28 @@
             </table>
         </div>
 
-            <div class="form-group">
-                @Html.LabelFor(model => model.VariantGroupId, "Группа", new { @class = "control-label col-md-2" })
-                <div class="col-md-10">
-                    @Html.DropDownList("VariantGroupId", String.Empty)
-                    @Html.ValidationMessageFor(model => model.VariantGroupId)
-                </div>
-            </div>
-
-            <div class="form-group">
-                <div class="col-md-offset-2 col-md-10">
-                    <input type="submit" value="Сохранить" class="btn btn-default" />
-                </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.VariantGroupId, "Группа", new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("VariantGroupId", String.Empty)
+                @Html.ValidationMessageFor(model => model.VariantGroupId)
             </div>
         </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Сохранить" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
 }
 @*
-<div>
-    @Html.ActionLink("Back to List", "Index")
-</div>*@
+    <div>
+        @Html.ActionLink("Back to List", "Index")
+    </div>*@
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/bundles/jqueryval"></script>
     <script>
         /*$('option').mousedown(function (e) {
             e.preventDefault();

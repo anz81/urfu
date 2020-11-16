@@ -32,4 +32,10 @@
 	<ItemGroup>
 	  <AdditionalDesignTimeBuildInput Remove="FakesAssemblies\**" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Compile Remove="Properties\AssemblyInfo.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Properties\" />
+	</ItemGroup>
 </Project>

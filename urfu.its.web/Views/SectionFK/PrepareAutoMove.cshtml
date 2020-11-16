@@ -83,7 +83,7 @@
 
 <div>
     <hr />
-    @using (Html.BeginForm("ExecuteAutoMove", "SectionFK", new { year = (int)ViewBag.year, semester = (int)ViewBag.semester,course = (int?)ViewBag.course, modules = (string)ViewBag.modules }, FormMethod.Post, new { id = "execform" }))
+    @using (Html.BeginForm("ExecuteAutoMove", "SectionFK", new { year = (int)ViewBag.year, semester = (int)ViewBag.semester,course = (int?)ViewBag.course, modules = (string)ViewBag.modules }, FormMethod.Post, null, new { id = "execform" }))
     {
         @Html.AntiForgeryToken()
 

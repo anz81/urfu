@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <OutputType>Library</OutputType>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>Urfu.Its.Web.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>

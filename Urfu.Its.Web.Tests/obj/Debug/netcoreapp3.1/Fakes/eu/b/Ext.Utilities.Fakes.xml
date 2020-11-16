@@ -1,0 +1,500 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ext.Utilities.Fakes</name>
+    </assembly>
+    <members>
+        <member name="T:Ext.Utilities.Fakes.ShimFilterRule">
+            <summary>Тип оболочки совместимости для Ext.Utilities.FilterRule</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRule.#ctor">
+            <summary>Инициализация нового экземпляра оболочки совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRule.#ctor(Ext.Utilities.FilterRule)">
+            <summary>Инициализация новой оболочки совместимости для заданного экземпляра</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.ShimFilterRule.AllInstances">
+            <summary>Определение оболочек совместимости для всех членов экземпляров</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRule.AllInstances.PropertyGet">
+            <summary>Задает оболочка совместимости FilterRule.get_Property(FilterRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRule.AllInstances.PropertySetString">
+            <summary>Задает оболочка совместимости FilterRule.set_Property(FilterRule this, String value)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRule.AllInstances.ValueGet">
+            <summary>Задает оболочка совместимости FilterRule.get_Value(FilterRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRule.AllInstances.ValueSetString">
+            <summary>Задает оболочка совместимости FilterRule.set_Value(FilterRule this, String value)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRule.AllInstances.VerbGet">
+            <summary>Задает оболочка совместимости FilterRule.get_Verb(FilterRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRule.AllInstances.VerbSetString">
+            <summary>Задает оболочка совместимости FilterRule.set_Verb(FilterRule this, String value)</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRule.BehaveAsCurrent">
+            <summary>Назначение поведения &quot;Current&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRule.BehaveAsNotImplemented">
+            <summary>Назначение поведения &quot;NotImplemented&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRule.Behavior">
+            <summary>Назначение поведения всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRule.Constructor">
+            <summary>Задает оболочка совместимости FilterRule.FilterRule(FilterRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRule.PropertyGet">
+            <summary>Задает оболочка совместимости FilterRule.get_Property(FilterRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRule.PropertySetString">
+            <summary>Задает оболочка совместимости FilterRule.set_Property(FilterRule this, String value)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRule.ValueGet">
+            <summary>Задает оболочка совместимости FilterRule.get_Value(FilterRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRule.ValueSetString">
+            <summary>Задает оболочка совместимости FilterRule.set_Value(FilterRule this, String value)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRule.VerbGet">
+            <summary>Задает оболочка совместимости FilterRule.get_Verb(FilterRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRule.VerbSetString">
+            <summary>Задает оболочка совместимости FilterRule.set_Verb(FilterRule this, String value)</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.ShimFilterRules">
+            <summary>Тип оболочки совместимости для Ext.Utilities.FilterRules</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRules.#ctor">
+            <summary>Инициализация нового экземпляра оболочки совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRules.#ctor(Ext.Utilities.FilterRules)">
+            <summary>Инициализация новой оболочки совместимости для заданного экземпляра</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.ShimFilterRules.AllInstances">
+            <summary>Определение оболочек совместимости для всех членов экземпляров</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRules.BehaveAsCurrent">
+            <summary>Назначение поведения &quot;Current&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRules.BehaveAsNotImplemented">
+            <summary>Назначение поведения &quot;NotImplemented&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRules.Behavior">
+            <summary>Назначение поведения всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRules.Bind(System.Collections.ICollection)">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRules.Bind(System.Collections.IEnumerable)">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRules.Bind(System.Collections.IList)">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRules.Bind(System.Collections.Generic.ICollection{Ext.Utilities.FilterRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRules.Bind(System.Collections.Generic.IEnumerable{Ext.Utilities.FilterRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRules.Bind(System.Collections.Generic.IList{Ext.Utilities.FilterRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRules.Bind(System.Collections.Generic.IReadOnlyCollection{Ext.Utilities.FilterRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimFilterRules.Bind(System.Collections.Generic.IReadOnlyList{Ext.Utilities.FilterRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRules.Constructor">
+            <summary>Задает оболочка совместимости FilterRules.FilterRules(FilterRules this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimFilterRules.DeserializeString">
+            <summary>Задает оболочка совместимости FilterRules.Deserialize(String json)</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.ShimObjectableFilterRule">
+            <summary>Тип оболочки совместимости для Ext.Utilities.ObjectableFilterRule</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRule.#ctor">
+            <summary>Инициализация нового экземпляра оболочки совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRule.#ctor(Ext.Utilities.ObjectableFilterRule)">
+            <summary>Инициализация новой оболочки совместимости для заданного экземпляра</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.ShimObjectableFilterRule.AllInstances">
+            <summary>Определение оболочек совместимости для всех членов экземпляров</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRule.AllInstances.PropertyGet">
+            <summary>Задает оболочка совместимости ObjectableFilterRule.get_Property(ObjectableFilterRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRule.AllInstances.PropertySetString">
+            <summary>Задает оболочка совместимости ObjectableFilterRule.set_Property(ObjectableFilterRule this, String value)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRule.AllInstances.ValueGet">
+            <summary>Задает оболочка совместимости ObjectableFilterRule.get_Value(ObjectableFilterRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRule.AllInstances.ValueSetObject">
+            <summary>Задает оболочка совместимости ObjectableFilterRule.set_Value(ObjectableFilterRule this, Object value)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRule.AllInstances.VerbGet">
+            <summary>Задает оболочка совместимости ObjectableFilterRule.get_Verb(ObjectableFilterRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRule.AllInstances.VerbSetString">
+            <summary>Задает оболочка совместимости ObjectableFilterRule.set_Verb(ObjectableFilterRule this, String value)</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRule.BehaveAsCurrent">
+            <summary>Назначение поведения &quot;Current&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRule.BehaveAsNotImplemented">
+            <summary>Назначение поведения &quot;NotImplemented&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRule.Behavior">
+            <summary>Назначение поведения всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRule.Constructor">
+            <summary>Задает оболочка совместимости ObjectableFilterRule.ObjectableFilterRule(ObjectableFilterRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRule.PropertyGet">
+            <summary>Задает оболочка совместимости ObjectableFilterRule.get_Property(ObjectableFilterRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRule.PropertySetString">
+            <summary>Задает оболочка совместимости ObjectableFilterRule.set_Property(ObjectableFilterRule this, String value)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRule.ValueGet">
+            <summary>Задает оболочка совместимости ObjectableFilterRule.get_Value(ObjectableFilterRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRule.ValueSetObject">
+            <summary>Задает оболочка совместимости ObjectableFilterRule.set_Value(ObjectableFilterRule this, Object value)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRule.VerbGet">
+            <summary>Задает оболочка совместимости ObjectableFilterRule.get_Verb(ObjectableFilterRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRule.VerbSetString">
+            <summary>Задает оболочка совместимости ObjectableFilterRule.set_Verb(ObjectableFilterRule this, String value)</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.ShimObjectableFilterRules">
+            <summary>Тип оболочки совместимости для Ext.Utilities.ObjectableFilterRules</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRules.#ctor">
+            <summary>Инициализация нового экземпляра оболочки совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRules.#ctor(Ext.Utilities.ObjectableFilterRules)">
+            <summary>Инициализация новой оболочки совместимости для заданного экземпляра</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.ShimObjectableFilterRules.AllInstances">
+            <summary>Определение оболочек совместимости для всех членов экземпляров</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRules.BehaveAsCurrent">
+            <summary>Назначение поведения &quot;Current&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRules.BehaveAsNotImplemented">
+            <summary>Назначение поведения &quot;NotImplemented&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRules.Behavior">
+            <summary>Назначение поведения всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRules.Bind(System.Collections.ICollection)">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRules.Bind(System.Collections.IEnumerable)">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRules.Bind(System.Collections.IList)">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRules.Bind(System.Collections.Generic.ICollection{Ext.Utilities.ObjectableFilterRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRules.Bind(System.Collections.Generic.IEnumerable{Ext.Utilities.ObjectableFilterRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRules.Bind(System.Collections.Generic.IList{Ext.Utilities.ObjectableFilterRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRules.Bind(System.Collections.Generic.IReadOnlyCollection{Ext.Utilities.ObjectableFilterRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimObjectableFilterRules.Bind(System.Collections.Generic.IReadOnlyList{Ext.Utilities.ObjectableFilterRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRules.Constructor">
+            <summary>Задает оболочка совместимости ObjectableFilterRules.ObjectableFilterRules(ObjectableFilterRules this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimObjectableFilterRules.DeserializeString">
+            <summary>Задает оболочка совместимости ObjectableFilterRules.Deserialize(String json)</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.ShimSortDirectionTypeEnumConverter">
+            <summary>Тип оболочки совместимости для Ext.Utilities.SortDirectionTypeEnumConverter</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortDirectionTypeEnumConverter.#ctor">
+            <summary>Инициализация нового экземпляра оболочки совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortDirectionTypeEnumConverter.#ctor(Ext.Utilities.SortDirectionTypeEnumConverter)">
+            <summary>Инициализация новой оболочки совместимости для заданного экземпляра</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.ShimSortDirectionTypeEnumConverter.AllInstances">
+            <summary>Определение оболочек совместимости для всех членов экземпляров</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortDirectionTypeEnumConverter.AllInstances.CanConvertType">
+            <summary>Задает оболочка совместимости SortDirectionTypeEnumConverter.CanConvert(SortDirectionTypeEnumConverter this, Type objectType)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortDirectionTypeEnumConverter.AllInstances.ReadJsonJsonReaderTypeObjectJsonSerializer">
+            <summary>Задает оболочка совместимости SortDirectionTypeEnumConverter.ReadJson(SortDirectionTypeEnumConverter this, JsonReader reader, Type objectType, Object existingValue, JsonSerializer serializer)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortDirectionTypeEnumConverter.AllInstances.WriteJsonJsonWriterObjectJsonSerializer">
+            <summary>Задает оболочка совместимости SortDirectionTypeEnumConverter.WriteJson(SortDirectionTypeEnumConverter this, JsonWriter writer, Object value, JsonSerializer serializer)</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortDirectionTypeEnumConverter.BehaveAsCurrent">
+            <summary>Назначение поведения &quot;Current&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortDirectionTypeEnumConverter.BehaveAsNotImplemented">
+            <summary>Назначение поведения &quot;NotImplemented&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortDirectionTypeEnumConverter.Behavior">
+            <summary>Назначение поведения всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortDirectionTypeEnumConverter.CanConvertType">
+            <summary>Задает оболочка совместимости SortDirectionTypeEnumConverter.CanConvert(SortDirectionTypeEnumConverter this, Type objectType)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortDirectionTypeEnumConverter.Constructor">
+            <summary>Задает оболочка совместимости SortDirectionTypeEnumConverter.SortDirectionTypeEnumConverter(SortDirectionTypeEnumConverter this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortDirectionTypeEnumConverter.ReadJsonJsonReaderTypeObjectJsonSerializer">
+            <summary>Задает оболочка совместимости SortDirectionTypeEnumConverter.ReadJson(SortDirectionTypeEnumConverter this, JsonReader reader, Type objectType, Object existingValue, JsonSerializer serializer)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortDirectionTypeEnumConverter.WriteJsonJsonWriterObjectJsonSerializer">
+            <summary>Задает оболочка совместимости SortDirectionTypeEnumConverter.WriteJson(SortDirectionTypeEnumConverter this, JsonWriter writer, Object value, JsonSerializer serializer)</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.ShimSortRule">
+            <summary>Тип оболочки совместимости для Ext.Utilities.SortRule</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRule.#ctor">
+            <summary>Инициализация нового экземпляра оболочки совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRule.#ctor(Ext.Utilities.SortRule)">
+            <summary>Инициализация новой оболочки совместимости для заданного экземпляра</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.ShimSortRule.AllInstances">
+            <summary>Определение оболочек совместимости для всех членов экземпляров</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortRule.AllInstances.DirectionGet">
+            <summary>Задает оболочка совместимости SortRule.get_Direction(SortRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortRule.AllInstances.DirectionSetSortDirection">
+            <summary>Задает оболочка совместимости SortRule.set_Direction(SortRule this, SortDirection value)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortRule.AllInstances.PropertyGet">
+            <summary>Задает оболочка совместимости SortRule.get_Property(SortRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortRule.AllInstances.PropertySetString">
+            <summary>Задает оболочка совместимости SortRule.set_Property(SortRule this, String value)</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRule.BehaveAsCurrent">
+            <summary>Назначение поведения &quot;Current&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRule.BehaveAsNotImplemented">
+            <summary>Назначение поведения &quot;NotImplemented&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortRule.Behavior">
+            <summary>Назначение поведения всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortRule.Constructor">
+            <summary>Задает оболочка совместимости SortRule.SortRule(SortRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortRule.DirectionGet">
+            <summary>Задает оболочка совместимости SortRule.get_Direction(SortRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortRule.DirectionSetSortDirection">
+            <summary>Задает оболочка совместимости SortRule.set_Direction(SortRule this, SortDirection value)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortRule.PropertyGet">
+            <summary>Задает оболочка совместимости SortRule.get_Property(SortRule this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortRule.PropertySetString">
+            <summary>Задает оболочка совместимости SortRule.set_Property(SortRule this, String value)</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.ShimSortRules">
+            <summary>Тип оболочки совместимости для Ext.Utilities.SortRules</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRules.#ctor">
+            <summary>Инициализация нового экземпляра оболочки совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRules.#ctor(Ext.Utilities.SortRules)">
+            <summary>Инициализация новой оболочки совместимости для заданного экземпляра</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.ShimSortRules.AllInstances">
+            <summary>Определение оболочек совместимости для всех членов экземпляров</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRules.BehaveAsCurrent">
+            <summary>Назначение поведения &quot;Current&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRules.BehaveAsNotImplemented">
+            <summary>Назначение поведения &quot;NotImplemented&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortRules.Behavior">
+            <summary>Назначение поведения всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRules.Bind(System.Collections.ICollection)">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRules.Bind(System.Collections.IEnumerable)">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRules.Bind(System.Collections.IList)">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRules.Bind(System.Collections.Generic.ICollection{Ext.Utilities.SortRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRules.Bind(System.Collections.Generic.IEnumerable{Ext.Utilities.SortRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRules.Bind(System.Collections.Generic.IList{Ext.Utilities.SortRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRules.Bind(System.Collections.Generic.IReadOnlyCollection{Ext.Utilities.SortRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.ShimSortRules.Bind(System.Collections.Generic.IReadOnlyList{Ext.Utilities.SortRule})">
+            <summary>Привязка членов интерфейса к оболочке совместимости.</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortRules.Constructor">
+            <summary>Задает оболочка совместимости SortRules.SortRules(SortRules this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.ShimSortRules.DeserializeString">
+            <summary>Задает оболочка совместимости SortRules.Deserialize(String json)</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.StubFilterRule">
+            <summary>Тип заглушки Ext.Utilities.FilterRule</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.StubFilterRule.#ctor">
+            <summary>Инициализирует новый экземпляр</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.StubFilterRule.CallBase">
+            <summary>Получает или задает значение, указывающее, следует ли вызывать базовый метод вместо резервного поведения</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.StubFilterRule.InitializeStub">
+            <summary>Инициализирует новый экземпляр type StubFilterRule</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.StubFilterRule.InstanceBehavior">
+            <summary>Получает или задает поведение экземпляра.</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.StubFilterRule.InstanceObserver">
+            <summary>Получает или задает наблюдатель экземпляра.</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.StubObjectableFilterRule">
+            <summary>Тип заглушки Ext.Utilities.ObjectableFilterRule</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.StubObjectableFilterRule.#ctor">
+            <summary>Инициализирует новый экземпляр</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.StubObjectableFilterRule.CallBase">
+            <summary>Получает или задает значение, указывающее, следует ли вызывать базовый метод вместо резервного поведения</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.StubObjectableFilterRule.InitializeStub">
+            <summary>Инициализирует новый экземпляр type StubObjectableFilterRule</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.StubObjectableFilterRule.InstanceBehavior">
+            <summary>Получает или задает поведение экземпляра.</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.StubObjectableFilterRule.InstanceObserver">
+            <summary>Получает или задает наблюдатель экземпляра.</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter">
+            <summary>Тип заглушки Ext.Utilities.SortDirectionTypeEnumConverter</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.#ctor">
+            <summary>Инициализирует новый экземпляр</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.CallBase">
+            <summary>Получает или задает значение, указывающее, следует ли вызывать базовый метод вместо резервного поведения</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.CanConvert(System.Type)">
+            <summary>Задает заглушка SortDirectionTypeEnumConverter.CanConvert(SortDirectionTypeEnumConverter this, Type objectType)</summary>
+        </member>
+        <member name="F:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.CanConvertType">
+            <summary>Задает stub SortDirectionTypeEnumConverter.CanConvert(SortDirectionTypeEnumConverter this, Type objectType)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.CanRead">
+            <summary>Задает stub JsonConverter.get_CanRead(JsonConverter this)</summary>
+        </member>
+        <member name="F:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.CanReadGet">
+            <summary>Задает stub JsonConverter.get_CanRead(JsonConverter this)</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.CanWrite">
+            <summary>Задает stub JsonConverter.get_CanWrite(JsonConverter this)</summary>
+        </member>
+        <member name="F:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.CanWriteGet">
+            <summary>Задает stub JsonConverter.get_CanWrite(JsonConverter this)</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.InitializeStub">
+            <summary>Инициализирует новый экземпляр type StubSortDirectionTypeEnumConverter</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.InstanceBehavior">
+            <summary>Получает или задает поведение экземпляра.</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.InstanceObserver">
+            <summary>Получает или задает наблюдатель экземпляра.</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.ReadJson(Newtonsoft.Json.JsonReader,System.Type,System.Object,Newtonsoft.Json.JsonSerializer)">
+            <summary>Задает заглушка SortDirectionTypeEnumConverter.ReadJson(SortDirectionTypeEnumConverter this, JsonReader reader, Type objectType, Object existingValue, JsonSerializer serializer)</summary>
+        </member>
+        <member name="F:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.ReadJsonJsonReaderTypeObjectJsonSerializer">
+            <summary>Задает stub SortDirectionTypeEnumConverter.ReadJson(SortDirectionTypeEnumConverter this, JsonReader reader, Type objectType, Object existingValue, JsonSerializer serializer)</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.WriteJson(Newtonsoft.Json.JsonWriter,System.Object,Newtonsoft.Json.JsonSerializer)">
+            <summary>Задает заглушка SortDirectionTypeEnumConverter.WriteJson(SortDirectionTypeEnumConverter this, JsonWriter writer, Object value, JsonSerializer serializer)</summary>
+        </member>
+        <member name="F:Ext.Utilities.Fakes.StubSortDirectionTypeEnumConverter.WriteJsonJsonWriterObjectJsonSerializer">
+            <summary>Задает stub SortDirectionTypeEnumConverter.WriteJson(SortDirectionTypeEnumConverter this, JsonWriter writer, Object value, JsonSerializer serializer)</summary>
+        </member>
+        <member name="T:Ext.Utilities.Fakes.StubSortRule">
+            <summary>Тип заглушки Ext.Utilities.SortRule</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.StubSortRule.#ctor">
+            <summary>Инициализирует новый экземпляр</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.StubSortRule.CallBase">
+            <summary>Получает или задает значение, указывающее, следует ли вызывать базовый метод вместо резервного поведения</summary>
+        </member>
+        <member name="M:Ext.Utilities.Fakes.StubSortRule.InitializeStub">
+            <summary>Инициализирует новый экземпляр type StubSortRule</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.StubSortRule.InstanceBehavior">
+            <summary>Получает или задает поведение экземпляра.</summary>
+        </member>
+        <member name="P:Ext.Utilities.Fakes.StubSortRule.InstanceObserver">
+            <summary>Получает или задает наблюдатель экземпляра.</summary>
+        </member>
+        <member name="T:Ext.Utilities.Linq.Fakes.ShimQueryable">
+            <summary>Тип оболочки совместимости для Ext.Utilities.Linq.Queryable</summary>
+        </member>
+        <member name="M:Ext.Utilities.Linq.Fakes.ShimQueryable.#ctor">
+            <summary>Инициализация нового экземпляра оболочки совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Linq.Fakes.ShimQueryable.BehaveAsCurrent">
+            <summary>Назначение поведения &quot;Current&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Linq.Fakes.ShimQueryable.BehaveAsNotImplemented">
+            <summary>Назначение поведения &quot;NotImplemented&quot; всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="P:Ext.Utilities.Linq.Fakes.ShimQueryable.Behavior">
+            <summary>Назначение поведения всем методам типа с оболочкой совместимости</summary>
+        </member>
+        <member name="M:Ext.Utilities.Linq.Fakes.ShimQueryable.OrderByOf1IQueryableOfM0SortRule``1(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Linq.IQueryable{``0},Ext.Utilities.SortRule,System.Linq.IQueryable{``0}})">
+            <summary>Задает оболочка совместимости Queryable.OrderBy(IQueryable`1 query, SortRule rule)</summary>
+        </member>
+        <member name="M:Ext.Utilities.Linq.Fakes.ShimQueryable.OrderByOf2IQueryableOfM0SortRuleExpressionOfFuncOfM0M1``2(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Linq.IQueryable{``0},Ext.Utilities.SortRule,System.Linq.Expressions.Expression{System.Func{``0,``1}},System.Linq.IQueryable{``0}})">
+            <summary>Задает оболочка совместимости Queryable.OrderBy(IQueryable`1 query, SortRule rule, Expression`1 keySelector)</summary>
+        </member>
+        <member name="M:Ext.Utilities.Linq.Fakes.ShimQueryable.WhereOf1IQueryableOfM0FilterRules``1(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Linq.IQueryable{``0},Ext.Utilities.FilterRules,System.Linq.IQueryable{``0}})">
+            <summary>Задает оболочка совместимости Queryable.Where(IQueryable`1 query, FilterRules rules)</summary>
+        </member>
+        <member name="M:Ext.Utilities.Linq.Fakes.ShimQueryable.WhereOf1IQueryableOfM0ObjectableFilterRules``1(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Linq.IQueryable{``0},Ext.Utilities.ObjectableFilterRules,System.Linq.IQueryable{``0}})">
+            <summary>Задает оболочка совместимости Queryable.Where(IQueryable`1 query, ObjectableFilterRules rules)</summary>
+        </member>
+    </members>
+</doc>

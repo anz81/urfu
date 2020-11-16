@@ -71,7 +71,7 @@
 
 <div>
     <hr />
-    @using (Html.BeginForm("CalculateAutoAdmissions", "SectionFKAdmission", new { competitionGroupId = Model.SemesterId}, FormMethod.Post,new {id="execform"}))
+    @using (Html.BeginForm("CalculateAutoAdmissions", "SectionFKAdmission", new { competitionGroupId = Model.SemesterId}, FormMethod.Post, null, new {id="execform"}))
     {
         @Html.AntiForgeryToken()
 

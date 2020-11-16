@@ -12,11 +12,11 @@
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.Module.title)
+            @Html.DisplayNameFor(model => model.Meta.Module.title)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.Module.title)
+            @Html.DisplayFor(model => model.Meta.Module.title)
         </dd>
 
         <dt>
@@ -28,19 +28,19 @@
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.Program.Name)
+            @Html.DisplayNameFor(model => model.Meta.Program.Name)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.Program.Name)
+            @Html.DisplayFor(model => model.Meta.Program.Name)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.Variant.Name)
+            @Html.DisplayNameFor(model => model.Meta.Program.Variant.Name)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.Variant.Name)
+            @Html.DisplayFor(model => model.Meta.Program.Variant.Name)
         </dd>
 
         <dt>
@@ -52,11 +52,11 @@
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.SubgroupType)
+            @Html.DisplayNameFor(model => model.Meta.Program.Variant.Groups.Select(type => type.SubgroupType))
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.SubgroupType)
+            @Html.DisplayFor(model => model.Meta.Program.Variant.Groups.Select(type => type.SubgroupType))
         </dd>
 
     </dl>

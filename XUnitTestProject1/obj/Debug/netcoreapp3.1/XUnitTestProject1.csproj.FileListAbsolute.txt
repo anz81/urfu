@@ -1,0 +1,4 @@
+D:\-urfu\its\Urfu.Its.Web\XUnitTestProject1\obj\Debug\netcoreapp3.1\XUnitTestProject1.csprojAssemblyReference.cache
+D:\-urfu\its\Urfu.Its.Web\XUnitTestProject1\obj\Debug\netcoreapp3.1\XUnitTestProject1.AssemblyInfoInputs.cache
+D:\-urfu\its\Urfu.Its.Web\XUnitTestProject1\obj\Debug\netcoreapp3.1\XUnitTestProject1.AssemblyInfo.cs
+D:\-urfu\its\Urfu.Its.Web\XUnitTestProject1\obj\Debug\netcoreapp3.1\XUnitTestProject1.csproj.CoreCompileInputs.cache

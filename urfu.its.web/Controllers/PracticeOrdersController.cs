@@ -626,7 +626,7 @@ namespace Urfu.Its.Web.Controllers
 
                         var model = PracticeOrdersHelper.GetModel(decree);
 
-                            HostingEnvironment hi = new HostingEnvironment();
+                            var hi = Startup._enviroment;
                             var fullName = Path.Combine(hi.ContentRootPath, @"PracticeOrder.docx");
 
                             using (var input = System.IO.File.Open(fullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -668,7 +668,7 @@ namespace Urfu.Its.Web.Controllers
                     return Json(new { success = false, message = $"Приказ не сформирован" });
 
                 var model = PracticeOrdersHelper.GetModel(decree);
-                var hi = new HostingEnvironment();
+                var hi = Startup._enviroment;
                 var fullName = System.IO.Path.Combine(hi.ContentRootPath, @"PracticeOrder.docx");
 
                 using (var input = System.IO.File.Open(fullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -710,7 +710,7 @@ namespace Urfu.Its.Web.Controllers
                 }
 
                 var model = PracticeOrdersHelper.GetModel(decree);
-                var hi = new HostingEnvironment();
+                var hi = Startup._enviroment;
                 var fullName = Path.Combine(hi.ContentRootPath, @"PracticeOrder.docx");
 
                 var user = db.Users.FirstOrDefault(u => u.UserName == User.Identity.Name);

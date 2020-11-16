@@ -23,14 +23,16 @@ namespace Urfu.Its.Web
 {
     public partial class Startup
     {
-        public Startup(HostingEnvironment env)
+        public Startup()
         {
-           // Configuration = configuration;
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
+            // Configuration = configuration;
+            var env = new HostingEnvironment();
+            _enviroment = env;
+            var builder = new ConfigurationBuilder();/*
+                .SetBasePath(_enviroment.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddEnvironmentVariables();
+                .AddEnvironmentVariables();*/
             this.Configuration = builder.Build();
         }
 
@@ -61,10 +63,8 @@ namespace Urfu.Its.Web
                   options.AccessDeniedPath = new PathString("/Security/Access");
                   options.LoginPath = new PathString("/Security/Login");
               });
-
-
         }
-
+        public static HostingEnvironment _enviroment;
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {

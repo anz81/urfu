@@ -195,26 +195,26 @@
                     @for (var i = 0; i < Model.periods.Count; i++)
                     {
                         var p = Model.periods[i];
-                    <tr>
-                        @Html.HiddenFor(m => m.periods[i].id)
-                        @Html.HiddenFor(m => m.periods[i].isDeleted)
-                        <td>
-                            @Html.DisplayFor(m => m.periods[i].year, new { htmlAttributes = new { @class = "form-control" } })
-                        </td>
-                        <td>
-                            @Html.DisplayFor(m => m.periods[i].semesterName, new { htmlAttributes = new { @class = "form-control" } })
-                        </td>
-                        <td>@Html.DisplayFor(m => m.periods[i].Course,new { htmlAttributes = new { @class = "form-control" } })</td>
-                        <td>
-                            @Html.DisplayFor(m => m.periods[i].SelectionBegin, new { htmlAttributes = new { @class = "form-control datecontrol", type = "date" } })
-                        </td>
-                        <td>
-                            @Html.DisplayFor(m => m.periods[i].selectionDeadline, new { htmlAttributes = new { @class = "form-control datecontrol", type = "date" } })
-                        </td>
-                        <td>
-                            @Html.DisplayFor(m => m.periods[i].Male, new { htmlAttributes = new { @class = "form-control" } })
-                        </td>
-                    </tr>
+                        <tr>
+                            @Html.HiddenFor(m => m.periods[i].id)
+                            @Html.HiddenFor(m => m.periods[i].isDeleted)
+                            <td>
+                                @Html.DisplayFor(m => m.periods[i].year, new { htmlAttributes = new { @class = "form-control" } })
+                            </td>
+                            <td>
+                                @Html.DisplayFor(m => m.periods[i].semesterName, new { htmlAttributes = new { @class = "form-control" } })
+                            </td>
+                            <td>@Html.DisplayFor(m => m.periods[i].Course, new { htmlAttributes = new { @class = "form-control" } })</td>
+                            <td>
+                                @Html.DisplayFor(m => m.periods[i].SelectionBegin, new { htmlAttributes = new { @class = "form-control datecontrol", type = "date" } })
+                            </td>
+                            <td>
+                                @Html.DisplayFor(m => m.periods[i].selectionDeadline, new { htmlAttributes = new { @class = "form-control datecontrol", type = "date" } })
+                            </td>
+                            <td>
+                                @Html.DisplayFor(m => m.periods[i].Male, new { htmlAttributes = new { @class = "form-control" } })
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>
@@ -235,9 +235,9 @@
     @Html.ActionLink("Вернуться к списку", "Index", new { focus = Model.moduleUUId })
 </div>
 
-@section Scripts 
+@section Scripts
 {
-    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/bundles/jqueryval"></script>
 
 <script>
     if (!Modernizr.inputtypes.date) {

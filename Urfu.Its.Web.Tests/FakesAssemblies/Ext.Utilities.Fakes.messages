@@ -1,0 +1,3 @@
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web.Tests\Fakes\Ext.Utilities01.fakes : warning : Невозможно создать заглушку для Ext.Utilities.SortDirection: тип является типом значения.
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web.Tests\Fakes\Ext.Utilities01.fakes : warning : Невозможно создать заглушку для Ext.Utilities.Linq.Queryable: тип не содержит видимые для семейства конструкторы.
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web.Tests\Fakes\Ext.Utilities01.fakes : warning : Невозможно создать оболочку совместимости для Ext.Utilities.SortDirection: тип является перечислением.

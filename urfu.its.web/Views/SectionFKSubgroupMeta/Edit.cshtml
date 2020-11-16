@@ -59,7 +59,7 @@
         @if (@Model.Tmer.Tmer.kmer == "TLEKC" || @Model.Tmer.Tmer.kmer == "TPRAK")
         {
             <div class="form-group">
-                @Html.Label(Model.Tmer.Tmer.kmer == "TLEKC" ? "Распределение практических занятий" : "Распределение лабораторных занятий", htmlAttributes: new { @class = "control-label col-md-2" })
+                @Html.Label(Model.Tmer.Tmer.kmer == "TLEKC" ? "Распределение практических занятий" : "Распределение лабораторных занятий", "", htmlAttributes: new { @class = "control-label col-md-2" })
                 <div class="col-md-10">
                     @Html.EditorFor(model => model.Distribution, new { htmlAttributes = new { @class = "form-control", type = "hidden" } })
                     @Html.ValidationMessageFor(model => model.Distribution, "", new { @class = "text-danger" })

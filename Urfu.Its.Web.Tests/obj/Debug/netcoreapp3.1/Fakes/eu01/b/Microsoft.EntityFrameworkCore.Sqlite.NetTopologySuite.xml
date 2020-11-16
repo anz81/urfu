@@ -1,0 +1,313 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.EntityFrameworkCore.Sqlite.NetTopologySuite</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.EntityFrameworkCore.Sqlite.Design.Internal.SqliteNetTopologySuiteDesignTimeServices">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.Sqlite.Design.Internal.SqliteNetTopologySuiteDesignTimeServices.ConfigureDesignTimeServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="T:Microsoft.EntityFrameworkCore.Sqlite.Infrastructure.Internal.SqliteNetTopologySuiteOptionsExtension">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="P:Microsoft.EntityFrameworkCore.Sqlite.Infrastructure.Internal.SqliteNetTopologySuiteOptionsExtension.Info">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.Sqlite.Infrastructure.Internal.SqliteNetTopologySuiteOptionsExtension.ApplyServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.Sqlite.Infrastructure.Internal.SqliteNetTopologySuiteOptionsExtension.Validate(Microsoft.EntityFrameworkCore.Infrastructure.IDbContextOptions)">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="T:Microsoft.EntityFrameworkCore.Sqlite.Internal.SqliteNTSStrings">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="P:Microsoft.EntityFrameworkCore.Sqlite.Internal.SqliteNTSStrings.NTSServicesMissing">
+            <summary>
+                UseNetTopologySuite requires AddEntityFrameworkSqliteNetTopologySuite to be called on the internal service provider used.
+            </summary>
+        </member>
+        <member name="T:Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteNetTopologySuiteMemberTranslatorPlugin">
+            <summary>
+                <para>
+                    This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                    the same compatibility standards as public APIs. It may be changed or removed without notice in
+                    any release. You should only use it directly in your code with extreme caution and knowing that
+                    doing so can result in application failures when updating to a new Entity Framework Core release.
+                </para>
+                <para>
+                    The service lifetime is <see cref="F:Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton"/>. This means a single instance
+                    is used by many <see cref="T:Microsoft.EntityFrameworkCore.DbContext"/> instances. The implementation must be thread-safe.
+                    This service cannot depend on services registered as <see cref="F:Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped"/>.
+                </para>
+            </summary>
+        </member>
+        <member name="P:Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteNetTopologySuiteMemberTranslatorPlugin.Translators">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="T:Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteNetTopologySuiteMethodCallTranslatorPlugin">
+            <summary>
+                <para>
+                    This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                    the same compatibility standards as public APIs. It may be changed or removed without notice in
+                    any release. You should only use it directly in your code with extreme caution and knowing that
+                    doing so can result in application failures when updating to a new Entity Framework Core release.
+                </para>
+                <para>
+                    The service lifetime is <see cref="F:Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton"/> and multiple registrations
+                    are allowed. This means a single instance of each service is used by many <see cref="T:Microsoft.EntityFrameworkCore.DbContext"/>
+                    instances. The implementation must be thread-safe.
+                    This service cannot depend on services registered as <see cref="F:Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped"/>.
+                </para>
+            </summary>
+        </member>
+        <member name="P:Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteNetTopologySuiteMethodCallTranslatorPlugin.Translators">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="T:Microsoft.EntityFrameworkCore.Sqlite.Scaffolding.Internal.SqliteNetTopologySuiteCodeGeneratorPlugin">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.Sqlite.Scaffolding.Internal.SqliteNetTopologySuiteCodeGeneratorPlugin.GenerateProviderOptions">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="T:Microsoft.EntityFrameworkCore.Sqlite.Storage.Internal.SqliteGeometryTypeMapping`1">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.Sqlite.Storage.Internal.SqliteGeometryTypeMapping`1.#ctor(NetTopologySuite.NtsGeometryServices,System.String)">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.Sqlite.Storage.Internal.SqliteGeometryTypeMapping`1.#ctor(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters,Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter{`0,System.Byte[]})">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.Sqlite.Storage.Internal.SqliteGeometryTypeMapping`1.Clone(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMapping.RelationalTypeMappingParameters)">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.Sqlite.Storage.Internal.SqliteGeometryTypeMapping`1.GenerateNonNullSqlLiteral(System.Object)">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.Sqlite.Storage.Internal.SqliteGeometryTypeMapping`1.GetDataReaderMethod">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.Sqlite.Storage.Internal.SqliteGeometryTypeMapping`1.AsText(System.Object)">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.Sqlite.Storage.Internal.SqliteGeometryTypeMapping`1.GetSrid(System.Object)">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="P:Microsoft.EntityFrameworkCore.Sqlite.Storage.Internal.SqliteGeometryTypeMapping`1.WKTReaderType">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="T:Microsoft.EntityFrameworkCore.Sqlite.Storage.Internal.SqliteNetTopologySuiteTypeMappingSourcePlugin">
+            <summary>
+                <para>
+                    This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                    the same compatibility standards as public APIs. It may be changed or removed without notice in
+                    any release. You should only use it directly in your code with extreme caution and knowing that
+                    doing so can result in application failures when updating to a new Entity Framework Core release.
+                </para>
+                <para>
+                    The service lifetime is <see cref="F:Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton"/> and multiple registrations
+                    are allowed. This means a single instance of each service is used by many <see cref="T:Microsoft.EntityFrameworkCore.DbContext"/>
+                    instances. The implementation must be thread-safe.
+                    This service cannot depend on services registered as <see cref="F:Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped"/>.
+                </para>
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.Sqlite.Storage.Internal.SqliteNetTopologySuiteTypeMappingSourcePlugin.#ctor(NetTopologySuite.NtsGeometryServices)">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.Sqlite.Storage.Internal.SqliteNetTopologySuiteTypeMappingSourcePlugin.FindMapping(Microsoft.EntityFrameworkCore.Storage.RelationalTypeMappingInfo@)">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="T:Microsoft.EntityFrameworkCore.Sqlite.Storage.ValueConversion.Internal.GeometryValueConverter`1">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.Sqlite.Storage.ValueConversion.Internal.GeometryValueConverter`1.#ctor(NetTopologySuite.IO.GaiaGeoReader,NetTopologySuite.IO.GaiaGeoWriter)">
+            <summary>
+                This is an internal API that supports the Entity Framework Core infrastructure and not subject to
+                the same compatibility standards as public APIs. It may be changed or removed without notice in
+                any release. You should only use it directly in your code with extreme caution and knowing that
+                doing so can result in application failures when updating to a new Entity Framework Core release.
+            </summary>
+        </member>
+        <member name="T:Microsoft.EntityFrameworkCore.SqliteNetTopologySuiteDbContextOptionsBuilderExtensions">
+            <summary>
+                NetTopologySuite specific extension methods for <see cref="T:Microsoft.EntityFrameworkCore.Infrastructure.SqliteDbContextOptionsBuilder" />.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.SqliteNetTopologySuiteDbContextOptionsBuilderExtensions.UseNetTopologySuite(Microsoft.EntityFrameworkCore.Infrastructure.SqliteDbContextOptionsBuilder)">
+            <summary>
+                Use NetTopologySuite to access SpatiaLite data.
+            </summary>
+            <param name="optionsBuilder"> The build being used to configure SQLite. </param>
+            <returns> The options builder so that further configuration can be chained. </returns>
+        </member>
+        <member name="T:Microsoft.EntityFrameworkCore.SqliteNetTopologySuitePropertyBuilderExtensions">
+            <summary>
+                SQLite and NetTopologySuite specific extension methods for <see cref="T:Microsoft.EntityFrameworkCore.Metadata.Builders.PropertyBuilder" />.
+            </summary>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.SqliteNetTopologySuitePropertyBuilderExtensions.HasGeometricDimension(Microsoft.EntityFrameworkCore.Metadata.Builders.PropertyBuilder,NetTopologySuite.Geometries.Ordinates)">
+            <summary>
+                Configures the dimension of the column that the property maps to when targeting SQLite.
+            </summary>
+            <param name="propertyBuilder"> The builder for the property being configured. </param>
+            <param name="ordinates"> The dimension ordinates. </param>
+            <returns> The same builder instance so that multiple calls can be chained. </returns>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.SqliteNetTopologySuitePropertyBuilderExtensions.HasGeometricDimension``1(Microsoft.EntityFrameworkCore.Metadata.Builders.PropertyBuilder{``0},NetTopologySuite.Geometries.Ordinates)">
+            <summary>
+                Configures the dimension of the column that the property maps to when targeting SQLite.
+            </summary>
+            <param name="propertyBuilder"> The builder for the property being configured. </param>
+            <param name="ordinates"> The dimension ordinates. </param>
+            <returns> The same builder instance so that multiple calls can be chained. </returns>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.SqliteNetTopologySuitePropertyBuilderExtensions.ForSqliteHasDimension(Microsoft.EntityFrameworkCore.Metadata.Builders.PropertyBuilder,NetTopologySuite.Geometries.Ordinates)">
+            <summary>
+                Configures the dimension of the column that the property maps to when targeting SQLite.
+            </summary>
+            <param name="propertyBuilder"> The builder for the property being configured. </param>
+            <param name="ordinates"> The dimension ordinates. </param>
+            <returns> The same builder instance so that multiple calls can be chained. </returns>
+        </member>
+        <member name="M:Microsoft.EntityFrameworkCore.SqliteNetTopologySuitePropertyBuilderExtensions.ForSqliteHasDimension``1(Microsoft.EntityFrameworkCore.Metadata.Builders.PropertyBuilder{``0},NetTopologySuite.Geometries.Ordinates)">
+            <summary>
+                Configures the dimension of the column that the property maps to when targeting SQLite.
+            </summary>
+            <param name="propertyBuilder"> The builder for the property being configured. </param>
+            <param name="ordinates"> The dimension ordinates. </param>
+            <returns> The same builder instance so that multiple calls can be chained. </returns>
+        </member>
+        <member name="T:Microsoft.Extensions.DependencyInjection.SqliteNetTopologySuiteServiceCollectionExtensions">
+            <summary>
+                EntityFrameworkCore.Sqlite.NetTopologySuite extension methods for <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" />.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.SqliteNetTopologySuiteServiceCollectionExtensions.AddEntityFrameworkSqliteNetTopologySuite(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+                Adds the services required for NetTopologySuite support in the SQLite provider for Entity Framework.
+            </summary>
+            <param name="serviceCollection"> The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" /> to add services to. </param>
+            <returns> The same service collection so that multiple calls can be chained. </returns>
+        </member>
+    </members>
+</doc>

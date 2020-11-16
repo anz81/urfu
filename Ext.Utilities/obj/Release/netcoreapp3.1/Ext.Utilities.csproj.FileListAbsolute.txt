@@ -1,0 +1,9 @@
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\bin\Release\netcoreapp3.1\Ext.Utilities.deps.json
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\bin\Release\netcoreapp3.1\Ext.Utilities.dll
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\bin\Release\netcoreapp3.1\Ext.Utilities.pdb
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Release\netcoreapp3.1\Ext.Utilities.csprojAssemblyReference.cache
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Release\netcoreapp3.1\Ext.Utilities.AssemblyInfoInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Release\netcoreapp3.1\Ext.Utilities.AssemblyInfo.cs
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Release\netcoreapp3.1\Ext.Utilities.csproj.CoreCompileInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Release\netcoreapp3.1\Ext.Utilities.dll
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Release\netcoreapp3.1\Ext.Utilities.pdb

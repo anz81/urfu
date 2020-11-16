@@ -1,0 +1,10 @@
+D:\-urfu\its\Urfu.Its.Web\Tools\ImportCompetencesScriptBuilder\bin\Release\netcoreapp3.1\ImportCompetencesScriptBuilder.dll.config
+D:\-urfu\its\Urfu.Its.Web\Tools\ImportCompetencesScriptBuilder\bin\Release\netcoreapp3.1\ImportCompetencesScriptBuilder.deps.json
+D:\-urfu\its\Urfu.Its.Web\Tools\ImportCompetencesScriptBuilder\bin\Release\netcoreapp3.1\ImportCompetencesScriptBuilder.dll
+D:\-urfu\its\Urfu.Its.Web\Tools\ImportCompetencesScriptBuilder\bin\Release\netcoreapp3.1\ImportCompetencesScriptBuilder.pdb
+D:\-urfu\its\Urfu.Its.Web\Tools\ImportCompetencesScriptBuilder\obj\Release\netcoreapp3.1\ImportCompetencesScriptBuilder.csprojAssemblyReference.cache
+D:\-urfu\its\Urfu.Its.Web\Tools\ImportCompetencesScriptBuilder\obj\Release\netcoreapp3.1\ImportCompetencesScriptBuilder.AssemblyInfoInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Tools\ImportCompetencesScriptBuilder\obj\Release\netcoreapp3.1\ImportCompetencesScriptBuilder.AssemblyInfo.cs
+D:\-urfu\its\Urfu.Its.Web\Tools\ImportCompetencesScriptBuilder\obj\Release\netcoreapp3.1\ImportCompetencesScriptBuilder.csproj.CoreCompileInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Tools\ImportCompetencesScriptBuilder\obj\Release\netcoreapp3.1\ImportCompetencesScriptBuilder.dll
+D:\-urfu\its\Urfu.Its.Web\Tools\ImportCompetencesScriptBuilder\obj\Release\netcoreapp3.1\ImportCompetencesScriptBuilder.pdb

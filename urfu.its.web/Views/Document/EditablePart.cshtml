@@ -105,8 +105,9 @@
         chain.Reverse();
 
         var path = string.Join("/", chain.Select(c => c.SystemName));
-        
-        if (!File.Exists(ContentResult("~/Scripts/VersionedDocs/" + path + ".js")))
+        var cr = new ContentResult();
+        string cont = cr.Content.Substring(0, cr.Content.IndexOf('\n'));
+        if (!File.Exists(cont + path + ".js"))
         {
             // Если файл не найден, считаем, что он должен быть в shared папке
             path = "Shared/" + model.SystemName;

@@ -1,0 +1,4 @@
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web.Tests\obj\Release\netcoreapp3.1\Urfu.Its.Web.Tests.csprojAssemblyReference.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web.Tests\obj\Release\netcoreapp3.1\Urfu.Its.Web.Tests.AssemblyInfoInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web.Tests\obj\Release\netcoreapp3.1\Urfu.Its.Web.Tests.AssemblyInfo.cs
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web.Tests\obj\Release\netcoreapp3.1\Urfu.Its.Web.Tests.csproj.CoreCompileInputs.cache

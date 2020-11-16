@@ -1,10 +1,11 @@
 ﻿@model Enum
 
-@if (EnumHelper.IsValidForEnumHelper(ViewData.ModelMetadata))
+@if (Html.GetEnumSelectList(typeof(Enum)).Count() > 0)
 {
     // Display Enum using same names (from [Display] attributes) as in editors
     string displayName = null;
-    foreach (SelectListItem item in EnumHelper.GetSelectList(ViewData.ModelMetadata, (Enum)Model))
+  
+    foreach (SelectListItem item in Html.GetEnumSelectList(typeof(Enum)))
     {
         if (item.Selected)
         {

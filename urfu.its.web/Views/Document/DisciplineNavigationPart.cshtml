@@ -1,4 +1,5 @@
-﻿@using Urfu.Its.Common
+﻿@using Microsoft.AspNetCore.Routing
+@using Urfu.Its.Web.DataContext
 @model Urfu.Its.VersionedDocs.ViewModels.DisciplineWorkingProgramViewModel
 
 @{
@@ -19,7 +20,7 @@
     <ul class="list-group" style="margin-top: 30px">
         @foreach (var s in Model.Sections)
         {
-            <li class="list-group-item"><a href="@Url.Action("Section", new RouteValueDictionary(Request.QueryStringToRouteValueDictionary()) {{"id", Model.DocumentId}, {"section", s.SystemName}})">@s.DisplayName</a></li>
+            <li class="list-group-item"><a href="@Url.Action("Section", new RouteValueDictionary(Context.Request.RouteValues) {{"id", Model.DocumentId}, {"section", s.SystemName}})">@s.DisplayName</a></li>
         }
     </ul>
 }
