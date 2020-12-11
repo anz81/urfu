@@ -16,6 +16,7 @@ using Urfu.Its.Web.Model;
 using Urfu.Its.Web.Model.Models;
 using Urfu.Its.Web.Model.Models.Practice;
 using Urfu.Its.Web.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Urfu.Its.Web.Controllers
 {
@@ -101,7 +102,7 @@ namespace Urfu.Its.Web.Controllers
                     data = rowsList,
                     total = rowsList.Count()
                 },
-                JsonRequestBehavior.AllowGet
+                new JsonSerializerSettings()
             );
         }
 
@@ -369,7 +370,7 @@ namespace Urfu.Its.Web.Controllers
                     {
                         var practiceInfo = db.PracticeInfo.FirstOrDefault(p => p.DisciplineUUID == disciplineUid && p.GroupId == groupId && p.SemesterId == semesterId);
 
-                        practice = db.Practices.Create();
+                        practice = new Practice();
 
                         practice.StudentId = studentId;
                         practice.DisciplineUUID = disciplineUid;
@@ -409,7 +410,7 @@ namespace Urfu.Its.Web.Controllers
                 {
                     data = countries
                 },
-                JsonRequestBehavior.AllowGet
+                new JsonSerializerSettings()
             );
         }
 
@@ -422,7 +423,7 @@ namespace Urfu.Its.Web.Controllers
                 {
                     data = regions
                 },
-                JsonRequestBehavior.AllowGet
+                new JsonSerializerSettings()
             );
         }
 
@@ -435,7 +436,7 @@ namespace Urfu.Its.Web.Controllers
                 {
                     data = cities
                 },
-                JsonRequestBehavior.AllowGet
+                new JsonSerializerSettings()
             );
         }
 
@@ -624,8 +625,8 @@ namespace Urfu.Its.Web.Controllers
 
                 if (ds.limit <= 0 && !admissions.Contains(ds.contractId.Value) && ds.status == AdmissionStatus.Admitted)
                 {
-                    return Json(new { success = false, message = "Вы не можете согласовать заявку на данное предприятие, т.к. лимит отрицителен или равен нулю" },
-                        "text/html", Encoding.Unicode);
+                    return Json(new { success = false, message = "Вы не можете согласовать заявку на данное предприятие, т.к. лимит отрицителен или равен нулю" });
+                        //"text/html", Encoding.Unicode);
                 }
                 dates = dates ?? new List<DateTime>();
                 if (dates.Count > 0 && (practice?.BeginDate == null || practice?.EndDate == null))
@@ -659,7 +660,7 @@ namespace Urfu.Its.Web.Controllers
                 var contractsData = ContractsData(practice, ds);
                 return JsonNet(new { success = true, status = "OK", contractsData = contractsData, practice?.TakeDatesfromGroup,  practice?.TakeReportDatesfromGroup });
             }
-            return Json(new { success = false, message = "Предприятие не выбрано" }, "text/html", Encoding.Unicode);
+            return Json(new { success = false, message = "Предприятие не выбрано" });//, "text/html", Encoding.Unicode);
         }
 
         private void SaveDogovorDs(PracticeContractDsViewModel ds, List<DateTime> dates)
@@ -671,7 +672,7 @@ namespace Urfu.Its.Web.Controllers
             var admission = practice.AdmissionCompanys.OrderByDescending(a => a.Id).FirstOrDefault();
             if (admission == null)
             {
-                admission = db.PracticeAdmissionCompanys.Create();
+                admission = new PracticeAdmissionCompany();
                 admission.CreateDate = DateTime.Now;
                 practice.AdmissionCompanys.Add(admission);
             }
@@ -700,7 +701,7 @@ namespace Urfu.Its.Web.Controllers
            var companies = db.Companies.Where(c => (c.Name.Contains(q) || c.ShortName.Contains(q)) && c.IsConfirmed && c.CompanyLocationId != null)
                     .Select(c => new { CompanyId = c.Id, c.Name })
                     .Distinct().ToList();
-                return Json(companies, JsonRequestBehavior.AllowGet);            
+                return Json(companies, new JsonSerializerSettings());            
         }
 
         public ActionResult GetCompanyInfo(int companyId,int practiceId)
@@ -806,7 +807,7 @@ namespace Urfu.Its.Web.Controllers
             var admission = practice.AdmissionCompanys.OrderByDescending(a => a.Id).FirstOrDefault();
             if (admission == null)
             {
-                admission = db.PracticeAdmissionCompanys.Create();
+                admission = new PracticeAdmissionCompany();
                 admission.CreateDate = DateTime.Now;
                 practice.AdmissionCompanys.Add(admission);
             }
@@ -819,7 +820,7 @@ namespace Urfu.Its.Web.Controllers
                 
                 if (ks.contractId == 0)
                 {
-                    admission.Contract = db.Contracts.Create();
+                    admission.Contract = new Contract();
                     admission.Contract.Company = companydata;
                 }
                 else if (ks.contractId != admission.ContractId)
@@ -831,8 +832,8 @@ namespace Urfu.Its.Web.Controllers
             }
             else 
             {
-                admission.Contract = db.Contracts.Create();
-                admission.Contract.Company = db.Companies.Create();
+                admission.Contract = new Contract();
+                admission.Contract.Company = new Company();
             }
 
             // если номер к/с договора не был указан ранее, то генерим его автоматически
@@ -899,7 +900,7 @@ namespace Urfu.Its.Web.Controllers
             var document = db.PracticeDocuments.FirstOrDefault(d => d.Id == id);
             if (document == null)
             {
-                return HttpNotFound("Document not found");
+                return NotFound("Document not found");
             }
 
             document.Status = status;
@@ -936,7 +937,7 @@ namespace Urfu.Its.Web.Controllers
                   statusId = (int)status,
                   statusName = PracticeDocumentViewModel.GetStatus(status)
               },
-              JsonRequestBehavior.AllowGet
+              new JsonSerializerSettings()
           );
             //return Json(
             //    new
@@ -968,29 +969,29 @@ namespace Urfu.Its.Web.Controllers
             var document = db.PracticeDocuments.Include(d=>d.FileStorage).FirstOrDefault(d => d.Id == id);
             if (document?.FileStorageId == null)
             {
-                return HttpNotFound("Document not found");
+                return NotFound("Document not found");
             }
 
-            return File(FileStorageHelper.GetBytes((int)document.FileStorageId), System.Net.Mime.MediaTypeNames.Application.Octet, document.FileStorage.FileNameForUser.ToDownloadFileName());
+            return File(Model.FileStorageHelper.GetBytes((int)document.FileStorageId), System.Net.Mime.MediaTypeNames.Application.Octet, document.FileStorage.FileNameForUser.ToDownloadFileName());
         }
         public ActionResult DownloadContractPeriodDocument(int id)
         {
             var document = db.FileStorage.FirstOrDefault(d => d.Id == id);
             if  (document?.Id == null)
             {
-                return HttpNotFound("Document not found");
+                return NotFound("Document not found");
             }
-            return File(FileStorageHelper.GetBytes(document.Id), System.Net.Mime.MediaTypeNames.Application.Octet, document.FileNameForUser.ToDownloadFileName());
+            return File(Model.FileStorageHelper.GetBytes(document.Id), System.Net.Mime.MediaTypeNames.Application.Octet, document.FileNameForUser.ToDownloadFileName());
         }
         //[Authorize(Roles = ItsRoles.PracticeManager)]
         public ActionResult UploadDocument(int practiceId, PracticeDocumentType? type)
         {
-            if (Request.Files.Count > 0)
+            if (Request.Form.Files.Count > 0)
             {
                 if (!User.IsInRole(ItsRoles.PracticeManager))
                     return JsonNet(new { success = false, message = "У вас нет прав вносить изменения" });
 
-                var file = Request.Files[0];
+                var file = Request.Form.Files[0];
                 if (type == null)
                 {
                     Log(practiceId, $"Попытка загрузить документ {System.IO.Path.GetFileName(file.FileName)} с неопознанным типом");
@@ -1005,7 +1006,7 @@ namespace Urfu.Its.Web.Controllers
 
                             if (document == null)
                             {
-                                document = db.PracticeDocuments.Create();
+                                document = new PracticeDocument();
                                 document.PracticeId = practiceId;
                                 document.DocumentType = type.Value;
 
@@ -1013,7 +1014,7 @@ namespace Urfu.Its.Web.Controllers
                             }
 
 
-                            int? id = FileStorageHelper.SaveFile(file, FileCategory.Practice, folder: $"{document.Practice.Group.Profile.Direction.okso}_{document.Practice.Year}", comment:$"{("PracticeId: " + document.PracticeId + "DocumentType: " + document.DocumentType)}", id: document.FileStorageId);
+                            int? id = DataContext.FileStorageHelper.SaveFile(file, DataContext.FileCategory.Practice, folder: $"{document.Practice.Group.Profile.Direction.okso}_{document.Practice.Year}", comment:$"{("PracticeId: " + document.PracticeId + "DocumentType: " + document.DocumentType)}", id: document.FileStorageId);
                             if(id == null)                                                       
                               return Json(new { success = false });
 
@@ -1033,18 +1034,18 @@ namespace Urfu.Its.Web.Controllers
                                 fileId = document.Id,
                                 fileName = document.FileStorage.FileNameForUser,
                                 date = document.FileStorage.Date.ToShortDateString()
-                            },
-                            "text/html", Encoding.Unicode);
+                            });
+                            //"text/html", Encoding.Unicode);
                         }
                         catch (Exception ex)
                         {                            
                             tran.Rollback();
-                            return Json(new { success = false, message = $"{ex.Message}" }, "text/html", Encoding.Unicode);
+                            return Json(new { success = false, message = $"{ex.Message}" });//, "text/html", Encoding.Unicode);
                         }
                     }
                 }
             }
-            return Json(new { success = false, message = "Передан пустой список файлов" }, "text/html", Encoding.Unicode);
+            return Json(new { success = false, message = "Передан пустой список файлов" });//, "text/html", Encoding.Unicode);
         }
 
         [Authorize(Roles = ItsRoles.PracticeManager)]
@@ -1057,10 +1058,10 @@ namespace Urfu.Its.Web.Controllers
                     var document = db.PracticeDocuments.Where(d => d.PracticeId == practiceId && d.DocumentType == type).FirstOrDefault();
 
                     if (document == null || document.Status == AdmissionStatus.Admitted)
-                        return HttpNotFound("Document not found");
+                        return NotFound("Document not found");
 
-                      if(document.FileStorageId!= null)                       
-                    FileStorageHelper.RemoveFile((int)document.FileStorageId);
+                      if(document.FileStorageId!= null)
+                        DataContext.FileStorageHelper.RemoveFile((int)document.FileStorageId);
 
                     db.PracticeDocuments.Remove(document);
                     db.SaveChanges();
@@ -1068,12 +1069,12 @@ namespace Urfu.Its.Web.Controllers
 
                     var descr = PracticFileDescriptor.Get(type);
                     Log(practiceId, $"Удален документ {descr.TypeName}");
-                    return Json(new { success = true, message = "Документ удален" }, "text/html", Encoding.Unicode);
+                    return Json(new { success = true, message = "Документ удален" });//, "text/html", Encoding.Unicode);
                 }
                 catch (Exception ex)
                 {
                     tran.Rollback();
-                    return Json(new { success = false, message = $"{ex.Message}" }, "text/html", Encoding.Unicode);
+                    return Json(new { success = false, message = $"{ex.Message}" });//, "text/html", Encoding.Unicode);
                 }
             }
         }
@@ -1081,7 +1082,7 @@ namespace Urfu.Its.Web.Controllers
         [Authorize(Roles = ItsRoles.ConfirmationOfContractPractice)]
         public ActionResult CheckConfirmRole()
         {
-            return new HttpStatusCodeResult(System.Net.HttpStatusCode.OK);
+            return new StatusCodeResult(StatusCodes.Status200OK);
         }
 
         [Authorize(Roles = ItsRoles.ConfirmationOfContractPractice)]
@@ -1092,11 +1093,11 @@ namespace Urfu.Its.Web.Controllers
             {
                 practice.ExistContract = isChecked;
                 db.SaveChanges();
-                return Json(new { success = true, message = "" }, "text/html", Encoding.Unicode);
+                return Json(new { success = true, message = "" });//, "text/html", Encoding.Unicode);
             }
             else
             {
-                return Json(new { success = false, message = "Информация по практике студента еще не заполнена" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Информация по практике студента еще не заполнена" });//, "text/html", Encoding.Unicode);
             }
         }
 
@@ -1107,7 +1108,7 @@ namespace Urfu.Its.Web.Controllers
             var admission = practice.Admissions.OrderByDescending(a => a.Id).FirstOrDefault();
             if (admission == null)
             {
-                admission = db.PracticeAdmissions.Create();
+                admission = new PracticeAdmission();
                 admission.CreateDate = DateTime.Now;
                 practice.Admissions.Add(admission);
             }

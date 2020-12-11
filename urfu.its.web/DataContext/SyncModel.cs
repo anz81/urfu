@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Newtonsoft.Json;
 using OfficeOpenXml.Core.ExcelPackage;
-using PagedList;
+using PagedList.Core;
 using Urfu.Its.Common;
 using Urfu.Its.Integration;
 using Urfu.Its.Integration.Models;
@@ -72,7 +72,8 @@ namespace Urfu.Its.Web.Models
                 return;
             }
             alreadyInProgress = false;
-            HostingEnvironment.QueueBackgroundWorkItem((Action<CancellationToken>)SyncPeople);
+            var backtask = new BackgroundTaskScheduler();
+            backtask.QueueBackgroundWorkItem((Action<CancellationToken>)SyncPeople);
         }
 
         internal static void SyncPeople(CancellationToken cancellationToken)
@@ -130,8 +131,8 @@ namespace Urfu.Its.Web.Models
                 using (var db = new ApplicationDbContext())
                 using (var dbcxtransaction = db.Database.BeginTransaction())
                 {
-                    db.Configuration.AutoDetectChangesEnabled = false;
-                    db.Configuration.ValidateOnSaveEnabled = false;
+                    db.ChangeTracker.AutoDetectChangesEnabled = false;
+                    //db.Configuration.ValidateOnSaveEnabled = false;
                     var restService = new UniRestService();
                     var personsXml =
                         restService.GetPersonsXml();
@@ -218,8 +219,8 @@ namespace Urfu.Its.Web.Models
                 using (var db = new ApplicationDbContext())
                 using (var dbcxtransaction = db.Database.BeginTransaction())
                 {
-                    db.Configuration.AutoDetectChangesEnabled = false;
-                    db.Configuration.ValidateOnSaveEnabled = false;
+                    db.ChangeTracker.AutoDetectChangesEnabled = false;
+                    //db.Configuration.ValidateOnSaveEnabled = false;
                     var restService = new UniRestService();
                     var directorsDto =
                         restService.GetDirectorsDto();
@@ -600,7 +601,8 @@ namespace Urfu.Its.Web.Models
                 return;
             }
             alreadyInProgress = false;
-            HostingEnvironment.QueueBackgroundWorkItem((Action<CancellationToken>)SyncModules);
+            var backtask = new BackgroundTaskScheduler();
+            backtask.QueueBackgroundWorkItem((Action<CancellationToken>)SyncModules);
         }
 
         public static bool ModulesSyncInProgress { get; set; }
@@ -617,8 +619,8 @@ namespace Urfu.Its.Web.Models
             {
                 using (var db = new ApplicationDbContext())
                 {
-                    db.Configuration.AutoDetectChangesEnabled = false;
-                    db.Configuration.ValidateOnSaveEnabled = false;
+                    db.ChangeTracker.AutoDetectChangesEnabled = false;
+                    //db.Configuration.ValidateOnSaveEnabled = false;
 
                     var divisions = new UniDivisionsService().GetDivisions();
 
@@ -883,8 +885,8 @@ namespace Urfu.Its.Web.Models
             {
                 using (var db = new ApplicationDbContext())
                 {
-                    db.Configuration.AutoDetectChangesEnabled = false;
-                    db.Configuration.ValidateOnSaveEnabled = false;
+                    db.ChangeTracker.AutoDetectChangesEnabled = false;
+                    //db.Configuration.ValidateOnSaveEnabled = false;
 
                     try
                     {
@@ -923,8 +925,8 @@ namespace Urfu.Its.Web.Models
             {
                 using (var db = new ApplicationDbContext())
                 {
-                    db.Configuration.AutoDetectChangesEnabled = false;
-                    db.Configuration.ValidateOnSaveEnabled = false;
+                    db.ChangeTracker.AutoDetectChangesEnabled = false;
+                    //db.Configuration.ValidateOnSaveEnabled = false;
 
                     try
                     {
@@ -955,8 +957,14 @@ namespace Urfu.Its.Web.Models
             var plans = service.GetPlanTerms();
 
             var planTerms = Mapper.Map<List<PlanTerm>>(plans);
-            db.PlanTerms.AddOrUpdate(p => new { p.eduplanUUID, p.Year }, planTerms.ToArray());
-
+            try
+            {
+                db.PlanTerms.Update(p => new { p.eduplanUUID, p.Year }, planTerms.ToArray());
+            }
+            catch
+            {
+                db.PlanTerms.Add(p => new { p.eduplanUUID, p.Year }, planTerms.ToArray());
+            }
             db.SaveChanges();
         }
 
@@ -1051,7 +1059,8 @@ namespace Urfu.Its.Web.Models
             }
             alreadyInProgress = false;
             _ratingSyncInProgress = true;
-            HostingEnvironment.QueueBackgroundWorkItem(token =>
+            var backtask = new BackgroundTaskScheduler();
+            backtask.QueueBackgroundWorkItem(token =>
             {
                 try
                 {
@@ -1074,7 +1083,8 @@ namespace Urfu.Its.Web.Models
             }
             alreadyInProgress = false;
             _groupHistory = true;
-            HostingEnvironment.QueueBackgroundWorkItem(token =>
+            var backtask = new BackgroundTaskScheduler();
+            backtask.QueueBackgroundWorkItem(token =>
             {
                 try
                 {
@@ -1157,7 +1167,8 @@ namespace Urfu.Its.Web.Models
             }
             alreadyInProgress = false;
             _ratingAvgSyncInProgress = true;
-            HostingEnvironment.QueueBackgroundWorkItem(token =>
+            var backtask = new BackgroundTaskScheduler();
+            backtask.QueueBackgroundWorkItem(token =>
             {
                 try
                 {
@@ -1211,7 +1222,8 @@ namespace Urfu.Its.Web.Models
             }
             alreadyInProgress = false;
             _studentPlanSyncInProgress = true;
-            HostingEnvironment.QueueBackgroundWorkItem(token =>
+            var backtask = new BackgroundTaskScheduler();
+            backtask.QueueBackgroundWorkItem(token =>
             {
                 try
                 {
@@ -1263,7 +1275,8 @@ namespace Urfu.Its.Web.Models
             }
             alreadyInProgress = false;
             _studentPlanSyncInProgress = true;
-            HostingEnvironment.QueueBackgroundWorkItem(token =>
+            var backtask = new BackgroundTaskScheduler();
+            backtask.QueueBackgroundWorkItem(token =>
             {
                 try
                 {
@@ -1320,7 +1333,8 @@ namespace Urfu.Its.Web.Models
             }
             alreadyInProgress = false;
             _selectionSyncInProgress = true;
-            HostingEnvironment.QueueBackgroundWorkItem(token =>
+            var backtask = new BackgroundTaskScheduler();
+            backtask.QueueBackgroundWorkItem(token =>
             {
                 try
                 {
@@ -1779,12 +1793,12 @@ namespace Urfu.Its.Web.Models
                             var roles = db.RoleSets.FirstOrDefault(r => r.Name == "Руководитель ОП")?.Contents?.Select(r => r.Role) ?? new List<IdentityRole>();
 
                             var um = new ApplicationUserManager(new UserStore<ApplicationUser>(db));
-                            var currentRoles = um.GetRoles(user.Id);
+                            var currentRoles = um.GetRolesAsync(user);
 
                             var rolesToAdd = roles.Where(r => !currentRoles.Any(cr => cr == r.Name));
                             foreach (var role in rolesToAdd)
                             {
-                                um.AddToRole(user.Id, role.Name);
+                                um.AddToRolesAsync(user, role.Name);
                             }
 
                             // связь пользователя и преподавателя
@@ -1989,7 +2003,7 @@ namespace Urfu.Its.Web.Models
         {
             using (var db = new ApplicationDbContext())
             {
-                db.Configuration.AutoDetectChangesEnabled = false;
+                db.ChangeTracker.AutoDetectChangesEnabled = false;
                 var programs = db.EduPrograms.Where(p => p.Variant.State == VariantState.Approved);
                 foreach (var p in programs.ToList())
                 {
@@ -2036,10 +2050,18 @@ namespace Urfu.Its.Web.Models
             }
             using (var db = new ApplicationDbContext())
             {
-                db.Configuration.AutoDetectChangesEnabled = false;
+                db.ChangeTracker.AutoDetectChangesEnabled = false;
 
                 var planDivision = ids.Select(id => allDivisions[id]).Select(Mapper.Map<Division>).ToArray();
-                db.Divisions.AddOrUpdate(d => d.uuid, planDivision);
+                try
+                {
+                    db.Divisions.Update(d => d.uuid, planDivision);
+                }
+                catch
+                {
+                    db.Divisions.Add(d => d.uuid, planDivision);
+                }
+                
                 db.SaveChanges();
                 Logger.Info($"Синхронизированы подразделения: {string.Join(", ", ids)}");
             }

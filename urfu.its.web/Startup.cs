@@ -28,8 +28,17 @@ namespace Urfu.Its.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
             services.AddControllersWithViews();
             services.AddMvc();
+            //Mapper.Initialize(cfg => cfg.AddProfile<AutoMapperConfig>());
+            services.AddAutoMapper(typeof(Startup));
             services.AddTransient<AuthorizeAttribute>();
             services.AddDataProtection();
             
@@ -63,6 +72,9 @@ namespace Urfu.Its.Web
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                    name: "frm",
+                    pattern: "frm");
             });
             app.Use(async (httpContext, next) =>
             {

@@ -100,7 +100,7 @@ namespace Urfu.Its.Web.Controllers
                 return EmtyResult();
             }
 
-            ((IObjectContextAdapter)db).ObjectContext.CommandTimeout = 1200000;
+            db.Database.SetCommandTimeout(1200000);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -568,7 +568,7 @@ namespace Urfu.Its.Web.Controllers
                 var decree = db.PracticeDecrees.FirstOrDefault(d => d.GroupId == groupId && d.SemesterID == semesterID && d.Term == term && d.DisciplineUUID == disciplineUID);
                 if (decree == null)
                 {
-                    decree = db.PracticeDecrees.Create();
+                    decree = new PracticeDecree();
                     decree.GroupId = groupId;
                     decree.DisciplineUUID = disciplineUID;
                     decree.SemesterID = semesterID;

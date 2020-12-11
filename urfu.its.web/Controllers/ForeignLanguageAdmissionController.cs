@@ -560,7 +560,7 @@ namespace Urfu.Its.Web.Controllers
             Expression<Func<ForeignLanguageAdmission, bool>> admissionFilter)
         {
             var expression = admissionFilter ?? (x => true);
-            ((IObjectContextAdapter)_db).ObjectContext.CommandTimeout = 90;
+            _db.Database.SetCommandTimeout(90);
             
             var periods =
                 _db.ForeignLanguageProperties

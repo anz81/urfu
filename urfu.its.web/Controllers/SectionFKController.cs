@@ -865,7 +865,7 @@ namespace Urfu.Its.Web.Controllers
         static StudentDesicionList _sdl;
         public ActionResult CopyComposition(int src, int dst, bool subgroups, bool composition, bool subgroupTeachers)
         {
-            ((IObjectContextAdapter)_db).ObjectContext.CommandTimeout = 1200000;
+            _db.Database.SetCommandTimeout(1200000);
 
             _sdl = new StudentDesicionList();
 

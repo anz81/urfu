@@ -154,7 +154,7 @@ namespace Urfu.Its.Web.Controllers
         {
             if (User.IsInRole(ItsRoles.AllMinors)) return true;
 
-            var userName = (User as IPrincipal).Identity.GetUserId();
+            var userName = (User as IPrincipal).Identity.Name;
 
             var access = db.Users.Single(u => u.UserName == userName).Minors.Any(m => m.ModuleId == minorID);
 

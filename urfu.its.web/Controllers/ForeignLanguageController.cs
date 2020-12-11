@@ -21,6 +21,7 @@ using Urfu.Its.Web.Model.Models;
 using Urfu.Its.Web.Model.Models.ModulesVM;
 using Urfu.Its.Web.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Urfu.Its.Web.Controllers
 {
@@ -1203,12 +1204,12 @@ namespace Urfu.Its.Web.Controllers
         public ActionResult Edit(string id)
         {
             if (id == null)
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return new StatusCodeResult(StatusCodes.Status400BadRequest);
 
             var module = db.UniModules().Include("ForeignLanguage.Periods").First(m => m.uuid == id);
 
             if (module == null)
-                return HttpNotFound();
+                return NotFound();
 
             var techSelector = new SelectList(db.ModuleTeches, "Id", "Name", module.ForeignLanguage?.ModuleTechId);
 

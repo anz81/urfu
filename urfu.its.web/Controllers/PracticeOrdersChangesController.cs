@@ -141,7 +141,7 @@ namespace Urfu.Its.Web.Controllers
 
                 if (newDecree == null)
                 {
-                    newDecree = db.PracticeChangedDecrees.Create();
+                    newDecree = new PracticeChangedDecree();
                     newDecree.MainDecreeId = decreeId;
                     
                     // порядковый номер считается внутри учебного года 

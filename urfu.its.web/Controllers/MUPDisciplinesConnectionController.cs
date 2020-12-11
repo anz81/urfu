@@ -30,7 +30,8 @@ namespace Urfu.Its.Web.Controllers
                 !(m.type == "Проектное обучение" || m.type == "Парный модуль" || m.type == "Секции ФК" || m.type == "Физическая культура"
                 || m.type == "Иностранный язык" || m.type == "Майноры");
 
-            if (Request.IsAjaxRequest())
+            bool isAjax = HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (isAjax)
             {
                 var sortRules = SortRules.Deserialize(sort);
                 var filterRules = ObjectableFilterRules.Deserialize(filter);

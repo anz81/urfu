@@ -23,6 +23,9 @@ using Urfu.Its.Web.Models;
 using Urfu.Its.Web.Excel;
 using Urfu.Its.VersionedDocs.Documents.BasicCharacteristicOPs;
 using System.Linq.Expressions;
+using FileCategory = Urfu.Its.Web.Model.FileCategory;
+using FileStorageHelper = Urfu.Its.Web.Model.FileStorageHelper;
+using Microsoft.Extensions.Hosting.Internal;
 
 namespace Urfu.Its.Web.Controllers
 {
@@ -49,7 +52,8 @@ namespace Urfu.Its.Web.Controllers
 
         public ActionResult Index(string filter, string focus)
         {
-            if (Request.IsAjaxRequest())
+            bool isAjax = HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (isAjax)
             {
                 var filterRules = FilterRules.Deserialize(filter);
                 var filterDivision = filterRules?.Find(f => f.Property == "divisionId");
@@ -154,7 +158,7 @@ namespace Urfu.Its.Web.Controllers
         public ActionResult Create(string profile, int year)
         {
             if (db.BasicCharacteristicOPInfos.Any(i => i.ProfileId == profile && i.Year == year))
-                return Json(new { success = false, message = "На указанные ОП и год уже создан документ" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "На указанные ОП и год уже создан документ" });//, "text/html", Encoding.Unicode);
 
             var info = new BasicCharacteristicOPInfo()
             {
@@ -164,12 +168,13 @@ namespace Urfu.Its.Web.Controllers
             db.BasicCharacteristicOPInfos.Add(info);
             db.SaveChanges();
 
-            return Json(new { success = true, id = info.Id }, "text/html", Encoding.Unicode);
+            return Json(new { success = true, id = info.Id });//, "text/html", Encoding.Unicode);
         }
 
         public ActionResult Versions(string filter, string focus)
         {
-            if (Request.IsAjaxRequest())
+            bool isAjax = HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (isAjax)
             {
                 var ohops = GetFilteredVersionOhop(filter);
 
@@ -413,11 +418,11 @@ namespace Urfu.Its.Web.Controllers
         {
             var ohop = db.BasicCharacteristicOPs.FirstOrDefault(b => b.VersionedDocumentId == id);
             if (ohop == null)
-                return Json(new { success = false, message = "Редактируемый документ не найден" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Редактируемый документ не найден" });//, "text/html", Encoding.Unicode);
 
             var statusUpop = db.UpopStatuses.FirstOrDefault(s => s.Id == status);
             if (statusUpop == null)
-                return Json(new { success = false, message = "Статус не найден" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Статус не найден" });//, "text/html", Encoding.Unicode);
             
             ohop.Status = statusUpop;
             ohop.StatusChangeTime = DateTime.Now;
@@ -434,21 +439,21 @@ namespace Urfu.Its.Web.Controllers
             _logger.Info($"Изменен статус документа ОХОП Id = {ohop.VersionedDocumentId} Status = {ohop.Status.Id} {ohop.Status.Name}" +
                 $"Profile = {ohop.Info.ProfileId} {ohop.Info.Profile?.CODE} {ohop.Info.Profile?.NAME}");
 
-            return Json(new { success = true }, "text/html", Encoding.Unicode);
+            return Json(new { success = true });//, "text/html", Encoding.Unicode);
         }
 
         public ActionResult SendVersion(int id)
         {
             var ohop = db.BasicCharacteristicOPs.Include(b => b.Status).FirstOrDefault(b => b.VersionedDocumentId == id);
             if (ohop == null)
-                return Json(new { success = false, message = "Редактируемый документ не найден" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Редактируемый документ не найден" });//, "text/html", Encoding.Unicode);
 
             if (!ohop.Status.CanEdit())
-                return Json(new { success = false, message = "Документ уже подписан или находится в обработке" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Документ уже подписан или находится в обработке" });//, "text/html", Encoding.Unicode);
 
             var statusUpop = db.UpopStatuses.FirstOrDefault(s => s.Id == 11 /*"В обработке"*/);
             if (statusUpop == null)
-                return Json(new { success = false, message = "Статус не найден" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Статус не найден" });//, "text/html", Encoding.Unicode);
 
             ohop = SaveDocxAndZip(ohop);
 
@@ -461,7 +466,7 @@ namespace Urfu.Its.Web.Controllers
                 $"Profile = {ohop.Info.ProfileId} {ohop.Info.Profile?.CODE} {ohop.Info.Profile?.NAME}");
 
             return Json(new { success = true, status = statusUpop.Name, statusId = statusUpop.Id,
-                    statusDate = $"{ohop.StatusChangeTime.ToShortDateString()} {ohop.StatusChangeTime.ToShortTimeString()}" }, "text/html", Encoding.Unicode);
+                statusDate = $"{ohop.StatusChangeTime.ToShortDateString()} {ohop.StatusChangeTime.ToShortTimeString()}" });//, "text/html", Encoding.Unicode);
         }
 
         private BasicCharacteristicOP SaveDocxAndZip(BasicCharacteristicOP ohop)
@@ -517,7 +522,7 @@ namespace Urfu.Its.Web.Controllers
                     })
                 }).ToList();
 
-            return await Task.FromResult(Json(competenceGroups, JsonRequestBehavior.AllowGet));
+            return await Task.FromResult(Json(competenceGroups, new JsonSerializerSettings()));
         }
 
         public async Task<ActionResult> GetProfessionalCompetences(int id)
@@ -537,7 +542,7 @@ namespace Urfu.Its.Web.Controllers
                     Type = c.Type
                 }).ToList();
 
-            return await Task.FromResult(Json(competences, JsonRequestBehavior.AllowGet));
+            return await Task.FromResult(Json(competences, new JsonSerializerSettings()));
         }
 
         public ActionResult GetVariants(int documentId)
@@ -559,7 +564,7 @@ namespace Urfu.Its.Web.Controllers
                 });
             variants.AddRange(trajectories);
             variants = variants.OrderBy(v => v.Name).ToList();
-            return Json(variants, JsonRequestBehavior.AllowGet);
+            return Json(variants, new JsonSerializerSettings());
         }
 
         [HttpPost]
@@ -568,8 +573,9 @@ namespace Urfu.Its.Web.Controllers
             try
             {
                 var model = JsonConvert.DeserializeObject<ApprovalActTemplateModel>(act);
+                var he = new HostingEnvironment();
 
-                var fullName = Path.Combine(HostingEnvironment.ApplicationPhysicalPath, @"ApprovalAct.docx");
+                var fullName = Path.Combine(he.ContentRootPath, @"ApprovalAct.docx");
 
                 var input = System.IO.File.Open(fullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
@@ -587,18 +593,18 @@ namespace Urfu.Its.Web.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Акт согласования не сформирован\n{ex.Message}" }, JsonRequestBehavior.AllowGet);
+                return Json(new { success = false, message = $"Акт согласования не сформирован\n{ex.Message}" }, new JsonSerializerSettings());
             }
         }
 
         public ActionResult UploadScan(int info, string comment)
         {
-            var file = Request.Files[0];
+            var file = Request.Form.Files[0];
             var data = db.BasicCharacteristicOPInfos.FirstOrDefault(i => i.Id == info);
             int? id = FileStorageHelper.SaveFile(file, FileCategory.OHOP, folder: $"{data.ProfileId}_{data.Year}", comment: comment,
                 id: null /*файл не перезаписываем на случай, если пользователь не сохранит изменения*/);
 
-            return Json(new { success = true, fileName = file.FileName, id }, JsonRequestBehavior.AllowGet);
+            return Json(new { success = true, fileName = file.FileName, id }, new JsonSerializerSettings());
         }
 
         public ActionResult DownloadScan(int id)
@@ -641,7 +647,7 @@ namespace Urfu.Its.Web.Controllers
                 {
                     data = areas
                 },
-                JsonRequestBehavior.AllowGet
+                new JsonSerializerSettings()
             );
 
             return json;
@@ -706,7 +712,7 @@ namespace Urfu.Its.Web.Controllers
                 {
                     orders = defaultValues.RequisitesOrders()
                 },
-                JsonRequestBehavior.AllowGet
+                new JsonSerializerSettings()
             );
         }
 
@@ -720,7 +726,7 @@ namespace Urfu.Its.Web.Controllers
                 {
                     formAndDuration = defaultValues.FormAndDuration()
                 },
-                JsonRequestBehavior.AllowGet
+                new JsonSerializerSettings()
             );
         }
 
@@ -734,7 +740,7 @@ namespace Urfu.Its.Web.Controllers
                 {
                     language = defaultValues.Language()
                 },
-                JsonRequestBehavior.AllowGet
+                new JsonSerializerSettings()
             );
         }
 
@@ -748,7 +754,7 @@ namespace Urfu.Its.Web.Controllers
                 {
                     competences = defaultValues.UniversalCompetences()
                 },
-                JsonRequestBehavior.AllowGet
+                new JsonSerializerSettings()
             );
         }
 
@@ -762,7 +768,7 @@ namespace Urfu.Its.Web.Controllers
                 {
                     competences = defaultValues.GeneralCompetences()
                 },
-                JsonRequestBehavior.AllowGet
+                new JsonSerializerSettings()
             );
         }
 
@@ -777,13 +783,13 @@ namespace Urfu.Its.Web.Controllers
                 {
                     profStandardsList = defaultValues.ProfStandardsList(codesArray)
                 },
-                JsonRequestBehavior.AllowGet
+                new JsonSerializerSettings()
             );
         }
 
         public ActionResult RatifyData()
         {
-            return Json(db.BasicCharacteristicOPRatifyData.ToList(), JsonRequestBehavior.AllowGet);
+            return Json(db.BasicCharacteristicOPRatifyData.ToList(), new JsonSerializerSettings());
         }
     }
 }

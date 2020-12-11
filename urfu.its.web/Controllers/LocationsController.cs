@@ -83,7 +83,8 @@ namespace Urfu.Its.Web.Controllers
 
         public ActionResult Cities(int? page, int? limit, string sort, string filter, string focus)
         {
-            if (Request.IsAjaxRequest())
+            bool isAjax = HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (isAjax)
             {
                 SortRules sortRules = SortRules.Deserialize(sort);
                 var cities = db.CompanyLocations.Where(l => l.Level == 3)

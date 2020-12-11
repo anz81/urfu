@@ -43,7 +43,7 @@ namespace Urfu.Its.Web.Controllers
                 var sortRules = SortRules.Deserialize(sort);
 
                 var projectRops = db.ProjectUsers.Include(u => u.Teacher).Where(u => u.Type == ProjectUserType.ROP).ToList();
-                var userId = User.Identity.GetUserId();
+                var userId = User.Identity.Name;
 
                 var modules = GetFilteredModules(filter);
                 var total = modules.Count();
@@ -90,7 +90,7 @@ namespace Urfu.Its.Web.Controllers
                         data = result,
                         total = total
                     },
-                    new Newtonsoft.Json.JsonSerializerSettings()
+                    new JsonSerializerSettings()
 
                 );
             }

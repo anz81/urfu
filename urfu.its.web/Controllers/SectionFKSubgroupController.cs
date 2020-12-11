@@ -64,7 +64,7 @@ namespace Urfu.Its.Web.Controllers
 
         public ActionResult StudentsCount(string filter, int competitionGroupId)
         {
-            ((IObjectContextAdapter)_db).ObjectContext.CommandTimeout = 1200000;
+            _db.Database.SetCommandTimeout(1200000);
             var subgroups =
                 GetSectionSubgroups(null, filter, competitionGroupId)
                     .ToList()
@@ -80,7 +80,7 @@ namespace Urfu.Its.Web.Controllers
 
         private IQueryable<object> GetSectionSubgroups(string sort, string filter, int competitionGroupId)
         {
-            ((IObjectContextAdapter)_db).ObjectContext.CommandTimeout = 1200000;
+            _db.Database.SetCommandTimeout(1200000);
             var subgroups = _db.SectionFKSubgroups
                 .Where(s => s.Meta.CompetitionGroupId == competitionGroupId)
                 .Select(v => new

@@ -18,6 +18,7 @@ using Urfu.Its.Web.Models;
 using System.Linq.Expressions;
 using Urfu.Its.Web.Model.Models.SharedDocumentModels;
 using Urfu.Its.VersionedDocs.Documents.Shared;
+using Ext.Utilities;
 
 namespace Urfu.Its.Web.Controllers
 {
@@ -47,7 +48,8 @@ namespace Urfu.Its.Web.Controllers
         
         public ActionResult Index(string filter, string focus)
         {
-            if (Request.IsAjaxRequest())
+            bool isAjax = HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (isAjax)
             {
                 var annotations = GetFilteredModuleAnnotations(filter);
 
@@ -129,7 +131,7 @@ namespace Urfu.Its.Web.Controllers
                 create = annotation == null,
                 documentId = annotation?.VersionedDocumentId,
                 standard = ohop?.Info?.Profile?.Direction?.standard
-            }, JsonRequestBehavior.AllowGet);
+            }, new JsonSerializerSettings());
         }
 
         [Authorize(Roles = ItsRoles.ApproveOhopRpdRpm)]
@@ -137,11 +139,11 @@ namespace Urfu.Its.Web.Controllers
         {
             var annotation = db.ModuleAnnotations.FirstOrDefault(b => b.VersionedDocumentId == id);
             if (annotation == null)
-                return Json(new { success = false, message = "Редактируемый документ не найден" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Редактируемый документ не найден" });//, "text/html", Encoding.Unicode);
 
             var statusUpop = db.UpopStatuses.FirstOrDefault(s => s.Id == status);
             if (statusUpop == null)
-                return Json(new { success = false, message = "Статус не найден" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Статус не найден" });//, "text/html", Encoding.Unicode);
             
             annotation.Status = statusUpop;
             annotation.StatusChangeTime = DateTime.Now;
@@ -159,21 +161,21 @@ namespace Urfu.Its.Web.Controllers
                $"Profile = {annotation.BasicCharacteristicOP.Info.ProfileId} {annotation.BasicCharacteristicOP.Info.Profile?.CODE} {annotation.BasicCharacteristicOP.Info.Profile?.NAME} " +
                $"Версия ОХОП {annotation.BasicCharacteristicOP.Version} {annotation.BasicCharacteristicOP.Info.Year} год");
 
-            return Json(new { success = true }, "text/html", Encoding.Unicode);
+            return Json(new { success = true });//, "text/html", Encoding.Unicode);
         }
 
         public ActionResult SendVersion(int id)
         {
             var annotation = db.ModuleAnnotations.Include(b => b.Status).FirstOrDefault(b => b.VersionedDocumentId == id);
             if (annotation == null)
-                return Json(new { success = false, message = "Редактируемый документ не найден" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Редактируемый документ не найден" });//, "text/html", Encoding.Unicode);
 
             if (!annotation.Status.CanEdit())
-                return Json(new { success = false, message = "Документ уже подписан или находится в обработке" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Документ уже подписан или находится в обработке" });//, "text/html", Encoding.Unicode);
 
             var statusUpop = db.UpopStatuses.FirstOrDefault(s => s.Id == 11 /*"В обработке"*/);
             if (statusUpop == null)
-                return Json(new { success = false, message = "Статус не найден" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Статус не найден" });//, "text/html", Encoding.Unicode);
 
             annotation = SaveDocx(annotation);
 
@@ -185,9 +187,9 @@ namespace Urfu.Its.Web.Controllers
             _logger.Info($"Изменен статус документа Аннотация модулей (Отправлен на согласование) Id = {annotation.VersionedDocumentId} Status = {annotation.Status.Id} {annotation.Status.Name} Номер плана {annotation.PlanNumber} Версия плана {annotation.PlanVersionNumber}" +
                $"Profile = {annotation.BasicCharacteristicOP.Info.ProfileId} {annotation.BasicCharacteristicOP.Info.Profile?.CODE} {annotation.BasicCharacteristicOP.Info.Profile?.NAME} " +
                $"Версия ОХОП {annotation.BasicCharacteristicOP.Version} {annotation.BasicCharacteristicOP.Info.Year} год");
-            
+
             return Json(new { success = true, status = statusUpop.Name, statusId = statusUpop.Id,
-                    statusDate = $"{annotation.StatusChangeTime.ToShortDateString()} {annotation.StatusChangeTime.ToShortTimeString()}" }, "text/html", Encoding.Unicode);
+                statusDate = $"{annotation.StatusChangeTime.ToShortDateString()} {annotation.StatusChangeTime.ToShortTimeString()}" });//, "text/html", Encoding.Unicode);
         }
 
         [ErrorFilter]
@@ -224,7 +226,7 @@ namespace Urfu.Its.Web.Controllers
                 .Select(m => new ModuleAnnotationRow(m))
                 .OrderBy(m => m.Name).ToList();
 
-            return Json(modules, JsonRequestBehavior.AllowGet);
+            return Json(modules, new JsonSerializerSettings());
         }
 
         public ActionResult Modules(string profile, int planNumber, int planVersionNumber)
@@ -235,7 +237,7 @@ namespace Urfu.Its.Web.Controllers
                 .Select(m => new ModuleAnnotationRow(m))
                 .OrderBy(m => m.Name).ToList();
 
-            return Json(modules, JsonRequestBehavior.AllowGet);
+            return Json(modules, new JsonSerializerSettings());
         }
 
         public ActionResult PracticeModules(string profile, int planNumber, int planVersionNumber)
@@ -246,7 +248,7 @@ namespace Urfu.Its.Web.Controllers
                 .Select(m => new ModuleAnnotationRow(m))
                 .OrderBy(m => m.Name).ToList();
 
-            return Json(modules, JsonRequestBehavior.AllowGet);
+            return Json(modules, new JsonSerializerSettings());
         }
 
         public ActionResult GiaModules(string profile, int planNumber, int planVersionNumber)
@@ -257,7 +259,7 @@ namespace Urfu.Its.Web.Controllers
                 .Select(m => new ModuleAnnotationRow(m))
                 .OrderBy(m => m.Name).ToList();
 
-            return Json(modules, JsonRequestBehavior.AllowGet);
+            return Json(modules, new JsonSerializerSettings());
         }
         
         private IQueryable<Plan> Plans(string profile, int planNumber, int planVersionNumber)
@@ -338,7 +340,7 @@ namespace Urfu.Its.Web.Controllers
                 $"номер плана: {annotation.PlanNumber} версия плана: {annotation.PlanVersionNumber}";
 
             var docxStream = _documentService.Print(document, FileFormat.Docx);
-            annotation.FileStorageDocxId = FileStorageHelper.SaveFile(docxStream, $"{fileName}.docx", FileCategory.ModuleAnnotation, folder: $"{annotation.BasicCharacteristicOP.Info.Year}",
+            annotation.FileStorageDocxId = Model.FileStorageHelper.SaveFile(docxStream, $"{fileName}.docx", Model.FileCategory.ModuleAnnotation, folder: $"{annotation.BasicCharacteristicOP.Info.Year}",
                 comment: $"Аннотация модулей {annotation.BasicCharacteristicOP.Info.Profile.OksoAndTitle} номер плана: {annotation.PlanNumber} версия плана: {annotation.PlanVersionNumber} " +
                     $"(Версия ОХОП {annotation.BasicCharacteristicOP.Version} {annotation.BasicCharacteristicOP.Info.Year} год)", id: annotation.FileStorageDocxId);
             

@@ -160,13 +160,13 @@ namespace Urfu.Its.Web.Controllers
             return new Tuple<string, string>(userName, password);
         }
 
-        public Task ChallengeAsync(HttpAuthenticationChallengeContext context, CancellationToken cancellationToken)
+        public Task ChallengeAsync(HttpContext context, CancellationToken cancellationToken)
         {
             Challenge(context);
             return Task.FromResult(0);
         }
 
-        private void Challenge(HttpAuthenticationChallengeContext context)
+        private void Challenge(HttpContext context)
         {
             string parameter;
 
@@ -192,24 +192,24 @@ namespace Urfu.Its.Web.Controllers
 
     public static class HttpAuthenticationChallengeContextExtensions
     {
-        public static void ChallengeWith(this HttpAuthenticationChallengeContext context, string scheme)
+        public static void ChallengeWith(this HttpContext context, string scheme)
         {
             ChallengeWith(context, new AuthenticationHeaderValue(scheme));
         }
 
-        public static void ChallengeWith(this HttpAuthenticationChallengeContext context, string scheme, string parameter)
+        public static void ChallengeWith(this HttpContext context, string scheme, string parameter)
         {
             ChallengeWith(context, new AuthenticationHeaderValue(scheme, parameter));
         }
 
-        public static void ChallengeWith(this HttpAuthenticationChallengeContext context, AuthenticationHeaderValue challenge)
+        public static void ChallengeWith(this HttpContext context, AuthenticationHeaderValue challenge)
         {
             if (context == null)
             {
                 throw new ArgumentNullException("context");
             }
 
-            context.Result = new AddChallengeOnUnauthorizedResult(challenge, context.Result);
+            IActionResult Result = new AddChallengeOnUnauthorizedResult(challenge, context);
         }
     }
 
@@ -273,15 +273,18 @@ namespace Urfu.Its.Web.Controllers
 
     public class AddChallengeOnUnauthorizedResult : IActionResult
     {
-        public AddChallengeOnUnauthorizedResult(AuthenticationHeaderValue challenge, IActionResult innerResult)
+        public AddChallengeOnUnauthorizedResult(AuthenticationHeaderValue challenge, HttpContext context)
         {
             Challenge = challenge;
-            InnerResult = innerResult;
+            Context = context;
         }
 
         public AuthenticationHeaderValue Challenge { get; private set; }
 
         public IActionResult InnerResult { get; private set; }
+
+        public HttpContext Context { get; private set; }
+
 
         public async Task ExecuteResultAsync(ActionContext context)
         {

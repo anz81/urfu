@@ -598,7 +598,7 @@ namespace Urfu.Its.Web.Controllers
 
         private MinorAutoVM AutoAdmitt(int competitionGroupId)
         {
-            ((IObjectContextAdapter)db).ObjectContext.CommandTimeout = 1200000;
+            db.Database.SetCommandTimeout(1200000);
 
             _sdl = new StudentDesicionList();
             var group = db.ProjectCompetitionGroups.FirstOrDefault(g => g.Id == competitionGroupId);

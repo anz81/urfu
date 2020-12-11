@@ -9,6 +9,7 @@ using Urfu.Its.VersionedDocs.Documents.Module;
 using Urfu.Its.VersionedDocs.Documents.Shared;
 using Urfu.Its.Web.DataContext;
 using Urfu.Its.Web.Models;
+using Newtonsoft.Json;
 
 namespace Urfu.Its.Web.Controllers
 {
@@ -42,7 +43,7 @@ namespace Urfu.Its.Web.Controllers
                     Description = r.Description,
                     ProfileId = r.ProfileId                    
                 }).ToListAsync();
-            return Json(eduResults, JsonRequestBehavior.AllowGet);
+            return Json(eduResults, new JsonSerializerSettings());
         }
         public async Task<ActionResult> GetCompetences(int documentId, string profileId)
         {
@@ -63,7 +64,7 @@ namespace Urfu.Its.Web.Controllers
                     DirectionId = c.DirectionId,
                     Content = c.Content
                 }).ToListAsync();
-            return Json(competences, JsonRequestBehavior.AllowGet);
+            return Json(competences, new JsonSerializerSettings());
         }        
     }
 }

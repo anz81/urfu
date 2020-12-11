@@ -300,7 +300,7 @@ namespace Urfu.Its.Web.Controllers
 
         private IQueryable<object> PrepareReport(string sort, string filter)
         {
-            ((IObjectContextAdapter)db).ObjectContext.CommandTimeout = 1200000;
+            db.Database.SetCommandTimeout(1200000);
 
             //var expression = admissionFilter ?? (x => true);
 

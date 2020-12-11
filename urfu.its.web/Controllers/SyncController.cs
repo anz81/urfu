@@ -14,6 +14,7 @@ using Urfu.Its.Integration.Models;
 using Urfu.Its.Web.DataContext;
 using Urfu.Its.Web.Models;
 using Microsoft.Extensions.Hosting.Internal;
+using Microsoft.Extensions.Logging;
 
 namespace Urfu.Its.Web.Controllers
 {
@@ -155,14 +156,8 @@ namespace Urfu.Its.Web.Controllers
         [Authorize(Roles = ItsRoles.NsiEdit)]
         public ActionResult SyncDirection(string directionId)
         {
-            var db = new ApplicationDbContext
-            {
-                Configuration =
-                {
-                    AutoDetectChangesEnabled = false,
-                    ValidateOnSaveEnabled = false
-                }
-            };
+            var db = new ApplicationDbContext();
+            db.ChangeTracker.AutoDetectChangesEnabled = false;
             Logger.Info("Синхронизация по запросу для "+ directionId);
             var divisions = new UniDivisionsService().GetDivisions();
             SyncEngine.SyncModulesForDirection(directionId, db, divisions);
@@ -192,7 +187,8 @@ namespace Urfu.Its.Web.Controllers
         public ActionResult SyncApploads(int year, int term)
         {
             AutoResetEvent e = new AutoResetEvent(false);
-            HostingEnvironment.QueueBackgroundWorkItem((x) =>
+            var backtask = new BackgroundTaskScheduler();
+            backtask.QueueBackgroundWorkItem(x =>
             {
                 SyncEngine.SyncApploads(year, term);
                 e.Set();
@@ -204,7 +200,9 @@ namespace Urfu.Its.Web.Controllers
         public ActionResult SyncDebtors(string moduleTitle, int? year, string term)
         {
             AutoResetEvent e = new AutoResetEvent(false);
-            HostingEnvironment.QueueBackgroundWorkItem((x) =>
+            
+            var backtask = new BackgroundTaskScheduler();
+            backtask.QueueBackgroundWorkItem(token =>
             {
                 SyncEngine.SyncDebtors(moduleTitle,year, term);
                 e.Set();
@@ -217,7 +215,8 @@ namespace Urfu.Its.Web.Controllers
         public ActionResult SyncForeignLanguageRating()
         {
             AutoResetEvent e = new AutoResetEvent(false);
-            HostingEnvironment.QueueBackgroundWorkItem((x) =>
+            var backtask = new BackgroundTaskScheduler();
+            backtask.QueueBackgroundWorkItem(x =>
             {
                 SyncEngine.SyncForeignLanguageRating();
                 e.Set();
@@ -229,7 +228,8 @@ namespace Urfu.Its.Web.Controllers
         public ActionResult SyncTmers()
         {
             AutoResetEvent e = new AutoResetEvent(false);
-            HostingEnvironment.QueueBackgroundWorkItem((x) =>
+            var backtask = new BackgroundTaskScheduler();
+            backtask.QueueBackgroundWorkItem(x =>
             {
                 SyncEngine.SyncTmers();
                 e.Set();

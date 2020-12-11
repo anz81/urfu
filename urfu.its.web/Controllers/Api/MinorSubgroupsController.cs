@@ -15,6 +15,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net;
 using System.Net.Http.Headers;
+using Microsoft.EntityFrameworkCore;
 
 namespace Urfu.Its.Web.Controllers.Api
 {
@@ -103,7 +104,7 @@ namespace Urfu.Its.Web.Controllers.Api
 
             using (var db = new ApplicationDbContext())
             {
-                db.Database.CommandTimeout = 300;
+                db.Database.SetCommandTimeout(300);
                 var minorsQuery = moduleType == ModuleTypeParam.All || moduleType == ModuleTypeParam.Minor ? MinorsQuery(db, year, semester) : Enumerable.Empty<Subgroup>();
                 var sectionfkQuery = moduleType == ModuleTypeParam.All || moduleType == ModuleTypeParam.SectionFk ? SectionFKQuery(db, year, semester) : Enumerable.Empty<Subgroup>();
                 var flQuery = moduleType == ModuleTypeParam.All || moduleType == ModuleTypeParam.ForeignLanguage ? ForeignLanguageQuery(db, year, semester) : Enumerable.Empty<Subgroup>();
@@ -420,7 +421,7 @@ namespace Urfu.Its.Web.Controllers.Api
             
             using (var db = new ApplicationDbContext())
             {
-                db.Database.CommandTimeout = newQuery ? 900 : 4000;
+                db.Database.SetCommandTimeout(newQuery ? 900 : 4000);
                 var minorsQuery = moduleType == ModuleTypeParam.All || moduleType == ModuleTypeParam.Minor ? (newQuery ? MinorsQuery(db, year, semester, moduleName, competitionGroup) : MinorsOldQuery(db, year, semester, moduleName, competitionGroup)) : Enumerable.Empty<SubgroupMembers>();
                 var sectionfkQuery = moduleType == ModuleTypeParam.All || moduleType == ModuleTypeParam.SectionFk ? (newQuery ? SectionFKQuery(db, year, semester, moduleName, competitionGroup) : SectionFKOldQuery(db, year, semester, moduleName, competitionGroup)) : Enumerable.Empty<SubgroupMembers>();
                 var flQuery = moduleType == ModuleTypeParam.All || moduleType == ModuleTypeParam.ForeignLanguage ? (newQuery ? ForeignLanguageQuery(db, year, semester, moduleName, competitionGroup) : ForeignLanguageOldQuery(db, year, semester, moduleName, competitionGroup)) : Enumerable.Empty<SubgroupMembers>();
@@ -1168,7 +1169,7 @@ namespace Urfu.Its.Web.Controllers.Api
         {
             using (var db = new ApplicationDbContext())
             {
-                db.Database.CommandTimeout = 300;
+                db.Database.SetCommandTimeout(300);
                 var query = ModuleSubgroupMembershipsController.MinorsOldQuery(db, year, term, moduleName);
                 return query.ToList().Select(ModuleSubgroupMembershipsController.Selector);
             }
@@ -1183,7 +1184,7 @@ namespace Urfu.Its.Web.Controllers.Api
             var semester = ModuleSubgroupsController.MapSemester(term);
             using (var db = new ApplicationDbContext())
             {
-                db.Database.CommandTimeout = 300;
+                db.Database.SetCommandTimeout(300);
                 var query = ModuleSubgroupsController.MinorsQuery(db, year, semester);
                 return query.ToList().Select(ModuleSubgroupsController.Selector);
             }

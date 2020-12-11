@@ -207,10 +207,10 @@ namespace Urfu.Its.Web.Controllers
             query["search"] = search;
             var queryString = query.ToString();*/
 
-            using (var client = new HttpClient(new WebRequestHandler
+            using (var client = new HttpClient(/*new WebRequestHandler
             {
                 Credentials = new NetworkCredential(login, password)
-            })
+            }*/)
             {
                 BaseAddress = new Uri(serviceUrl)
             })

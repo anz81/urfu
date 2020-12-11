@@ -19,6 +19,10 @@ namespace Urfu.Its.Common
     {
         private static volatile ILog _log;
         
+        public ILogger GetLogger()
+        {
+            return _log.Logger;
+        }
         public static void Write(TraceEventType logLevel, string message, params object[] args)
         {
             if (_log == null)

@@ -44,7 +44,8 @@ namespace Urfu.Its.Web.Controllers
         
         public ActionResult Index(string filter, string focus)
         {
-            if (Request.IsAjaxRequest())
+            bool isAjax = HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (isAjax)
             {
                 var passports = GetFilteredCompetencePassport(filter);
 
@@ -109,11 +110,11 @@ namespace Urfu.Its.Web.Controllers
         {
             var passport = db.CompetencePassports.FirstOrDefault(b => b.VersionedDocumentId == id);
             if (passport == null)
-                return Json(new { success = false, message = "Редактируемый документ не найден" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Редактируемый документ не найден" });//, "text/html", Encoding.Unicode);
 
             var statusUpop = db.UpopStatuses.FirstOrDefault(s => s.Id == status);
             if (statusUpop == null)
-                return Json(new { success = false, message = "Статус не найден" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Статус не найден" });//, "text/html", Encoding.Unicode);
             
             passport.Status = statusUpop;
             passport.StatusChangeTime = DateTime.Now;
@@ -131,21 +132,21 @@ namespace Urfu.Its.Web.Controllers
                $"Profile = {passport.BasicCharacteristicOP.Info.ProfileId} {passport.BasicCharacteristicOP.Info.Profile?.CODE} {passport.BasicCharacteristicOP.Info.Profile?.NAME} " +
                $"Версия ОХОП {passport.BasicCharacteristicOP.Version} {passport.BasicCharacteristicOP.Info.Year} год");
 
-            return Json(new { success = true }, "text/html", Encoding.Unicode);
+            return Json(new { success = true });//, "text/html", Encoding.Unicode);
         }
 
         public ActionResult SendVersion(int id)
         {
             var passport = db.CompetencePassports.Include(b => b.Status).FirstOrDefault(b => b.VersionedDocumentId == id);
             if (passport == null)
-                return Json(new { success = false, message = "Редактируемый документ не найден" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Редактируемый документ не найден" });//, "text/html", Encoding.Unicode);
 
             if (!passport.Status.CanEdit())
-                return Json(new { success = false, message = "Документ уже подписан или находится в обработке" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Документ уже подписан или находится в обработке" });//, "text/html", Encoding.Unicode);
 
             var statusUpop = db.UpopStatuses.FirstOrDefault(s => s.Id == 11 /*"В обработке"*/);
             if (statusUpop == null)
-                return Json(new { success = false, message = "Статус не найден" }, "text/html", Encoding.Unicode);
+                return Json(new { success = false, message = "Статус не найден" });//, "text/html", Encoding.Unicode);
 
             passport = SaveDocx(passport);
 
@@ -159,7 +160,7 @@ namespace Urfu.Its.Web.Controllers
                 $"Версия ОХОП {passport.BasicCharacteristicOP.Version} {passport.BasicCharacteristicOP.Info.Year} год");
 
             return Json(new { success = true, status = statusUpop.Name, statusId = statusUpop.Id,
-                    statusDate = $"{passport.StatusChangeTime.ToShortDateString()} {passport.StatusChangeTime.ToShortTimeString()}" }, "text/html", Encoding.Unicode);
+                statusDate = $"{passport.StatusChangeTime.ToShortDateString()} {passport.StatusChangeTime.ToShortTimeString()}" });//, "text/html", Encoding.Unicode);
         }
 
         [ErrorFilter]
@@ -202,7 +203,7 @@ namespace Urfu.Its.Web.Controllers
                 .Select(m => new ModuleInfoWithDisciplines(m))
                 .OrderBy(m => m.Name);
 
-            return Json(modules, JsonRequestBehavior.AllowGet);
+            return Json(modules, new JsonSerializerSettings());
         }
 
         public ActionResult AllEduResults(string ids)
@@ -217,7 +218,7 @@ namespace Urfu.Its.Web.Controllers
                                         .Select(e => new EduResultsInfo(e))
                     });
 
-            return Json(eduResults, JsonRequestBehavior.AllowGet);
+            return Json(eduResults, new JsonSerializerSettings());
         }
 
         private IQueryable<CompetencePassportViewModel> GetFilteredCompetencePassport(string filter)
@@ -292,7 +293,7 @@ namespace Urfu.Its.Web.Controllers
                 $"пасспорт компетенций версия {passport.Version}";
 
             var docxStream = _documentService.Print(document, FileFormat.Docx);
-            passport.FileStorageDocxId = FileStorageHelper.SaveFile(docxStream, $"{fileName}.docx", FileCategory.CompetencePassport, folder: $"{passport.BasicCharacteristicOP.Info.Year}",
+            passport.FileStorageDocxId = Model.FileStorageHelper.SaveFile(docxStream, $"{fileName}.docx", Model.FileCategory.CompetencePassport, folder: $"{passport.BasicCharacteristicOP.Info.Year}",
                 comment: $"Пасспорт компетенций {passport.BasicCharacteristicOP.Info.Profile.OksoAndTitle} {passport.Year} версия {passport.Version} " +
                     $"(Версия ОХОП {passport.BasicCharacteristicOP.Version} {passport.BasicCharacteristicOP.Info.Year} год)", id: passport.FileStorageDocxId);
             

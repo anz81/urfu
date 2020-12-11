@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting.Internal;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
 using Urfu.Its.Common;
@@ -29,7 +30,8 @@ namespace Urfu.Its.Web.Excel
 
         public Stream Export(object obj, string templateFile, List<ReportDynamicColumn> dynColumns = null)
         {
-            using (var fileStream = File.Open(HostingEnvironment.ApplicationPhysicalPath + templateFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            var he = new HostingEnvironment();
+            using (var fileStream = File.Open(he.ContentRootPath + templateFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (var package = new ExcelPackage(fileStream))
             {
                 FillWorkbookWithObject(package, obj, dynColumns);

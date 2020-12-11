@@ -25,7 +25,7 @@ namespace Urfu.Its.Web.Controllers.Api
         {
             using (var db = new ApplicationDbContext())
             {
-                ((IObjectContextAdapter)db).ObjectContext.CommandTimeout = 300;
+                db.Database.SetCommandTimeout(300);
                 var query = db.Subgroups.Select(s => new
                 {
                     s,
@@ -88,7 +88,7 @@ namespace Urfu.Its.Web.Controllers.Api
         {
             using (var db = new ApplicationDbContext())
             {
-                ((IObjectContextAdapter)db).ObjectContext.CommandTimeout = 300;
+                db.Database.SetCommandTimeout(300);
                 var query = db.Subgroups.Where(s => !s.Removed).Select(s => new
                 {
                     s,

@@ -17,32 +17,11 @@ using Urfu.Its.Web.Models;
 
 namespace Urfu.Its.Web
 {
-    public class AutoMapperConfig
+    public class AutoMapperConfig: AutoMapper.Profile
     {
-        public static void Register()
+        public AutoMapperConfig()
         {
-            ConfigureMappingFromServicesToDb();
-            ConfigureMappingFromDbToApi();
-            
-            MapperConfiguration mc = new MapperConfiguration(new AutoMapper.Configuration.MapperConfigurationExpression());
-            mc.AssertConfigurationIsValid();
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-
-            IMapper mapper = mapperConfig.CreateMapper();
-            //services.AddSingleton(mapper);
-
-            //services.AddMvc();
-        }
-
-        private static void ConfigureMappingFromDbToApi()
-        {
-            var mce = new MapperConfigurationExpression();
-            var mc = new MapperConfiguration(mce);
-            var mapper = new Mapper(mc);
-            Mapper.Map<Subgroup, SubgroupApiDto>(Subgroup, SubgroupApiDto)
+            CreateMap<Subgroup, SubgroupApiDto>()
                 .ForMember(s=>s.groupId, opt=>opt.MapFrom(s=>s.Meta.groupId))
                 .ForMember(s=>s.moduleId, opt=>opt.MapFrom(s=>s.Meta.moduleId))
                 .ForMember(s=>s.selectable, opt=>opt.MapFrom(s=>s.Meta.Selectable))
@@ -61,7 +40,7 @@ namespace Urfu.Its.Web
                 .ForMember(s=>s.moduleNumber,opt=>opt.Ignore())
                 .ForMember(s=>s.combinedKey,opt=>opt.Ignore())
                 .ForMember(s => s.combinedKey2, opt => opt.Ignore());
-            Mapper.CreateMap<Subgroup, SubgroupWithMemebersApiDto>()
+            CreateMap<Subgroup, SubgroupWithMemebersApiDto>()
                 .ForMember(s=>s.groupId, opt=>opt.MapFrom(s=>s.Meta.groupId))
                 .ForMember(s=>s.moduleId, opt=>opt.MapFrom(s=>s.Meta.moduleId))
                 .ForMember(s=>s.selectable, opt=>opt.MapFrom(s=>s.Meta.Selectable))
@@ -79,7 +58,7 @@ namespace Urfu.Its.Web
                 .ForMember(s=>s.students,opt=>opt.Ignore())
                 .ForMember(s=>s.combinedKey,opt=>opt.Ignore())
                 .ForMember(s => s.combinedKey2, opt => opt.Ignore());
-            Mapper.CreateMap<Variant, VariantApiDto>()
+            CreateMap<Variant, VariantApiDto>()
                 .ForMember(dst => dst.direction, option => option.MapFrom(variant => variant.Program.Direction))
                 .ForMember(dst => dst.groups, option => option.MapFrom(variant => variant.Groups))
                 .ForMember(dst => dst.variantName, option => option.MapFrom(variant => variant.Name))
@@ -94,24 +73,22 @@ namespace Urfu.Its.Web
                 .ForMember(dst => dst.eduProgramName, option => option.MapFrom(variant => variant.Program.Name))
                 .ForMember(dst => dst.modules, option => option.MapFrom(variant => variant.Groups.SelectMany(g=>g.Contents).Where(c=>c.Selected)));
 
-            Mapper.CreateMap<Direction, DirectionApiDto>();
-
-            Mapper.CreateMap<VariantSelectionGroup, VariantSelectionGroupApiDto>()
+            CreateMap<Direction, DirectionApiDto>();
+            CreateMap<VariantSelectionGroup, VariantSelectionGroupApiDto>()
                 .ForMember(dst => dst.id, option => option.MapFrom(variantGroup => variantGroup.Id))
                 .ForMember(dst => dst.groupName, option => option.MapFrom(variantGroup => variantGroup.Name))
                 .ForMember(dst => dst.testUnits, option => option.MapFrom(variantGroup => variantGroup.TestUnits));
 
-            Mapper.CreateMap<VariantGroup, VariantGroupApiDto>()
+            CreateMap<VariantGroup, VariantGroupApiDto>()
                 .ForMember(dst => dst.id, option => option.MapFrom(variantGroup => variantGroup.Id))
                 .ForMember(dst => dst.testUnits, option => option.MapFrom(variantGroup => variantGroup.TestUnits))
                 .ForMember(dst => dst.groupName,option => option.MapFrom(variantGroup => variantGroup.GroupType.GetName()));
 
-            Mapper.CreateMap<VariantContent, VariantContentApiDto>()
+            CreateMap<VariantContent, VariantContentApiDto>()
                 .ForMember(dst => dst.id, option => option.MapFrom(src => src.Id))
                 .ForMember(dst => dst.selectable, option => option.MapFrom(src => src.Selectable))
                 .ForMember(dst => dst.limits, option => option.MapFrom(src =>
-
-                     src.Group.Variant.ProgramLimits.Where(l => l.ModuleId == src.moduleId).Select(l => l.StudentsCount).FirstOrDefault()
+                   src.Group.Variant.ProgramLimits.Where(l => l.ModuleId == src.moduleId).Select(l => l.StudentsCount).FirstOrDefault()
                 ))
                 .ForMember(dst => dst.moduleUuid, option => option.MapFrom(src => src.moduleId))
                 .ForMember(dst => dst.requiredVariantContentIds,
@@ -152,9 +129,9 @@ namespace Urfu.Its.Web
                 .ForMember(dst => dst.selectionGroupId, option => option.MapFrom(src => src.VariantSelectionGroupId))
                 .ForMember(dst => dst.variantContentType, option => option.MapFrom(src => src.ModuleType.Name));
 
-            Mapper.CreateMap<Discipline, DisciplineApiDto>();
+            CreateMap<Discipline, DisciplineApiDto>();
 
-            Mapper.CreateMap<Plan, PlanApiDto>()
+            CreateMap<Plan, PlanApiDto>()
                 .ForMember(dst=>dst.versionNumber,opt=>opt.MapFrom(src=>src.versionTitle))
                 .ForMember(dst => dst.allTerms,
                     option => option.MapFrom(src => JsonConvert.DeserializeObject<int[]>(src.allTermsExtracted)))
@@ -163,7 +140,7 @@ namespace Urfu.Its.Web
                         option.MapFrom(src => JsonConvert.DeserializeObject<List<Dictionary<string, List<int>>>>(src.controls)))
                         .ForMember(src=>src.teachers,opt=>opt.Ignore());
 
-            Mapper.CreateMap<PlanAdditionalDto, PlanAdditional>()
+            CreateMap<PlanAdditionalDto, PlanAdditional>()
                 .ForMember(dst => dst.disciplineUUID, opt => opt.MapFrom(src => src.id))
                 .ForMember(dst => dst.versionUUID, opt => opt.MapFrom(src => src.version))
                 .ForMember(dst => dst.discipline, opt => opt.MapFrom(src => src.title))
@@ -194,28 +171,23 @@ namespace Urfu.Its.Web
                 .ForMember(dst => dst.ttu12, opt => opt.MapFrom(src => src.ttu12 != "" ? int.Parse(src.ttu12) : 0 ))
                 ;
 
-
-
-            Mapper.CreateMap<VariantAdmission, VariantAdmissionDto>()
+            CreateMap<VariantAdmission, VariantAdmissionDto>()
                 .ForMember(dst => dst.variantId,
                 option => option.MapFrom(src => src.variantId));
-            Mapper.CreateMap<ModuleAdmission, ModuleAdmissionDto>();
-            Mapper.CreateMap<AdmissionStatus, AdmissionStatusDto>();
-            Mapper.CreateMap<Division, DivisionApiDto>();
-            Mapper.CreateMap<EduProgram, ProgramApiDto>();
+            CreateMap<ModuleAdmission, ModuleAdmissionDto>();
+            CreateMap<AdmissionStatus, AdmissionStatusDto>();
+            CreateMap<Division, DivisionApiDto>();
+            CreateMap<EduProgram, ProgramApiDto>();
 
-            Mapper.CreateMap<VariantsUni, TrajectoryDto>()
+            CreateMap<VariantsUni, TrajectoryDto>()
                 .ForMember(dst => dst.trajectory_uuid, opt => opt.MapFrom(src => src.TrajectoryUuid))
                 .ForMember(dst => dst.externalid, opt => opt.MapFrom(src => src.VariantId))
                 .ForMember(dst => dst.specialization_uuid, opt => opt.MapFrom(src => src.ProfileId))
                 .ForMember(dst => dst.documentname, opt => opt.MapFrom(src => src.DocumentName));
 
-            Mapper.CreateMap<BasicCharacteristicOPRatifyData, RatifyingInfo>();
-        }
-
-        private static void ConfigureMappingFromServicesToDb()
-        {
-            Mapper.CreateMap<ProfileXmlDto, DataContext.Profile>()
+            CreateMap<BasicCharacteristicOPRatifyData, RatifyingInfo>();
+            
+            CreateMap<ProfileXmlDto, DataContext.Profile>()
                 .ForMember(dst=>dst.Direction,opt=>opt.Ignore())
                 .ForMember(dst=>dst.Division,opt=>opt.Ignore())
                 .ForMember(dst=>dst.remove,opt=>opt.Ignore());
@@ -226,7 +198,7 @@ namespace Urfu.Its.Web
                 { "СУОС", "СУОС" }
             };
             
-            Mapper.CreateMap<DirectionDto, Direction>()
+            CreateMap<DirectionDto, Direction>()
                 .ForMember(dst => dst.qualifications, option => option.MapFrom(src => string.Join(", ", src.qualifications)))
                 .ForMember(dst => dst.Modules, option => option.Ignore())
                 .ForMember(dst => dst.Programs, option => option.Ignore())
@@ -238,19 +210,19 @@ namespace Urfu.Its.Web
                 .ForMember(dst => dst.standard, option => option.MapFrom(src => standards.ContainsKey(src.standard) ? standards[src.standard] : null));
                 
 
-            Mapper.CreateMap<DisciplineDto, Discipline>()
+            CreateMap<DisciplineDto, Discipline>()
                 .ForMember(dst => dst.Modules, option => option.Ignore())
                 .ForMember(dst => dst.WorkingProgramResponsiblePersons, option => option.Ignore())
                 .ForMember(dst => dst.pkey, option => option.MapFrom(src => src.discipline));
 
-            Mapper.CreateMap<GroupXmlDto, Group>()
+            CreateMap<GroupXmlDto, Group>()
                 .ForMember(dst=>dst.Profile,opt=>opt.Ignore())
                 .ForMember(dst=>dst.SectionFkCompetitionGroups,opt=>opt.Ignore())
                 .ForMember(dst=>dst.ForeignLanguageCompetitionGroups,opt=>opt.Ignore())
                 .ForMember(dst => dst.ProjectCompetitionGroups, opt => opt.Ignore())
                 .ForMember(dst => dst.MUPCompetitionGroups, opt => opt.Ignore());
 
-            Mapper.CreateMap<StudentXmlDto, Student>()
+            CreateMap<StudentXmlDto, Student>()
                 .ForMember(dst=>dst.Group,opt=>opt.Ignore())
                 .ForMember(dst=>dst.Sportsman,opt=>opt.Ignore())
                 .ForMember(dst=>dst.Selections,opt=>opt.Ignore())
@@ -278,9 +250,9 @@ namespace Urfu.Its.Web
                 .ForMember(dst=>dst.Male, opt=>opt.MapFrom(x=>x.Sex!=0))
                 .ForMember(dst=>dst.SelectionJson,opt=>opt.Ignore());
             
-            Mapper.CreateMap<PersonXmlDto, Person>();
+            CreateMap<PersonXmlDto, Person>();
 
-            Mapper.CreateMap<ApploadDto, Appload>()
+            CreateMap<ApploadDto, Appload>()
                 .ForMember(dst=>dst.grp,opt=>opt.MapFrom(src=>src.group))
                 .ForMember(dst=>dst.duModule,opt=>opt.MapFrom(src=>src.eduModule))
                 .ForMember(dst=>dst.year,opt=>opt.Ignore())
@@ -288,7 +260,7 @@ namespace Urfu.Its.Web
                 .ForMember(dst=>dst.term,opt=>opt.Ignore())
                 .ForMember(dst => dst.Level, opt => opt.MapFrom(src => src.TypeProject));
 
-            Mapper.CreateMap<GroupHistoryDto, GroupsHistory>()
+            CreateMap<GroupHistoryDto, GroupsHistory>()
                 .ForMember(dst => dst.GroupId, opt => opt.MapFrom(src => src.group))
                 .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.code))
                 .ForMember(dst => dst.Course, opt => opt.MapFrom(src => src.course))
@@ -312,7 +284,7 @@ namespace Urfu.Its.Web
 
 
 
-            Mapper.CreateMap<DivisionDto, Division>()
+            CreateMap<DivisionDto, Division>()
                 .ForMember(dst => dst.MinorDisciplineTmerPeriod, opt => opt.Ignore())
                 .ForMember(dst => dst.SectionFKDisciplineTmerPeriod, opt => opt.Ignore())
                 .ForMember(dst => dst.ForeignLanguageDisciplineTmerPeriods, opt => opt.Ignore())
@@ -321,7 +293,7 @@ namespace Urfu.Its.Web
                 .ForMember(dst => dst.ParentDivision, option => option.Ignore())
                 .ForMember(dst => dst.Users,opt=>opt.Ignore());
 
-            Mapper.CreateMap<ModuleDto, Module>()
+            CreateMap<ModuleDto, Module>()
                 .ForMember(dst => dst.disciplines, option => option.MapFrom(src => src.disciplines))
                 .ForMember(dst => dst.specialities, option => option.MapFrom(src => string.Join(", ", src.specialities.Distinct().OrderBy(s => s))))
                 .ForMember(dst => dst.Directions, option => option.Ignore())
@@ -337,7 +309,7 @@ namespace Urfu.Its.Web
                 .ForMember(dst => dst.Level, option => option.MapFrom(src => src.typeProject))
                 .ForMember(dst => dst.MUP, option => option.Ignore());
 
-            Mapper.CreateMap<PlanDto, Plan>()
+            CreateMap<PlanDto, Plan>()
                 .ForMember(dst => dst.controls, option => option.MapFrom(src => JsonConvert.SerializeObject(src.controls)))
                 .ForMember(dst => dst.testUnitsByTerm, option => option.MapFrom(src => JsonConvert.SerializeObject(src.testUnitsByTerm)))
                 .ForMember(dst => dst.terms, option => option.MapFrom(src => JsonConvert.SerializeObject(src.terms)))
@@ -359,10 +331,10 @@ namespace Urfu.Its.Web
             //Mapper.CreateMap<IEnumerable<PlanDto>, List<PlanTerm>>()
             //    .ConvertUsing<MyTypeConverter>();
 
-            Mapper.CreateMap<IEnumerable<PlanTermsDto>, List<PlanTerm>>()
+            CreateMap<IEnumerable<PlanTermsDto>, List<PlanTerm>>()
                 .ConvertUsing<PlanDtoTypeConverter>();
 
-            Mapper.CreateMap<TeacherDto, Teacher>()
+            CreateMap<TeacherDto, Teacher>()
                 .ForMember(dst => dst.AccountancyGuid, option => option.MapFrom(src => src.accountancyGuid))
                 .ForMember(dst => dst.SectionFKProperties, option => option.Ignore())
                 .ForMember(dst => dst.ForeignLanguageProperties, option => option.Ignore())
@@ -373,7 +345,7 @@ namespace Urfu.Its.Web
                 .ForMember(dst => dst.User, option => option.Ignore())
                 .ForMember(dst => dst.Practices, option => option.Ignore());
 
-            Mapper.CreateMap<MinorPeriod, PeriodApiDto>()
+            CreateMap<MinorPeriod, PeriodApiDto>()
                 .ForMember(dst => dst.year, option => option.MapFrom(src => src.Year))
                 .ForMember(dst => dst.semester, option => option.MapFrom(src => src.Semester.Name))
                 .ForMember(dst => dst.selectionDeadline, option => option.MapFrom(src => src.SelectionDeadline))
@@ -381,16 +353,16 @@ namespace Urfu.Its.Web
                 .ForMember(dst => dst.maxStudentCount, option => option.MapFrom(src => src.MaxStudentsCount));
 
 
-            Mapper.CreateMap<MinorDisciplineTmerPeriod, MinorDisciplineTmerPeriodApiDto>()
+            CreateMap<MinorDisciplineTmerPeriod, MinorDisciplineTmerPeriodApiDto>()
                 .ForMember(dst => dst.year, option => option.MapFrom(src => src.Period.Year))
                 .ForMember(dst => dst.semester, option => option.MapFrom(src => src.Period.Semester.Name))
                 .ForMember(dst => dst.chairs, option => option.MapFrom(src => src.Divisions.Select(d=> $"{d.ParentName()}/{d.typeTitle} {d.title}")));
 
-            Mapper.CreateMap<MinorDisciplineTmer, MinorDisciplineTmerApiDto>()
+            CreateMap<MinorDisciplineTmer, MinorDisciplineTmerApiDto>()
                 .ForMember(dst => dst.rmer, option => option.MapFrom(src => src.Tmer.rmer))
                 .ForMember(dst => dst.periods, option => option.MapFrom(src => src.Periods));
 
-            Mapper.CreateMap<MinorDiscipline, MinorDisciplineApiDto>()
+            CreateMap<MinorDiscipline, MinorDisciplineApiDto>()
                 .ForMember(dst => dst.uid, opt => opt.MapFrom(src => src.Discipline.uid))
                 .ForMember(dst => dst.title, opt => opt.MapFrom(src => src.Discipline.title))
                 .ForMember(dst => dst.section, opt => opt.MapFrom(src => src.Discipline.section))
@@ -399,7 +371,7 @@ namespace Urfu.Its.Web
                 .ForMember(dst => dst.number, opt => opt.MapFrom(src => src.Discipline.number))
                 .ForMember(dst => dst.tmers, opt => opt.MapFrom(src => src.Tmers));
 
-            Mapper.CreateMap<Module, ModuleApiDto>()
+            CreateMap<Module, ModuleApiDto>()
                 .ForMember(dst => dst.disciplines, option => option.MapFrom(src => src.GetMinorDisciplines()))
                 .ForMember(dst => dst.tech, option => option.MapFrom(src => src.GetTechName()))
                 .ForMember(dst => dst.showInLC, option => option.MapFrom(src => src.GetShowInLC()))
@@ -407,7 +379,7 @@ namespace Urfu.Its.Web
                 .ForMember(dst => dst.requirmentTitle, option => option.MapFrom(src => src.Minor == null ? null : src.Minor.GetRequirmentTitle()))
                 .ForMember(dst => dst.period, option => option.Ignore());
 
-            Mapper.CreateMap<Module, MinorApiDto>()
+            CreateMap<Module, MinorApiDto>()
                 .ForMember(dst => dst.disciplines, option => option.MapFrom(src => src.GetMinorDisciplines()))
                 .ForMember(dst => dst.tech, option => option.MapFrom(src => src.GetTechName()))
                 .ForMember(dst => dst.showInLC, option => option.MapFrom(src => src.GetShowInLC()))
@@ -416,7 +388,7 @@ namespace Urfu.Its.Web
                 .ForMember(dst => dst.period, option => option.Ignore())
                 .ForMember(dst => dst.agreement, option => option.Ignore());
             
-            Mapper.CreateMap<ForeignLanguagePeriod, PeriodApiDto>()
+            CreateMap<ForeignLanguagePeriod, PeriodApiDto>()
                 .ForMember(dst => dst.year, option => option.MapFrom(src => src.Year))
                 .ForMember(dst => dst.semester, option => option.MapFrom(src => src.Semester.Name))
                 .ForMember(dst => dst.selectionDeadline, option => option.MapFrom(src => src.SelectionDeadline))
@@ -424,23 +396,23 @@ namespace Urfu.Its.Web
                 .ForMember(dst => dst.maxStudentCount, option => option.Ignore());
 
 
-            Mapper.CreateMap<DirectorDto, Director>()
+            CreateMap<DirectorDto, Director>()
                 .ForMember(dst => dst.DivisionUuid, option => option.MapFrom(src => src.divisionUUID))
                 .ForMember(dst => dst.Division, option => option.Ignore())
                 .ForMember(dst => dst.Surname, option => option.MapFrom(src => src.lastName))
                 .ForMember(dst => dst.Name, option => option.MapFrom(src => src.firstName))
                 .ForMember(dst => dst.PatronymicName, option => option.MapFrom(src => src.middleName));
 
-            Mapper.CreateMap<ModuleAgreementDto, ModuleAgreement>()
+            CreateMap<ModuleAgreementDto, ModuleAgreement>()
                 .ForMember(dst => dst.UniId, opt => opt.MapFrom(src => src.ID))
                 .ForMember(dst => dst.SemesterId, opt => opt.Ignore())
                 .ForMember(dst => dst.Semester, opt => opt.Ignore())
                 .ForMember(dst => dst.Module, opt => opt.Ignore())
-                .ForSourceMember(st => st.Terms, opt => opt.Ignore());
+                .ForSourceMember(st => st.Terms, opt => opt.DoNotValidate());
 
-            Mapper.CreateMap<ModuleAgreement, ModuleAgreementApiDto>();
+            CreateMap<ModuleAgreement, ModuleAgreementApiDto>();
 
-            Mapper.CreateMap<ProjectRoleApiDto, ProjectRole>()
+            CreateMap<ProjectRoleApiDto, ProjectRole>()
                 .ForMember(dst => dst.Id, opt => opt.Ignore())
                 .ForMember(dst => dst.Project, opt => opt.Ignore())
                 .ForMember(dst => dst.ProjectId, opt => opt.Ignore())
@@ -448,20 +420,20 @@ namespace Urfu.Its.Web
                 .ForMember(dst => dst.Description, opt => opt.MapFrom(src => src.description))
                 .ForMember(dst => dst.EmployersId, opt => opt.MapFrom(src => src.id));
 
-            Mapper.CreateMap<EduProgram, EduProgramVM>()
+            CreateMap<EduProgram, EduProgramVM>()
                 .ForMember(dst => dst.RequiredPlanNumber, opt => opt.MapFrom(src => src.PlanNumber))
                 .ForMember(dst => dst.RequiredPlanVersionNumber, opt => opt.MapFrom(src => src.PlanVersionNumber));
 
-            Mapper.CreateMap<TmerDto, Tmer>();
+            CreateMap<TmerDto, Tmer>();
 
-            Mapper.CreateMap<AreaEducationDto, AreaEducation>()
+            CreateMap<AreaEducationDto, AreaEducation>()
                 .ForMember(dst => dst.Code, opt => opt.MapFrom(src => src.code))
                 .ForMember(dst => dst.Title, opt => opt.MapFrom(src => src.title))
                 .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.id))
                 .ForMember(dst => dst.Orders, opt => opt.Ignore())
                 .ForMember(dst => dst.Competences, opt => opt.Ignore());
 
-            Mapper.CreateMap<TrajectoryDto, VariantsUni>()
+            CreateMap<TrajectoryDto, VariantsUni>()
                 .ForMember(dst => dst.TrajectoryUuid, opt => opt.MapFrom(src => src.trajectory_uuid))
                 .ForMember(dst => dst.VariantId, opt => opt.MapFrom(src => src.externalid))
                 .ForMember(dst => dst.ProfileId, opt => opt.MapFrom(src => src.specialization_uuid))

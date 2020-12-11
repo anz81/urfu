@@ -13,6 +13,8 @@ using Urfu.Its.VersionedDocs.Documents.Discipline;
 using Urfu.Its.VersionedDocs.Documents.Practices;
 using Urfu.Its.VersionedDocs.Documents.Shared;
 using Urfu.Its.Web.DataContext;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace Urfu.Its.Web.Controllers
 {
@@ -39,7 +41,7 @@ namespace Urfu.Its.Web.Controllers
                 _.Id,
                 Name = _.Description
             }).ToList();
-            return Json(ways, JsonRequestBehavior.AllowGet);
+            return Json(ways, new JsonSerializerSettings());
         }
         public ActionResult GetPracticeMethods()
         {
@@ -48,7 +50,7 @@ namespace Urfu.Its.Web.Controllers
                 _.Id,
                 Name = _.Description
             }).ToList();
-            return Json(list, JsonRequestBehavior.AllowGet);
+            return Json(list, new JsonSerializerSettings());
         }
 
         public ActionResult GetGroups(int documentId)
@@ -67,7 +69,7 @@ namespace Urfu.Its.Web.Controllers
                     g.Name
                 }).OrderBy(g => g.Name);
             //  .ToListAsync();
-            return Json(groups, JsonRequestBehavior.AllowGet);
+            return Json(groups, new JsonSerializerSettings());
         }
 
         [ErrorFilter]
@@ -76,7 +78,7 @@ namespace Urfu.Its.Web.Controllers
             var techCardService = new TechCardService();
             var techCardDto = await Task.Run(() => techCardService.GetTechCards(year, semester, disciplineName, groupId).FirstOrDefault());
             if (techCardDto == null)
-                return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
+                return new StatusCodeResult(StatusCodes.Status400BadRequest);
 
             var loads = techCardDto.loads.FirstOrDefault();
             
@@ -104,7 +106,7 @@ namespace Urfu.Its.Web.Controllers
                         Coefficient = techCardDto.termRatio
                     }
                 }
-            }, JsonRequestBehavior.AllowGet);
+            }, new JsonSerializerSettings());
         }
 
         private static TechCardCertificationItemInfo PrepareCertificationItem(TechCardLoadDto labCard)

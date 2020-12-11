@@ -7,6 +7,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting.Internal;
 using Urfu.Its.Common;
+using Urfu.Its.Web.DataContext;
 
 namespace Urfu.Its.Web.Schedule
 {
@@ -17,7 +18,8 @@ namespace Urfu.Its.Web.Schedule
             Jobs.Add(new TeacherScan());
             Jobs.Add(new HeartBeat());
             Jobs.Add(new NightResync());
-            HostingEnvironment.QueueBackgroundWorkItem((Action<CancellationToken>) MainLoop);
+            var bt = new BackgroundTaskScheduler();
+            bt.QueueBackgroundWorkItem((Action<CancellationToken>) MainLoop);
         }
 
         static readonly List<ScheduledJob> Jobs = new List<ScheduledJob>();
@@ -43,7 +45,8 @@ namespace Urfu.Its.Web.Schedule
                     Jobs.Remove(job);
                 }
             }
-            HostingEnvironment.QueueBackgroundWorkItem((Action<CancellationToken>) MainLoop);
+            var bt = new BackgroundTaskScheduler();
+            bt.QueueBackgroundWorkItem((Action<CancellationToken>) MainLoop);
         }
 
         private static void ProbeTask(ScheduledJob task)

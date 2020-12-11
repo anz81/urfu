@@ -667,7 +667,7 @@ namespace Urfu.Its.Web.Controllers
         private IQueryable<object> PrepareReport(string sort, string filter,
             Expression<Func<SectionFKAdmission, bool>> admissionFilter, bool allWithPriority = false)
         {
-            ((IObjectContextAdapter)_db).ObjectContext.CommandTimeout = 1200000;
+            _db.Database.SetCommandTimeout(1200000);
 
             var expression = admissionFilter ?? (x => true);
             //((IObjectContextAdapter)_db).ObjectContext.CommandTimeout = 90;

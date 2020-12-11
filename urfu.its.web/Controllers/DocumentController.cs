@@ -310,7 +310,7 @@ namespace Urfu.Its.Web.Controllers
             _logger.Debug("Попытка открытия документа с идентификатором {0}", id);
             var document = await _db.VersionedDocuments.FindAsync(id);
             if (document == null)
-                throw new HttpException((int)HttpStatusCode.NotFound, $"Документ с идентификатором {id} не найден");
+                throw new Exception($"Документ с идентификатором {id} не найден");
 
             if (new[]
             {
@@ -356,7 +356,7 @@ namespace Urfu.Its.Web.Controllers
                     var split = literatureServiceUrl.Split(new[] { '?' }, 2);
                     var address = split[0];
                     var queryString = split[1];
-                    var query = HttpUtility.ParseQueryString(queryString);
+                    var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(queryString);
                     query["USERID"] = abisRuslanUser.BARCODE;
                     query["PASSWORD"] = abisRuslanUser.PASSWORD;
                     literatureServiceUrl = $"{address}?{query}";
@@ -381,7 +381,7 @@ namespace Urfu.Its.Web.Controllers
                 .Include(d => d.Template)
                 .FirstOrDefaultAsync(d => d.Id == id);
             if (document == null)
-                throw new HttpException((int)HttpStatusCode.NotFound, $"Документ с идентификатором {id} не найден");
+                throw new Exception($"Документ с идентификатором {id} не найден");
 
             var service = ResolveDocumentImplementationService(document.Template.DocumentType);
             var vm = service.GetNavigationViewModel(document);
@@ -417,8 +417,9 @@ namespace Urfu.Its.Web.Controllers
             {
                 _logger.Debug("Раздел '{0}' документа типа '{1}' не найден в модели представления. Перенаправление на список разделов.", section, document.Template.DocumentType);
                 var queryParameters = new RouteValueDictionary();
-                foreach (string key in Request.QueryString.Keys)
-                    queryParameters[key] = Request.QueryString[key];
+                //queryParameters = RouteValueDictionary.FromArray(Request.Query);
+                foreach (var key in Request.Query.Keys)
+                    queryParameters[key] = Request.Query[key];
                 queryParameters.Add("id", document.Id);
                 return RedirectToAction("Index", queryParameters);
             }
@@ -445,7 +446,7 @@ namespace Urfu.Its.Web.Controllers
                 .Include(d => d.BlockLinks.Select(l => l.DocumentBlock))
                 .FirstOrDefaultAsync(d => d.Id == id);
             if (document == null)
-                throw new HttpException((int)HttpStatusCode.NotFound, $"Документ с идентификатором {id} не найден");
+                throw new Exception($"Документ с идентификатором {id} не найден");
 
             var result = new JObject();
 
@@ -527,7 +528,7 @@ namespace Urfu.Its.Web.Controllers
                 .Include(d => d.BlockLinks.Select(l => l.DocumentBlock))
                 .FirstOrDefaultAsync(d => d.Id == id);
             if (document == null)
-                throw new HttpException((int)HttpStatusCode.NotFound, $"Документ с идентификатором {id} не найден");
+                throw new Exception($"Документ с идентификатором {id} не найден");
 
             FileFormat fileFormat;
             string fileExtension = format;
@@ -556,7 +557,7 @@ namespace Urfu.Its.Web.Controllers
                 if (ohop != null && ohop?.FileStorageDocxId != null && ohop?.Status?.CanEdit() == false)
                 {
                     // берем документ из хранилища в случае, если он не может редактироваться и есть в хранилище
-                    var fileStream = FileStorageHelper.GetStream(ohop.FileStorageDocxId.Value);
+                    var fileStream = Model.FileStorageHelper.GetStream(ohop.FileStorageDocxId.Value);
                     return File(fileStream, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
                 }
             }
@@ -566,7 +567,7 @@ namespace Urfu.Its.Web.Controllers
                 if (passport != null && passport?.FileStorageDocxId != null && passport?.Status?.CanEdit() == false)
                 {
                     // берем документ из хранилища в случае, если он не может редактироваться и есть в хранилище
-                    var fileStream = FileStorageHelper.GetStream(passport.FileStorageDocxId.Value);
+                    var fileStream = Model.FileStorageHelper.GetStream(passport.FileStorageDocxId.Value);
                     return File(fileStream, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
                 }
             }
@@ -576,7 +577,7 @@ namespace Urfu.Its.Web.Controllers
                 if (annotation != null && annotation?.FileStorageDocxId != null && annotation?.Status?.CanEdit() == false)
                 {
                     // берем документ из хранилища в случае, если он не может редактироваться и есть в хранилище
-                    var fileStream = FileStorageHelper.GetStream(annotation.FileStorageDocxId.Value);
+                    var fileStream = Model.FileStorageHelper.GetStream(annotation.FileStorageDocxId.Value);
                     return File(fileStream, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
                 }
             }
@@ -598,7 +599,7 @@ namespace Urfu.Its.Web.Controllers
                 .Include(d => d.BlockLinks.Select(l => l.DocumentBlock))
                 .FirstOrDefaultAsync(d => d.Id == id);
             if (document == null)
-                throw new HttpException((int)HttpStatusCode.NotFound, $"Документ с идентификатором {id} не найден");
+                throw new Exception($"Документ с идентификатором {id} не найден");
 
             dynamic model = _documentService.CreateProxyModel(document, "FileName");
             string fileName = $"{model.FileName}.zip".ToDownloadFileName();
@@ -609,7 +610,7 @@ namespace Urfu.Its.Web.Controllers
                 if (ohop != null && ohop?.FileStorageZipId != null && ohop?.Status?.CanEdit() == false)
                 {
                     // берем архив из хранилища в случае, если он не может редактироваться и есть в хранилище
-                    var fileStream = FileStorageHelper.GetStream(ohop.FileStorageZipId.Value);
+                    var fileStream = Model.FileStorageHelper.GetStream(ohop.FileStorageZipId.Value);
                     return File(fileStream, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
                 }
             }
@@ -659,13 +660,13 @@ namespace Urfu.Its.Web.Controllers
                 filterContext.Result = new ContentResult
                 {
                     Content = filterContext.Exception.Message,
-                    ContentEncoding = Encoding.UTF8,
+                   // ContentEncoding = Encoding.UTF8,
                     ContentType = "text/plain; charset=UTF-8"
                 };
                 filterContext.ExceptionHandled = true;
                 filterContext.HttpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 filterContext.HttpContext.Response.ContentType = "text/plain; charset=UTF-8";
-                filterContext.HttpContext.Response.TrySkipIisCustomErrors = true;
+                //filterContext.HttpContext.Response.TrySkipIisCustomErrors = true;
             }
             else
             {
