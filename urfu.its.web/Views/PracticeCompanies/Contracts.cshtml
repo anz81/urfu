@@ -1,0 +1,2622 @@
+﻿@model Urfu.Its.Web.Model.Models.Practice.ContractsViewModel
+
+@{
+    ViewBag.Title = ViewBag.IsProjectPage 
+        ? "Лимиты и направления. Предприятие " + Model.CompanyName
+        : "Договоры с " + Model.CompanyName;
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@{
+    <div class="form-horizontal">
+        <script type="text/javascript">
+
+            Ext.onReady(function () {
+                Ext.tip.QuickTipManager.init();
+
+                var localStorageName = "ContractFilters";
+                var companyIdNameField = "CompanyIdNameField";
+            
+                var hidden = '@ViewBag.ContractId' != '';
+
+                function checkEditRole(actions) {
+                    if ('@ViewBag.CanEdit' == 'True') {
+                        actions();
+                    }
+                    else {
+                        Ext.MessageBox.alert('Ошибка', "У вас нет прав вносить изменения в справочник");
+                    }
+                }
+
+                function parseJson(json) {
+                    var data = JSON.parse(json.replace(/&quot;/g, '"'));
+                    return data;
+                }
+
+                //var setValues = false;
+
+                function setCompanyValuesToEditForm() {
+                    editWnd.getComponent("DirectorCntr").setValue('@Model.Director');
+                    editWnd.getComponent("DirectorInitialsCntr").setValue('@Model.DirectorInitials');
+                    editWnd.getComponent("DirectorGenitiveCntr").setValue('@Model.DirectorGenitive');
+                    editWnd.getComponent("PostOfDirectorCntr").setValue('@Model.PostOfDirector');
+                    editWnd.getComponent("PostOfDirectorGenitiveCntr").setValue('@Model.PostOfDirectorGenitive');
+                    editWnd.getComponent("PersonInChargeCntr").setValue('@Model.PersonInCharge');
+                    editWnd.getComponent("PersonInChargeInitialsCntr").setValue('@Model.PersonInChargeInitials');
+                    editWnd.getComponent("PostOfPersonInChargeCntr").setValue('@Model.PostOfPersonInCharge');
+                    editWnd.getComponent("PhoneNumber").setValue('@Model.PhoneNumber');
+                    editWnd.getComponent("Email").setValue('@Model.Email');
+                }
+
+                function setValuesToEditForm(params) {
+                    //setValues = true;
+                    editWnd.items.items.forEach(function (element, index, array) {
+                        if (element.itemId == 'datesContainer')
+                            element.items.items.forEach(function (element, index, array) {
+                                var date = params[element.itemId].replace(/\D/g, '/')
+                                element.setValue(date);
+                            });
+                        else if (element.itemId == 'ContractDate') {
+                            var date = params[element.itemId].replace(/\D/g, '/')
+                            element.setValue(date);
+                        }
+                        else if (element.itemId == 'ksButtonContainer') {
+                            element.getComponent('Year').setValue(params['YearKs']);
+                        }
+                        else if (element.itemId == 'Scan')
+                            element.items.items[0].items.items[0].setRawValue(params['ScanName'] == "" ? "Выберите документ" : params['ScanName']);
+                      
+                        else if (params[element.itemId] !== undefined)
+                            element.setValue(params[element.itemId]);
+                    });
+
+                }
+                
+                var yearTest = /^\d{4}$/;
+                var numbersTest = /^\d+$/;
+                var initialsTest = /^\D{1,40}$/;
+                Ext.apply(Ext.form.field.VTypes, {
+                    year: function (val, field) {
+                        return yearTest.test(val);
+                    },
+                    yearText: 'Введите 4 цифры',
+
+                    numbers: function (val, field) {
+                        return numbersTest.test(val);
+                    },
+                    numbersText: 'Допустимы только числа',
+
+                    initials: function (val, field) {
+                        return initialsTest.test(val);
+                    },
+                    initialsText: 'Инициалы могут быть не более 40 символов'
+                });
+
+                Ext.define('ContractsModel',
+                    {
+                        extend: 'Ext.data.Model',
+                        fields:
+                        [
+                            { type: 'string', name: 'Id' },
+                            { type: 'string', name: 'Name' }
+                        ]
+                    });
+
+                function updateRecord(id, rowIndex) {
+                    oneContractStore.proxy.setUrl('@Url.Action("Contract")?id=' + id + '&rowIndex=' + rowIndex);
+                    oneContractStore.reload();
+                }
+
+                var oneContractStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/PracticeCompanies/Contract',
+                            reader: {
+                                type: 'json',
+                            }
+                        },
+                        listeners: {
+                            load: function (t, records, successful, operation, eOpts) {
+                                var data = records[0].data.data[0];
+                                var index = data.RowIndex;
+                                if (index >= 0) {
+                                    // существующая запись
+                                    store.getAt(index).data = data;
+                                }
+                                else {
+                                    // новая запись
+                                    store.add(data);
+                                }
+                                Ext.getCmp('ContractsGrid').getView().refresh();
+                            }
+                        }
+                    });
+
+                var store = Ext.create("Ext.data.Store",  //BufferedStore",
+                    {
+                        idProperty: 'Id',
+                        fields: [
+                            "Id", "Number"
+                        ],
+                        autoLoad: true,
+                        pageSize: 25,
+                        model: 'ContractsModel',
+                        remoteSort: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/PracticeCompanies/Contracts?id=' + @Model.CompanyId + '&contractId=@ViewBag.ContractId',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                totalProperty: 'total'
+                            }
+                        }
+                    });
+
+                function setFilters() {
+                    settings = [
+                        { property: 'Number', value: filtersWnd.getComponent("Number").getValue() },
+                        { property: 'DirectorCntr', value: filtersWnd.getComponent("Director").getValue() },
+                        { property: 'PersonInChargeCntr', value: filtersWnd.getComponent("PersonInCharge").getValue() },
+                        { property: 'IsShortDated', value: filtersWnd.getComponent('IsShortDatedField').getValue().IsShortDatedField },
+                        { property: 'IsEndless', value: filtersWnd.getComponent('IsEndlessField').getValue().IsEndlessField },
+                        { property: 'Year', value: yearCmbx.getValue() },
+                        { property: 'Semester', value: semesterCmbx.getValue() },
+                        { property: 'OksoList', value: oksoCmbx.getValue() },
+                        { property: 'QualificationList', value: qualificationCmbx.getValue() },
+                        { property: 'FolderNumber', value: filtersWnd.getComponent("FolderNumber").getValue() }
+                    ];
+                    store.setFilters(settings);
+                    localStorage.setItem(localStorageName, JSON.stringify(settings));
+                    localStorage.setItem(companyIdNameField, JSON.stringify(@Model.CompanyId));
+                }
+
+                var prevSettings = {};
+                try {
+                    var prevCompanyId = JSON.parse(localStorage.getItem(companyIdNameField));
+                    if (@Model.CompanyId == prevCompanyId) {
+                        var prevSettingString = JSON.parse(localStorage.getItem(localStorageName) || "[]");
+
+                        for (var i = 0; i < prevSettingString.length; i++) {
+                            prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                        }
+                    }
+                }
+                catch (err) {
+                }
+
+                function setLimitFilters() {
+                    settings = [
+                        { property: 'Okso', value: limitsWnd.getComponent("filtersContainer1").items.map['OksoFilter'].rawValue },
+                        { property: 'Profile', value: limitsWnd.getComponent("filtersContainer1").items.map['ProfileFilter'].rawValue },
+                        { property: 'Qualification', value: qualificationLimFilterCmbx.getValue() },
+                        { property: 'Course', value: courseLimFilterCmbx.getValue() },
+                        { property: 'Semester', value: semesterLimFilterCmbx.getValue() },
+                        { property: 'Year', value: yearLimFilterCmbx.getValue() }
+                    ];
+                    limitsStore.setFilters(settings);
+                }
+
+                function setOksoFilters() {
+                    settings = [
+                        { property: 'OksoAndTitle', value: Ext.ComponentQuery.query('#oksoSearchText')[0].getValue() }
+                    ];
+                    oksoStore.setFilters(settings);
+                }
+
+                var limitsStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        remoteSort: false,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/PracticeCompanies/Limits',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                totalProperty: 'total'
+                            }
+                        }
+                    });
+
+                var oksoListX = [];
+
+                function findOksoByName(name) {
+                    var oksoId = "";
+                    oksoListX.forEach(function (item, i, arr) {
+                        if (item.Name == name)
+                            oksoId = item.Id;
+                    });
+                    return oksoId;
+                }
+
+                var oksoListStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        indexId: 'oksoStoreID',
+                        proxy: {
+                            type: 'ajax',
+                            url: '/PracticeCompanies/OksoList',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        },
+                        listeners: {
+                            load: function (store, records, successful, eOpts) {
+                                oksoListX = [];
+                                records.forEach(function (item, i, arr) {
+                                    oksoListX.push(item.data);
+                                })
+
+                            }
+                        }
+                    });
+
+                var profileListX = [];
+                function findProfileByName(name) {
+                    var profileId = "";
+                    profileListX.forEach(function (item, i, arr) {
+                        if (item.Name == name)
+                            profileId = item.Id;
+                    });
+                    return profileId;
+                }
+                var profileListStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        indexId: 'profileStoreID',
+                        proxy: {
+                            type: 'ajax',
+                            url: '/PracticeCompanies/ProfileList',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        },
+                        listeners: {
+                            load: function (store, records, successful, eOpts) {
+                                profileListX = [];
+                                records.forEach(function (item, i, arr) {
+                                    profileListX.push(item.data);
+                                })
+
+                            }
+                        }
+                    });
+
+                var qualificationStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/PracticeCompanies/Qualifications',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        }
+                    });
+
+                var courseListStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/PracticeCompanies/CourseList',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        }
+                    });
+
+                var periodsListX = [];
+
+                function findPeriodIdByName(name) {
+                    var periodId = "";
+                    periodsListX.forEach(function (item, i, arr) {
+                        if (item.Name == name)
+                            periodId = item.Id;
+                    });
+                    return periodId;
+                }
+
+                var periodListStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/PracticeCompanies/PeriodList',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        },
+                        listeners: {
+                            load: function (store, records, successful, eOpts) {
+                                periodsListX = [];
+                                records.forEach(function (item, i, arr) {
+                                    periodsListX.push(item.data);
+                                })
+
+                            }
+                        }
+                    });
+
+
+                var addLimit = function () {
+                    limitsGrid.getSelectionModel().deselectAll(true);                    
+                    limitsStore.add({ Id: '-1', Okso: 'Не указано', Profile: 'Не указано', Qualification: 'Не указано', Course: '0', Period: '', Limit: '0' });                    
+                    limitsGrid.getSelectionModel().select(limitsStore.getAt(limitsStore.getCount()-1));
+                    var rowEl = limitsGrid.getView().getRow(limitsStore.getCount() - 1);
+                    rowEl.scrollIntoView(limitsGrid.getGridEl, false);
+                };
+
+                var removeLimits = function () {
+                    var objects = limitsWnd.getComponent('limitsGridId').getSelectionModel().getSelection();
+                    if (objects.length == 0) {
+                        Ext.MessageBox.alert('Ошибка', "Выберите хотя бы один лимит для удаления");
+                    }
+                    else {
+                        var remove = function () {
+                            var limitIds = [];
+                            objects.forEach(function (item, index, array) {
+                                limitIds.push(item.data.Id);
+                            });
+                            Ext.Ajax.request({
+                                //method: 'POST',
+                                url: '@Url.Action("RemoveLimits")',
+                                params: {
+                                    ids: limitIds
+                                },
+                                success: function (response) {
+                                    limitsStore.reload();
+                                },
+                                failure: function (response) {
+                                    limitsStore.reload();
+                                }
+                            });
+                        }
+
+                        var request = function () {
+                            var limitIds = [];
+                            objects.forEach(function (item, index, array) {
+                                limitIds.push(item.data.Id);
+                            });
+                            Ext.Ajax.request({
+                                url: '@Url.Action("CheckStudentsAdmissionsOnLimits")',
+                                params: {
+                                    limitIds: limitIds
+                                },
+                                success: function (response) {
+                                    if (response.responseText != "") {
+                                        var data = Ext.decode(response.responseText);
+                                        if (data.success) {
+                                            remove();
+                                        }
+                                        else {
+                                            Ext.MessageBox.show({
+                                                title: 'Предупреждение',
+                                                msg: data.message + "Вы хотите удалить лимиты? Заявки студентов будут отклонены!",
+                                                buttons: Ext.MessageBox.YESNO,
+                                                fn: function (btn) {
+                                                    if (btn === 'yes') {
+                                                        remove();
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                },
+                                failure: function (response) {
+                                }
+                            });
+                        }
+
+                        var checkFunction = function () {
+                            Ext.MessageBox.show({
+                                title: 'Информационное сообщение',
+                                msg: "Вы хотите удалить выбранные лимиты?",
+                                buttons: Ext.MessageBox.YESNO,
+                                fn: function (btn) {
+                                    if (btn === 'yes') {
+                                        request();
+                                    }
+                                }
+                            });
+                        }
+
+                        checkEditRole(checkFunction);
+                    }
+                };
+
+                function setContractLimit() {
+                    Ext.Ajax.request({
+                        method: 'POST',
+                        url: '@Url.Action("SetContractLimits")',
+                        params: {
+                            id: limitsWnd.getComponent('Id').getValue()
+                        },
+                        success: function (response) {
+                            if (response.responseText != "") {
+                                var data = Ext.decode(response.responseText);
+                                if (data.success) {
+                                    limitsStore.reload();
+                                    updateRecord(limitsWnd.getComponent('Id').getValue(), limitsWnd.getComponent('RowIndex').getValue());
+                                }
+                                else {
+                                    Ext.MessageBox.show({
+                                        title: 'Ошибка',
+                                        msg: data.message,
+                                        buttons: Ext.MessageBox.OK
+                                    });
+                                }
+                            }
+                        },
+                        failure: function (response) {
+                            Ext.MessageBox.show({
+                                title: 'Ошибка',
+                                msg: 'Неизвестная ошибка',
+                                buttons: Ext.MessageBox.OK
+                            });
+                        }
+                    });
+                }
+
+                var limitsGrid = Ext.create('Ext.grid.Panel',
+                    {
+                        region: 'center',
+                        store: limitsStore,
+                        loadMask: true,
+                        columnLines: true,
+                        id: 'limitsGridId',
+                        viewConfig:{
+                            markDirty:false
+                        },
+                        height: 450,
+                        width: 990,                        
+                        tbar: [
+                            {
+                                xtype: 'button',
+                                text: "Лимит по договору",
+                                tooltip: "Для всех лимитов проставить лимит по договору",
+                                handler: function () {
+                                    checkEditRole(function () {
+                                        var maxAdmissionsAdmitted = 0;
+                                        limitsStore.each(function (record) {
+                                            var current = record.get('AdmissionsAdmitted');
+                                            maxAdmissionsAdmitted = current > maxAdmissionsAdmitted ? current : maxAdmissionsAdmitted;
+                                        });
+                                        var recordLimit = gridPanel.getStore().getAt(limitsWnd.getComponent('RowIndex').getValue()).get('Limit');
+                                        var message = recordLimit < maxAdmissionsAdmitted
+                                                ? "Есть согласованные заявки, превышающие лимит по договору"
+                                                : "";
+                                            Ext.MessageBox.show({
+                                                title: 'Предупреждение',
+                                                msg: message + '<br>'+"Все существующие лимиты по данному договору будут изменены на лимит из договора. Продолжить?",
+                                                buttons: Ext.MessageBox.YESNO,
+                                                fn: function (btn) {
+                                                    if (btn === 'yes') {
+                                                        setContractLimit();
+                                                    }
+                                                }
+                                            });
+                                    });
+                                }
+                            }, '-',
+                            {
+                                xtype: 'button',
+                                text: "Добавить лимит",
+                                handler: function () {
+                                    checkEditRole(function () {
+                                        addLimit()
+                                    });
+                                }
+                            }, '-',
+                            {
+                                xtype: 'button',
+                                text: "Удалить",
+                                handler: function () {
+                                    checkEditRole(function () {
+                                        removeLimits()
+                                    });
+                                }
+                            }
+                        ],
+                        plugins: [{
+                            //ptype: 'cellediting',
+                            ptype: 'rowediting',
+                            clicksToEdit: 1,
+                            saveBtnText: "Сохранить",
+                            cancelBtnText: "Отмена",
+                            errorSummary: false                            
+                        }],
+                        columns: [
+                            {
+                                header: 'Направление',
+                                align: 'left',
+                                id: 'oksoColumn',
+                                dataIndex: 'Okso',
+                                width: 250,
+                                sortable: true,
+                                tooltip: 'Направление',
+                                editor: {
+                                    xtype: 'combobox',
+                                    editable: false,
+                                    store: oksoListStore,
+                                    allowBlank: false,
+                                    valueField: 'Id',
+                                    displayField: 'Name',
+                                    listeners: {
+                                        'select': function (combo, records, eOpts) {
+                                            combo.value = records.data.Name;
+                                        },
+                                    }
+                                },
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Образовательная программа',
+                                align: 'left',
+                                id: 'profileColumn',
+                                dataIndex: 'Profile',
+                                width: 200,
+                                sortable: true,
+                                tooltip: 'Образовательная программа',
+                                editor: {
+                                    xtype: 'combobox',
+                                    editable: false,
+                                    store: profileListStore,
+                                    allowBlank: false,
+                                    valueField: 'Id',
+                                    displayField: 'Name',
+                                    listeners: {
+                                        'select': function (combo, records, eOpts) {
+                                            combo.value = records.data.Name;
+                                        }
+                                    }
+                                },
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Уровень обучения',
+                                align: 'left',
+                                dataIndex: 'Qualification',
+                                width: 170,
+                                sortable: true,
+                                tooltip: 'Уровень обучения',
+                                editor: {
+                                    xtype: 'combobox',
+                                    editable: false,
+                                    store: qualificationStore,
+                                    allowBlank: false,
+                                    valueField: 'Name',
+                                    displayField: 'Name'
+                                },
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Курс',
+                                align: 'left',
+                                dataIndex: 'Course',
+                                width: 70,
+                                sortable: true,
+                                tooltip: 'Курс',
+                                editor: {
+                                    xtype: 'combobox',
+                                    editable: false,
+                                    store: courseListStore,
+                                    allowBlank: false,
+                                    valueField: 'Course',
+                                    displayField: 'Course'
+                                },
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Период',
+                                dataIndex: 'Period',
+                                width: 160,
+                                sortable: true,
+                                tooltip: 'Период',
+                                editor: {
+                                    xtype: 'combobox',
+                                    editable: false,
+                                    store: periodListStore,
+                                    allowBlank: false,
+                                    valueField: 'Id',
+                                    displayField: 'Name',
+                                    listeners: {
+                                        'select': function (combo, records, eOpts) {
+                                            combo.value = records.data.Name;
+                                        }
+                                    }
+                                },
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Номер заявки',
+                                dataIndex: 'RequestNumber',
+                                width: 100,
+                                sortable: true,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Лимит',
+                                align: 'left',
+                                dataIndex: 'Limit',
+                                width: 80,
+                                sortable: false,
+                                tooltip: 'Лимит',
+                                editor: {
+                                    xtype: 'textfield',
+                                    vtype: 'numbers'
+                                },
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Формируются',
+                                align: 'left',
+                                dataIndex: 'AdmissionsIndeterminate',
+                                width: 80,
+                                sortable: false,
+                                tooltip: 'Формируются',
+                                hidden: hidden,
+                                renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
+                                    metaData.tdAttr = 'data-qtip="' + Ext.String.htmlEncode('Количество заявок на формировании') + '"';
+                                    return value;
+                                }
+                            },
+                            {
+                                header: 'Согласованы',
+                                align: 'left',
+                                dataIndex: 'AdmissionsAdmitted',
+                                width: 80,
+                                sortable: false,
+                                tooltip: 'Согласованы',
+                                hidden: hidden,
+                                renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
+                                    metaData.tdAttr = 'data-qtip="' + Ext.String.htmlEncode('Количество согласованных заявок') + '"';
+                                    return value;
+                                }
+                            },
+                            {
+                                header: 'Остаток',
+                                align: 'left',
+                                dataIndex: 'CurrentLimit',
+                                width: 80,
+                                sortable: false,
+                                hidden: hidden,
+                                tooltip: 'Остаток', 
+                                renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
+                                    metaData.tdAttr = 'data-qtip="' + Ext.String.htmlEncode('Остаток по лимиту') + '"';
+                                    return value;
+                                }
+                            },
+                            {
+                                header: '',
+                                xtype: 'templatecolumn',
+                                sortable: false,
+                                hidden: hidden,
+                                tpl: '<a href="@Url.Action("ContractStudents")?limitId={Id}">Студенты</a>',
+                                width: 100
+                            },
+                            {
+                                xtype: 'actioncolumn',
+                                region: 'center',
+                                width: 50,
+                                sortable: false,
+                                items: [
+                                    {
+                                        icon: '@Url.Content("~/Content/Images/remove.png")',
+                                        iconCls: 'icon-padding',
+                                        text: 'Удалить',
+                                        tooltip: 'Удалить',
+                                        handler: function (grid, rowIndex, colIndex) {
+
+                                            var remove = function () {
+                                                var rec = limitsGrid.getStore().getAt(rowIndex);
+                                                Ext.Ajax.request({
+                                                        url: '@Url.Action("RemoveLimit")',
+                                                        params: {
+                                                            id: rec.get("Id")
+                                                        },
+                                                        success: function (response) {
+                                                            limitsStore.remove(rec);
+                                                            updateRecord(limitsWnd.getComponent('Id').getValue(), limitsWnd.getComponent('RowIndex').getValue());
+                                                        },
+                                                        failure: function (response) {
+                                                            limitsStore.remove(rec);
+                                                        }
+                                                });
+                                            }
+
+                                            var request = function () {
+                                                var rec = limitsGrid.getStore().getAt(rowIndex);
+                                                if (rec.get("Id") == -1) {
+                                                    limitsStore.remove(rec);
+                                                    return;
+                                                }
+                                                Ext.Ajax.request({
+                                                     url: '@Url.Action("CheckStudentsAdmissionsOnLimit")',
+                                                     params: {
+                                                         limitId: rec.get("Id")
+                                                     },
+                                                     success: function (response) {
+                                                         if (response.responseText != "") {
+                                                             var data = Ext.decode(response.responseText);
+                                                             if (data.success) {
+                                                                 remove();
+                                                             }
+                                                             else {
+                                                                 Ext.MessageBox.show({
+                                                                     title: 'Предупреждение',
+                                                                     msg: data.message + "Вы хотите удалить лимит? Заявки студентов будут отклонены!",
+                                                                     buttons: Ext.MessageBox.YESNO,
+                                                                     fn: function (btn) {
+                                                                         if (btn === 'yes') {
+                                                                             remove();
+                                                                         }
+                                                                     }
+                                                                 });
+                                                             }
+                                                         }
+                                                     },
+                                                     failure: function (response) {
+                                                     }
+                                                });
+                                            }
+
+                                            var checkFunction = function () {
+                                                Ext.MessageBox.show({
+                                                    title: 'Информационное сообщение',
+                                                    msg: "Вы хотите удалить лимит?",
+                                                    buttons: Ext.MessageBox.YESNO,
+                                                    fn: function (btn) {
+                                                        if (btn === 'yes') {
+                                                            request();
+                                                        }
+                                                    }
+                                                });
+                                            }
+
+                                            checkEditRole(checkFunction);
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        selModel: {
+                            selType: 'checkboxmodel',
+                            mode: 'MULTI',
+                            headerWidth: 30,
+                            checkOnly: 'true',
+                            allowDeselect: true
+                        }
+                    });
+
+                limitsGrid.on('edit', function (editor, e) {                  
+                    checkEditRole(function () {
+                        e.record.set("Okso", e.newValues.Okso);
+                        e.record.set("Profile",e.newValues.Profile);
+                        e.record.set("Qualification", e.newValues.Qualification);
+                        e.record.set("Period", e.newValues.Period);
+                        e.record.set("Limit", e.newValues.Limit);
+                        e.record.set("Course", e.newValues.Course);
+                        var periodId = findPeriodIdByName(e.record.data.Period);                        
+                        if (periodId != "") {
+                            var record = e.record;
+                            var oksoId = findOksoByName(e.record.data.Okso);
+                            var profileId = findProfileByName(e.record.data.Profile);
+                            Ext.Ajax.request({
+                                method: 'POST',
+                                url: '@Url.Action("UpdateLimit")',
+                                params: {
+                                    id: e.record.data.Id,
+                                    oksoId: oksoId,
+                                    profileId: profileId,
+                                    qualification: e.record.data.Qualification,
+                                    course: e.record.data.Course,
+                                    periodId: periodId,
+                                    limitCount: e.record.data.Limit
+                                },
+                                success: function (response) {
+                                    if (response.responseText != "") {
+                                        var data = Ext.decode(response.responseText);
+                                        if (data.success) {
+                                            e.record.data.Id = data.Id;
+                                            e.record.data.CurrentLimit = data.CurrentLimit;
+                                            //updateRecord(limitsWnd.getComponent('Id').getValue(), limitsWnd.getComponent('RowIndex').getValue());
+                                            record.commit();
+                                            }
+                                        else {
+                                                Ext.MessageBox.show({
+                                                    title: 'Ошибка',
+                                                    msg: data.message,
+                                                    buttons: Ext.MessageBox.OK,
+                                            });                                           
+                                                if (data.deleted) {
+                                                    var rec = limitsGrid.getStore().getAt(e.rowIdx);
+                                                    limitsStore.remove(rec);
+                                                }
+                                                else
+                                                    record.reject();
+                                        }
+                                    }
+                                },
+                                failure: function (response) {
+                                    Ext.MessageBox.show({
+                                        title: 'Ошибка',
+                                        msg: 'Неизвестная ошибка',
+                                        buttons: Ext.MessageBox.OK
+                                    });
+                                }
+                            });
+                        }
+                        else {
+                            setTimeout(function () {Ext.MessageBox.show({
+                                title: 'Ошибка',
+                                msg: 'Необходимо указать период',
+                                buttons: Ext.MessageBox.OK
+                            }); })                            
+                        }
+                    });
+                });
+
+                var qualificationLimFilterCmbx = Ext.create('Ext.form.ComboBox',
+                    {
+                        xtype: 'combobox',
+                        fieldLabel: 'Уровень обучения',
+                        labelWidth: 130,
+                        width: 300,
+                        store: qualificationStore,
+                        valueField: 'Name',
+                        displayField: 'Name',
+                        queryMode: 'remote'
+                    });
+
+                var semestersData = parseJson('@ViewBag.Semesters');
+                var semesterFilterStore = Ext.create("Ext.data.Store",
+                    {
+                        data: semestersData
+                    });
+
+                var semesterLimFilterCmbx = Ext.create('Ext.form.ComboBox',
+                    {
+                        xtype: 'combobox',
+                        fieldLabel: 'Семестр',
+                        labelWidth: 70,
+                        width: 215,
+                        margin: '0 0 0 10',
+                        store: semesterFilterStore,
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'remote'
+                    });
+
+                var courseLimFilterCmbx = Ext.create('Ext.form.ComboBox',
+                    {
+                        xtype: 'combobox',
+                        fieldLabel: 'Курс',
+                        labelWidth: 40,
+                        width: 115,
+                        margin: '0 0 0 10',
+                        store: courseListStore,
+                        valueField: 'Course',
+                        displayField: 'Course',
+                        queryMode: 'remote'
+                    });
+
+                var limitYearsListStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        remoteSort: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/PracticeCompanies/LimitYearsList',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                totalProperty: 'total'
+                            }
+                        }
+                    });
+
+                var yearLimFilterCmbx = Ext.create('Ext.form.ComboBox',
+                    {
+                        xtype: 'combobox',
+                        fieldLabel: 'Год',
+                        labelWidth: 30,
+                        width: 120,
+                        margin: '0 0 0 10',
+                        store: limitYearsListStore,
+                        valueField: 'Year',
+                        displayField: 'Year',
+                        queryMode: 'remote'
+                    });
+
+                var clearFilterFields = function () {
+                    limitsWnd.getComponent("filtersContainer1").items.map['OksoFilter'].setValue('');
+                    limitsWnd.getComponent("filtersContainer1").items.map['ProfileFilter'].setValue('');
+                    yearLimFilterCmbx.setValue('');
+                    qualificationLimFilterCmbx.setValue('');
+                    courseLimFilterCmbx.setValue('');
+                    semesterLimFilterCmbx.setValue('');
+                }
+
+                var limitsWnd = Ext.create('Ext.window.Window',
+                    {
+                        title: "Лимиты",
+                        closeAction: 'hide',
+                        resizable: true,
+                        autoHeight: false,
+                        height: 625,
+                        width: 1020,
+                        autoWidth: true,
+                        autoScroll: false,
+                        bodyPadding: 6,
+                        defaults: {
+                            xtype: 'textfield',
+                        },
+                        items: [
+                            {
+                                xtype: 'hidden',
+                                itemId: 'Id',
+                            },
+                            {
+                                xtype: 'hidden',
+                                itemId: 'RowIndex',
+                            },
+                            {
+                                xtype: 'fieldcontainer',
+                                itemId: 'filtersContainer1',
+                                defaultType: 'textfield',
+                                layout: {
+                                    type: 'hbox',
+                                    align: 'stretch'
+                                },
+                                items: [
+                                    {
+                                        xtype: 'textfield',
+                                        fieldLabel: 'Направление',
+                                        labelWidth: 100,
+                                        itemId: 'OksoFilter',
+                                        width: 300
+                                    },
+                                    {
+                                        xtype: 'textfield',
+                                        fieldLabel: 'Образовательная программа',
+                                        labelWidth: 210,
+                                        margin: '0 0 0 10',
+                                        itemId: 'ProfileFilter',
+                                        width: 500
+                                    }
+                                ]
+                            },
+                            {
+                                xtype: 'fieldcontainer',
+                                itemId: 'filtersContainer2',
+                                defaultType: 'textfield',
+                                margin: '0 0 25 0',
+                                layout: {
+                                    type: 'hbox',
+                                    align: 'stretch'
+                                },
+                                items: [
+                                    qualificationLimFilterCmbx,
+                                    courseLimFilterCmbx,
+                                    yearLimFilterCmbx,
+                                    semesterLimFilterCmbx,
+                                    {
+                                        xtype: 'button',
+                                        margin: '0 0 0 10',
+                                        text: "Применить",
+                                        handler: function () {
+                                            setLimitFilters();
+                                        }
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        margin: '0 0 0 10',
+                                        text: "Отменить",
+                                        handler: function () {
+                                            limitsStore.clearFilter();
+                                            clearFilterFields();
+                                        }
+                                    }
+                                ]
+                            },
+                            limitsGrid
+                        ]
+                    });
+
+                limitsWnd.on('resize', function (t, width, height) {                    
+                    limitsGrid.setWidth(width - 16);
+                    limitsGrid.setHeight(height - 165);
+                });
+
+                var oksoStore = Ext.create("Ext.data.TreeStore",
+                    {
+                        remoteFilter: true,
+                        autoLoad: true,
+                        root: {
+                            text: 'Root',
+                            id: 'rootId'
+                        },
+                        proxy: {
+                            type: 'ajax',
+                            url: '@Url.Action("Okso")',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'children'
+                            }
+                        }
+                    });
+
+                var saveOkso = function (toReloadStore) {
+                    var checkedOksoIds = [];
+                    var uncheckedIksoIds = [];
+                    var checkedProfileIds = [];
+                    var uncheckedProfileIds = [];
+                    oksoStore.getRootNode().childNodes.forEach(function (item, i, arr) {
+                        if (item.data.checked) {
+                            checkedOksoIds.push(item.data.nodeId);
+                        }
+                        else {
+                            uncheckedIksoIds.push(item.data.nodeId);
+                        }
+
+                        item.childNodes.forEach(function (it, i, arr) {
+                            if (it.data.checked)
+                                checkedProfileIds.push(it.data.nodeId);
+                            else
+                                uncheckedProfileIds.push(it.data.nodeId);
+                        })
+                    });
+
+                    Ext.Ajax.request({
+                        method: 'POST',
+                        url: '@Url.Action("RemoveAndAddOkso")',
+                        params: {
+                            contractId: oksoWnd.getComponent("Id").getValue(),
+                            checkedOksoIds: checkedOksoIds,
+                            uncheckedOksoIds: uncheckedIksoIds,
+                            checkedProfileIds: checkedProfileIds,
+                            uncheckedProfileIds: uncheckedProfileIds
+                        },
+
+                        success: function (response) {
+                            if (response.responseText != "") {
+                                var data = Ext.decode(response.responseText);
+                                if (data.success) {
+                                    if (toReloadStore) {
+                                        oksoStore.reload();
+                                        updateRecord(oksoWnd.getComponent('Id').getValue(), oksoWnd.getComponent('RowIndex').getValue());
+                                    }
+                                }
+                                else {
+                                    if (data.isLimits) {
+                                        Ext.MessageBox.show({
+                                            title: 'Информационное сообщение',
+                                            msg: data.msg,
+                                            buttons: Ext.MessageBox.OK
+                                        });
+                                        oksoStore.reload();
+                                    }
+                                    else {
+                                        oksoStore.reload();
+                                        Ext.MessageBox.show({
+                                            title: 'Информационное сообщение',
+                                            msg: data.msg,
+                                            buttons: Ext.MessageBox.OK
+                                        });
+                                    }
+                                }
+                            }
+                        },
+                        failure: function (response) {
+                        }
+                    });
+                }
+
+                var treePanelCollapsed = true;
+                oksoWnd = {};
+                function colExpTree() {
+                    var oksTreeView = oksoWnd.getComponent('oksoTreeView');
+                    if (oksTreeView == undefined) return;
+                    if (treePanelCollapsed) oksTreeView.collapseAll(oksTreeView);
+                    else oksTreeView.expandAll(oksTreeView);
+                }
+                var oksoWnd = Ext.create('Ext.window.Window',
+                    {
+                        title: "Код направления (ОКСО)",
+                        closeAction: 'hide',
+                        resizable: true,
+                        height: 700,
+                        autoScroll: true,
+                        bodyPadding: 6,
+                        defaults: {
+                            xtype: 'textfield',
+                            width: 900
+                        },
+                        tbar: [
+                                {
+                                    xtype: 'textfield',
+                                    fieldLabel: '',
+                                    itemId: 'oksoSearchText',
+                                    width: 500
+                                },
+                                {
+                                    xtype: 'button',
+                                    icon: '/Content/Images/search.png',
+                                    handler: function () {
+                                        saveOkso(false);
+                                        setOksoFilters();
+                                    }
+                                },
+                                {
+                                    xtype: 'button',
+                                    margin: '0 0 0 10',
+                                    text: "Развернуть\\Свернуть группировку",
+                                    handler: function () {
+                                        treePanelCollapsed = !treePanelCollapsed;
+                                        colExpTree();
+                                    }
+                                }
+                        ],
+                        items: [
+                            {
+                                xtype: 'hidden',
+                                itemId: 'Id',
+                            },
+                            {
+                                xtype: 'hidden',
+                                itemId: 'RowIndex',
+                            },
+                            {
+                                xtype: 'treepanel',
+                                rootVisible: false,
+                                id: 'oksoTreeView',
+                                store: oksoStore,
+
+                                listeners: {
+                                    checkchange: function (node, checked) {
+                                        if (checked) {
+                                            node.parentNode.set('checked', checked);
+                                        }
+                                        else {
+                                            node.cascadeBy(function (child) {
+                                                child.set('checked', false);
+                                            });
+
+                                            currentNode = node.parentNode;
+                                            if (currentNode.data.children != null) {
+                                                var r = currentNode.data.children.some(function (child) {
+                                                    return child.checked;
+                                                });
+                                                if (!r) {
+                                                    currentNode.set('checked', checked);
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                updateTreeView: function (tree, fn) {
+                                    var view = tree.getView();
+                                    view.getStore().loadRecords(fn(tree.getRootNode()));
+                                    view.refresh();
+                                },
+                                collapseAll: function (tree) {
+                                    this.updateTreeView(tree, function (root) {
+                                        root.cascadeBy(function (node) {
+                                            if (!node.isRoot() || tree.rootVisible) {
+                                                node.data.expanded = false;
+                                            }
+                                        });
+                                        return tree.rootVisible ? [root] : root.childNodes;
+                                    });
+                                },
+                                expandAll: function (tree) {
+                                    this.updateTreeView(tree, function (root) {
+                                        var nodes = [];
+                                        root.cascadeBy(function (node) {
+                                            if (!node.isRoot() || tree.rootVisible) {
+                                                node.data.expanded = true;
+                                                nodes.push(node);
+                                            }
+                                        });
+                                        return nodes;
+                                    })
+                                }
+                            }
+                        ],
+                        buttons: [
+                            {
+                                xtype: 'button',
+                                text: 'Сохранить',
+                                height: 30,
+                                handler: function () {
+                                    saveOkso(true);
+                                }
+                            }
+                        ]
+                    });
+
+                var semestersListX = [];
+
+                function findSemesterIdByName(name) {
+                    var semesterId = -1;
+                    semestersListX.forEach(function (item, i, arr) {
+                        if (item.Name === name)
+                            semesterId = item.Id;
+                    });
+                    return semesterId;
+                }
+
+                var periodStore = Ext.create("Ext.data.Store",
+                    {
+                        idProperty: 'Id',
+                        fields: [
+                            "Id", "Year"
+                        ],
+                        autoLoad: false,
+                        remoteSort: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: '@Url.Action("Periods")',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                totalProperty: 'total'
+                            }
+                        }
+                    });
+
+                var yearsListStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/PracticeCompanies/Years',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        }
+                    });
+
+                var semesterListStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/PracticeCompanies/Semesters',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        },
+                        listeners: {
+                            load: function (store, records, successful, eOpts) {
+                                semestersListX = [];
+                                records.forEach(function (item, i, arr) {
+                                    semestersListX.push(item.data);
+                                })
+                            }
+                        }
+                    });
+
+                function addPeriod() {
+                    periodStore.add({ Id: '-1', Year: '', Semester: '' });
+                }
+
+                var periodsGrid = Ext.create('Ext.grid.Panel',
+                    {
+                        flex: 1,
+                        store: periodStore,
+                        loadMask: true,
+                        columnLines: true,
+                        viewConfig: {
+                            markDirty: false
+                        },
+                        plugins: [{
+                            ptype: 'cellediting',
+                            clicksToEdit: 1
+                        }],
+                        tbar: [
+                            {
+                                xtype: 'datefield',
+                                fieldLabel: '',
+                                itemId: 'FinishDatePeriods',
+                                labelWidth: labelWidth,
+                                width: 150
+                            },
+                            {
+                                xtype: 'button',
+                                text: "Сгенерировать",
+                                handler: function () {
+                                    Ext.Ajax.request({
+                                        url: '@Url.Action("AutogenerationPeriods")',
+                                        params: {
+                                            contractId: periodWnd.getComponent('Id').getValue(),
+                                            finishDate: Ext.ComponentQuery.query('#FinishDatePeriods')[0].getValue()
+                                        },
+                                        success: function (response) {
+                                            periodStore.reload();
+                                            updateRecord(periodWnd.getComponent("Id").getValue(), periodWnd.getComponent("RowIndex").getValue());
+                                        },
+                                        failure: function (response) {
+                                            Ext.MessageBox.show({
+                                                title: 'Ошибка',
+                                                msg: 'Укажите даты начала и окончания действия договора',
+                                                buttons: Ext.MessageBox.OK
+                                            });
+                                        }
+                                    });
+                                }
+                            },
+                            {
+                                xtype: 'button',
+                                text: "Добавить период",
+                                handler: function () {
+                                    addPeriod();
+                                }
+                            }
+                        ],
+                        columns: [
+                            {
+                                header: 'Год',
+                                dataIndex: 'Year',
+                                width: 120,
+                                editor: {
+                                    xtype: 'combobox',
+                                    editable: false,
+                                    store: yearsListStore,
+                                    valueField: 'Year',
+                                    displayField: 'Year'
+                                },
+                                renderer : function(value, metadata,record) {
+                                    return getExpandableImage(value, metadata,record);
+                                }
+                            },
+                            {
+                                header: 'Семестр',
+                                dataIndex: 'Semester',
+                                width: 140,
+                                sortable: false,
+                                editor: {
+                                    xtype: 'combobox',
+                                    editable: false,
+                                    store: semesterListStore,
+                                    valueField: 'Id',
+                                    displayField: 'Name',
+                                    listeners: {
+                                        'select': function (combo, records, eOpts) {
+                                            combo.value = records.data.Name;
+                                        }
+                                    }
+                                },
+                                renderer : function(value, metadata,record) {
+                                    return getExpandableImage(value, metadata,record);
+                                }
+                            },
+                            {
+                                header: 'Номер заявки',
+                                dataIndex: 'RequestNumber',
+                                width: 180,
+                                sortable: false,
+                                renderer : function(value, metadata,record) {
+                                    return getExpandableImage(value, metadata,record);
+                                }
+                            },
+                            {
+                                xtype: 'templatecolumn',
+                                sortable: false,
+                                tpl: '<a href="@Url.Action("DownloadContractPeriodFile")?fileId={FileId}">{FileName}</a>',
+                            },
+                            {
+                                xtype: 'actioncolumn',
+                                region: 'center',
+                                width: 50,
+                                items: [
+                                    {
+                                        icon: '@Url.Content("~/Content/Images/remove.png")',
+                                        iconCls: 'icon-padding',
+                                        text: 'Удалить',
+                                        tooltip: 'Удалить',
+                                        handler: function (grid, rowIndex, colIndex) {
+                                            var rec = periodsGrid.getStore().getAt(rowIndex);
+                                            Ext.Ajax.request({
+                                                    url: '@Url.Action("RemovePeriod")',
+                                                    params: {
+                                                        id: rec.get("Id")
+                                                    },
+                                                    success: function (response) {
+                                                        if (response.responseText != "") {
+                                                            var data = Ext.decode(response.responseText);
+                                                            if (data.msg) {
+                                                                Ext.MessageBox.show({
+                                                                    title: 'Ошибка',
+                                                                    msg: data.msg,
+                                                                    buttons: Ext.MessageBox.OK
+                                                                });
+                                                            }
+                                                        }
+                                                        else { // период успешно удален
+                                                            periodStore.remove(rec);
+                                                            updateRecord(periodWnd.getComponent("Id").getValue(), periodWnd.getComponent("RowIndex").getValue());
+                                                        }
+                                                    },
+                                                    failure: function (response) {
+                                                        periodStore.remove(rec);
+                                                    }
+                                                });
+
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        listeners: {
+                        }
+                    });
+
+                function getExpandableImage(value, metaData, record) {
+                    var divisionDescription = record.get('DivisionDescription') !== null ? record.get('DivisionDescription') : "Не указано";
+                        "Вид деятельности отдела, где будет проходить практика: " + record.get('DivisionDescription');
+                    var divisionDescriptioninform = "Вид деятельности отдела, где будет проходить практика: " + divisionDescription;
+                    var additionalTerms = record.get('AdditionalTerms') !== null ? record.get('AdditionalTerms') : "Не указано";
+                    var additionalTermsinform = "Дополнительные условия прохождения практики: " + additionalTerms;
+                    metaData.tdAttr = 'data-qtip="' + divisionDescriptioninform + '<br>' + additionalTermsinform +'"';
+                    return value;
+                }
+
+
+
+                periodsGrid.on('edit', function (editor, e) {
+                    if (e.record.get('Year') !== "" && e.record.get('Semester') !== "") {
+                        //var semesterId = findSemesterIdByName(e.record.data.Semester);
+                        Ext.Ajax.request({
+                            method: 'POST',
+                            url: '@Url.Action("UpdatePeriod")',
+                            params: {
+                                id: e.record.get('Id'),
+                                contractId: periodWnd.getComponent("Id").getValue(),
+                                year: e.record.get('Year'),
+                                semesterId: e.record.get('SemesterId')
+                            },
+                            success: function (response) {
+                                if (response.responseText === "") {
+                                    updateRecord(periodWnd.getComponent("Id").getValue(), periodWnd.getComponent("RowIndex").getValue());
+                                }
+                                else
+                                {
+                                    var data = Ext.decode(response.responseText);
+                                    Ext.MessageBox.show({
+                                        title: 'Информационное сообщение',
+                                        msg: data.msg,
+                                        buttons: Ext.MessageBox.OK
+                                    });
+                                    periodStore.reload();
+                                }
+                            },
+                            failure: function (response) {
+
+                            }
+                        });
+                    }
+                });
+
+                var periodWnd = Ext.create('Ext.window.Window',
+                    {
+                        title: "Учебные периоды",
+                        closeAction: 'hide',
+                        id: 'periods',
+                        resizable: true,
+                        height: 500,
+                        autoScroll: true,
+                        bodyPadding: 6,
+                        defaults: {
+                            xtype: 'textfield',
+                            width: 600
+                        },
+                        layout: {
+                            type: 'vbox',
+                            align : 'stretch',
+                            pack  : 'start',
+                        },
+                        items: [
+                            {
+                                xtype: 'hidden',
+                                itemId: 'Id',
+                            },
+                            {
+                                xtype: 'hidden',
+                                itemId: 'RowIndex',
+                            },
+                            periodsGrid
+                        ]
+                    });
+
+                var labelWidth = 135;
+
+                var yearStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/PracticeCompanies/YearsForFilter',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        }
+                    });
+
+                var yearCmbx = Ext.create('Ext.form.ComboBox',
+                    {
+                        xtype: 'combobox',
+                        fieldLabel: 'Учебный год',
+                        labelWidth: labelWidth,
+                        width: 400,
+                        store: yearStore,
+                        //value: prevSettings["semesterId"],
+                        valueField: 'Year',
+                        displayField: 'Year',
+                        value: prevSettings["Year"],
+                        queryMode: 'remote',
+                        multiSelect: true
+                    });
+
+                var semesterCmbx = Ext.create('Ext.form.ComboBox',
+                    {
+                        xtype: 'combobox',
+                        fieldLabel: 'Семестр',
+                        labelWidth: labelWidth,
+                        width: 400,
+                        store: semesterFilterStore,
+                        //value: prevSettings["semesterId"],
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'remote'
+                    });
+
+                var qualificationData = parseJson('@ViewBag.Qualifications');
+                var qualificationFilterStore = Ext.create("Ext.data.Store",
+                    {
+                        data: qualificationData
+                    });
+                var qualificationCmbx = Ext.create('Ext.form.ComboBox',
+                    {
+                        xtype: 'combobox',
+                        fieldLabel: 'Уровень обучения',
+                        labelWidth: labelWidth,
+                        width: 400,
+                        store: qualificationFilterStore,
+                        //value: prevSettings["semesterId"],
+                        valueField: 'Name',
+                        displayField: 'Name',
+                        queryMode: 'local',
+                        multiSelect: true
+                    });
+
+                var oksoData = parseJson('@ViewBag.Okso');
+
+                var codeOksoFilterStore = Ext.create("Ext.data.Store",
+                    {
+                        data: oksoData
+                    });
+                var oksoCmbx = Ext.create('Ext.form.ComboBox',
+                    {
+                        xtype: 'combobox',
+                        fieldLabel: 'Направление',
+                        labelWidth: labelWidth,
+                        width: 400,
+                        store: codeOksoFilterStore,
+                        //value: prevSettings["semesterId"],
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'local',
+                        multiSelect: true
+                    });
+
+                var filtersWnd = Ext.create('Ext.window.Window',
+                    {
+                        title: "Фильтры",
+                        closeAction: 'hide',
+                        resizable: false,
+                        autoHeight: true,
+                        bodyPadding: 6,
+                        rowHeight: 100,
+                        defaults: {
+                            xtype: 'textfield',
+                            width: 600
+                        },
+                        items: [
+                            {
+                                xtype: 'hidden',
+                                itemId: 'Id',
+                            },
+                            {
+                                xtype: 'textfield',
+                                fieldLabel: 'Номер договора',
+                                labelWidth: labelWidth,
+                                itemId: 'Number',
+                                value: prevSettings["Number"],
+                                width: 600
+                            },
+                            yearCmbx,
+                            semesterCmbx,
+                            oksoCmbx,
+                            qualificationCmbx,
+                            {
+                                xtype: 'textfield',
+                                fieldLabel: 'Директор',
+                                labelWidth: labelWidth,
+                                itemId: 'Director',
+                                value: prevSettings["Director"],
+                                width: 600
+                            },
+                            {
+                                xtype: 'textfield',
+                                fieldLabel: 'Ответственный',
+                                labelWidth: labelWidth,
+                                itemId: 'PersonInCharge',
+                                value: prevSettings["PersonInCharge"],
+                                width: 600
+                            },
+                            {
+                                xtype: 'radiogroup',
+                                fieldLabel: 'Тип договора',
+                                labelWidth: labelWidth,
+                                itemId: "IsShortDatedField",
+                                value: prevSettings["IsShortDated"],
+                                items: [
+                                    {
+                                        boxLabel: 'Все',
+                                        name: 'IsShortDatedField',
+                                        inputValue: '',
+                                        checked: true
+
+                                    }, {
+                                        boxLabel: 'Краткосрочный',
+                                        name: 'IsShortDatedField',
+                                        inputValue: 'true'
+                                    }, {
+                                        boxLabel: 'Долгосрочный',
+                                        name: 'IsShortDatedField',
+                                        inputValue: 'false'
+                                    }
+                                ],
+                                listeners: {
+                                    change: function (t, newValue, oldValue, eOpts) {
+                                        // если выбран краткосрочный тип договора
+                                        if (newValue["IsShortDatedField"] == 'true')
+                                        {
+                                            // блокируем возможность выбрать бессрочный договор
+                                            filtersWnd.items.get('IsEndlessField').setValue({ IsEndlessField: 'false' });
+                                            filtersWnd.items.get('IsEndlessField').setDisabled(true);
+                                        }
+                                        else {
+                                            filtersWnd.items.get('IsEndlessField').setDisabled(false);
+                                        }
+                                    }
+
+                                }
+                            },
+                            {
+                                xtype: 'radiogroup',
+                                fieldLabel: 'Бессрочный',
+                                labelWidth: labelWidth,
+                                itemId: "IsEndlessField",
+                                value: prevSettings["IsEndless"],
+                                items: [
+                                    {
+                                        boxLabel: 'Все',
+                                        name: 'IsEndlessField',
+                                        inputValue: '',
+                                        checked: true
+
+                                    }, {
+                                        boxLabel: 'Да',
+                                        name: 'IsEndlessField',
+                                        inputValue: 'true'
+                                    }, {
+                                        boxLabel: 'Нет',
+                                        name: 'IsEndlessField',
+                                        inputValue: 'false'
+                                    }
+                                ],
+                                listeners: {
+                                    change: function (t, newValue, oldValue, eOpts) {
+                                        // если выбран бессрочный договор
+                                        if (newValue['IsEndlessField'] == 'true')
+                                        {
+                                            // блокируем возможность выбрать тип договора
+                                            filtersWnd.items.get('IsShortDatedField').setValue({ IsShortDatedField: '' });
+                                            filtersWnd.items.get('IsShortDatedField').setDisabled(true);
+                                        }
+                                        else {
+                                            filtersWnd.items.get('IsShortDatedField').setDisabled(false);
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                xtype: 'textfield',
+                                fieldLabel: 'Номер папки',
+                                labelWidth: labelWidth,
+                                itemId: 'FolderNumber',
+                                value: prevSettings["FolderNumber"],
+                                width: 300
+                            }
+                        ],
+                        buttons: [
+                            {
+                                text: "ОК",
+                                handler: function () {
+                                    setFilters();
+                                    filtersWnd.hide();
+                                }
+                            },
+                            {
+                                text: "Отмена",
+                                handler: function () { filtersWnd.hide(); }
+                            }
+                        ]
+                    });
+
+                setFilters();
+
+                var removeScan = false;
+                var uploadScan = false;
+
+                var filePanel = Ext.create('Ext.form.Panel',
+                    {
+                        title: '',
+                        fileUpload: true,
+                        defaults: {
+                            xtype: 'textfield',
+                            width: 700
+                        },
+                        itemId: "Scan",
+                        items: [
+                            {
+                                xtype: 'fieldcontainer',
+                                itemId: 'scanContainer',
+                                defaultType: 'textfield',
+                                layout: {
+                                    type: 'hbox',
+                                    align: 'stretch'
+                                },
+                                items: [
+                                    {
+                                        xtype: 'filefield',
+                                        fieldLabel: 'Скан договора',
+                                        labelWidth: labelWidth,
+                                        id: 'form-file',
+                                        emptyText: 'Выберите документ',
+                                        name: 'document-path',
+                                        buttonText: 'Загрузить',
+                                        width: 600,
+                                        multiple: false,
+                                        listeners: {
+                                            change: function (t, value, eOpts) {
+                                                var newValue = value.replace(/^c:\\fakepath\\/i, ''); // remove fakepath
+                                                t.setRawValue(newValue);
+                                                uploadScan = true;
+                                                removeScan = false;
+                                            }
+                                        }
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        text: "Удалить",
+                                        width: 95,
+                                        margin: '0 0 0 5',
+                                        handler: function () {
+                                            filePanel.reset();
+                                            uploadScan = false;
+                                            removeScan = true;
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+
+                    });
+
+                function required(value) {
+                    return (value != undefined && value.length > 0) ? true : "Поле не может быть пустым";
+                }
+
+                var editWnd = Ext.create('Ext.window.Window',
+                    {
+                        title: "Договор",
+                        closeAction: 'hide',
+                        resizable: false,
+                        //autoHeight: true,
+                        scrollable: true,
+                        resizable: true,
+                        height: 700,
+                        width: 750,
+                        bodyPadding: 6,
+                        fileUpload: true,
+                        rowHeight: 100,
+                        defaults: {
+                            xtype: 'textfield',
+                            width: 700
+                        },
+                        items: [
+                             {
+                                xtype: 'hidden',
+                                itemId: 'Id',
+                                name:'Id'
+                             },
+                            {
+                                xtype: 'hidden',
+                                itemId: 'RowIndex',
+                            },
+                            {
+                                xtype: 'checkbox',
+                                boxLabel: 'Краткосрочный договор',
+                                itemId: 'IsShortDated',
+                                name:'IsShortDated',
+                                margin: '0 0 0 138',
+                                width: 571,
+                                listeners: {
+                                    change: function (t, newValue, oldValue, eOpts) {
+                                        //if (setValues == false) {
+                                            if (newValue == true) // краткосрочный договор
+                                            {
+                                                editWnd.getComponent("ksButtonContainer").setHidden(false);
+                                            }
+                                            else {
+                                                editWnd.getComponent("ksButtonContainer").setHidden(true);
+                                                editWnd.getComponent("Number").setValue('');
+                                            }
+                                        //}
+                                        //setValues = false;
+                                    }
+                                }
+                            },
+                            {
+                                xtype: 'fieldcontainer',
+                                itemId: 'ksButtonContainer',
+                                hidden: true,
+                                layout: {
+                                    type: 'hbox',
+                                    align: 'stretch'
+                                },
+                                items: [
+                                    {
+                                        xtype: 'textfield',
+                                        fieldLabel: 'Учебный год',
+                                        labelWidth: labelWidth,
+                                        itemId: 'Year',
+                                        vtype: 'year',
+                                        width: 200,
+                                        validator: required
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        margin: '0 0 0 20',
+                                        text: "Сгенерировать номер",
+                                        handler: function () {
+                                            var currentContractNumber = editWnd.getComponent("Number").getValue();
+
+                                            var request = function () {
+                                                // сгенерировать номер договора
+                                                Ext.Ajax.request({
+                                                    method: 'GET',
+                                                    url: '@Url.Action("CreateContractKsNumber")',
+                                                    params: {
+                                                        year: editWnd.getComponent("ksButtonContainer").getComponent('Year').getValue()
+                                                    },
+                                                    success: function (response) {
+                                                        if (response.responseText != "") {
+                                                            var data = Ext.decode(response.responseText);
+                                                            editWnd.getComponent("Number").setValue(data.contractNumber);
+                                                        }
+                                                    },
+                                                    failure: function (response) {
+                                                    }
+                                                });
+                                            }
+
+                                            if (!editWnd.getComponent("ksButtonContainer").getComponent('Year').isValid()) {
+                                                Ext.MessageBox.alert('Ошибка', 'Укажите учебный год');
+                                            }
+                                            else if (currentContractNumber.length > 0)
+                                                Ext.MessageBox.show({
+                                                    title: 'Информационное сообщение',
+                                                    msg: "Будет сгенерирован номер договора. Изменить указанный номер на сгенерированный?",
+                                                    buttons: Ext.MessageBox.YESNO,
+                                                    fn: function (btn) {
+                                                        if (btn === 'yes') {
+                                                            request();
+                                                        }
+                                                    }
+                                                });
+                                            else
+                                                request();
+                                        }
+                                    },
+                                ]
+                            },
+                            {
+                                fieldLabel: 'Номер договора*',
+                                labelWidth: labelWidth,
+                                itemId: 'Number',
+                                name:'Number',
+                                width: 700,
+                                validator: required
+                            },
+                            {
+                                xtype: 'datefield',
+                                fieldLabel: 'Дата заключения',
+                                labelWidth: labelWidth,
+                                itemId: 'ContractDate',
+                                name:'ContractDate',
+                                width: 300,
+                                startDay: 1
+                            },
+                            {
+
+                                fieldLabel: 'Руководитель',
+                                labelWidth: labelWidth,
+                                itemId: 'DirectorCntr',
+                                name:'Director',
+                                width: 700
+                            },
+                            {
+
+                                fieldLabel: 'Инициалы руководителя',
+                                labelWidth: labelWidth,
+                                itemId: 'DirectorInitialsCntr',
+                                name:'DirectorInitials',
+                                vtype: 'initials',
+                                width: 400
+                            },
+                            {
+
+                                fieldLabel: 'ФИО руководителя в родительном падеже',
+                                labelWidth: labelWidth,
+                                itemId: 'DirectorGenitiveCntr',
+                                name:'DirectorGenitive',
+                                width: 700
+                            },
+                            {
+
+                                fieldLabel: 'Должность руководителя',
+                                labelWidth: labelWidth,
+                                itemId: 'PostOfDirectorCntr',
+                                name:'PostOfDirector',
+                                width: 700
+                            },
+                            {
+
+                                fieldLabel: 'Должность руководителя в родительном падеже',
+                                labelWidth: labelWidth,
+                                itemId: 'PostOfDirectorGenitiveCntr',
+                                name:'PostOfDirectorGenitive',
+                                width: 700
+                            },
+                            {
+
+                                fieldLabel: 'Ответственный',
+                                labelWidth: labelWidth,
+                                itemId: 'PersonInChargeCntr',
+                                name: 'PersonInCharge',
+                                width: 700
+                            },
+                            {
+                                fieldLabel: 'Инициалы ответственного',
+                                labelWidth: labelWidth,
+                                itemId: 'PersonInChargeInitialsCntr',
+                                name:'PersonInChargeInitials',
+                                vtype: 'initials',
+                                width: 400
+                            },
+                            {
+                                fieldLabel: 'Должность ответственного лица',
+                                labelWidth: labelWidth,
+                                itemId: 'PostOfPersonInChargeCntr',
+                                name:'PostOfPersonInCharge',
+                                width: 700
+                            },
+                            {
+
+                                fieldLabel: 'Телефон ответственного лица',
+                                labelWidth: labelWidth,
+                                itemId: 'PhoneNumber',
+                                name:'PhoneNumber',
+                                width: 350
+                            },
+                            {
+
+                                fieldLabel: 'E-mail',
+                                labelWidth: labelWidth,
+                                itemId: 'Email',
+                                name:'Email',
+                                vtype: 'email',
+                                width: 550
+                            },
+                            {
+                                xtype: 'checkbox',
+                                boxLabel: 'Бессрочный договор',
+                                itemId: 'IsEndless',
+                                name:'IsEndless',
+                                margin: '0 0 0 138',
+                                width: 571
+                            },
+                            {
+                                xtype: 'fieldcontainer',
+                                itemId: 'datesContainer',
+                                defaultType: 'datefield',
+                                layout: {
+                                    type: 'hbox',
+                                    align: 'stretch'
+                                },
+                                items: [
+                                    {
+                                        xtype: 'datefield',
+                                        fieldLabel: 'Действителен с',
+                                        labelWidth: labelWidth,
+                                        itemId: 'StartDate',
+                                        name:'StartDate',
+                                        width: 300,
+                                        startDay: 1
+                                    },
+                                    {
+                                        xtype: 'datefield',
+                                        margin: '0 0 0 50',
+                                        fieldLabel: 'по',
+                                        labelWidth: 25,
+                                        itemId: 'FinishDate',
+                                        name:'FinishDate',
+                                        width: 215,
+                                        startDay: 1,
+                                    }
+                                ]
+                            },
+                            {
+
+                                fieldLabel: 'Лимит по договору',
+                                labelWidth: labelWidth,
+                                itemId: 'Limit',
+                                name:'Limit',
+                                vtype: 'numbers',
+                                width: 315
+                            },
+                            {
+
+                                fieldLabel: 'Комментарий для студентов',
+                                labelWidth: labelWidth,
+                                itemId: 'Comment',
+                                name:'Comment',
+                                width: 700
+                            },
+                            {
+
+                                fieldLabel: 'Комментарий учебного отдела',
+                                labelWidth: labelWidth,
+                                itemId: 'PersonalComment',
+                                name:'PersonalComment',
+                                width: 700
+                            },
+                            filePanel,
+                            {
+
+                                fieldLabel: 'Номер папки',
+                                labelWidth: labelWidth,
+                                itemId: 'FolderNumber',
+                                name:'FolderNumber',
+                                vtype: 'numbers',
+                                width: 315
+                            },
+                        ],
+                        buttons: [
+                            {
+                                id: 'btnAddContract',
+                                text: "Сохранить",
+                                handler: function () {
+
+                                    var isValid = true;
+                                    editWnd.items.items.forEach(function (element, index, array) {
+                                        if (element.itemId == 'ksButtonContainer') {
+                                            if (editWnd.getComponent('IsShortDated').getValue() && !element.getComponent('Year').isValid())
+                                                isValid = false;
+                                        }
+                                        else if (element.itemId != 'datesContainer' && element.itemId != 'ContractDate') {
+                                            if (!element.isValid())
+                                                isValid = false;
+                                        }
+                                    });
+                                    if (!isValid) return false;
+                                    var params = {
+                                        CompanyId: @Model.CompanyId,
+                                        Id: editWnd.getComponent("Id").getValue()
+                                            ? editWnd.getComponent("Id").getValue()
+                                            : 0,
+                                        number: editWnd.getComponent("Number").getValue(),
+                                        director: editWnd.getComponent("DirectorCntr").getValue(),
+                                        directorInitials: editWnd.getComponent("DirectorInitialsCntr").getValue(),
+                                        directorGenitive: editWnd.getComponent("DirectorGenitiveCntr").getValue(),
+                                        postOfDirector: editWnd.getComponent("PostOfDirectorCntr").getValue(),
+                                        postOfDirectorGenitive: editWnd.getComponent("PostOfDirectorGenitiveCntr")
+                                            .getValue(),
+                                        personInCharge: editWnd.getComponent("PersonInChargeCntr").getValue(),
+                                        personInChargeInitials: editWnd.getComponent("PersonInChargeInitialsCntr")
+                                            .getValue(),
+                                        postOfPersonInCharge: editWnd.getComponent("PostOfPersonInChargeCntr").getValue(),
+                                        phoneNumber: editWnd.getComponent("PhoneNumber").getValue(),
+                                        email: editWnd.getComponent("Email").getValue(),
+                                        isShortDated: editWnd.getComponent("IsShortDated").getValue(),
+                                        isEndless: editWnd.getComponent("IsEndless").getValue(),
+                                        contractDate: editWnd.getComponent("ContractDate").rawValue,
+                                        startDate: editWnd.getComponent("datesContainer").items.map['StartDate']
+                                            .rawValue,
+                                        finishDate: editWnd.getComponent("datesContainer").items.map['FinishDate']
+                                            .rawValue,
+                                        limit: editWnd.getComponent("Limit").getValue(),
+                                        comment: editWnd.getComponent("Comment").getValue(),
+                                        personalComment: editWnd.getComponent("PersonalComment").getValue(),
+                                        removeScan: removeScan,
+                                        uploadScan: uploadScan,
+                                        folderNumber: editWnd.getComponent("FolderNumber").getValue(),
+                                        year: editWnd.getComponent("ksButtonContainer").getComponent('Year').getValue()
+                                    };
+
+
+                                    var form = filePanel.getForm();
+                                    form.submit({
+                                        method: 'POST',
+                                        url: '@Url.Action("AddOrUpdateContract")',
+                                        params: params,
+                                        success: function (form, action) {
+                                                updateRecord(action.result.id, editWnd.getComponent("RowIndex").getValue());
+                                                editWnd.hide();
+                                            },
+                                        failure: function (form, action) {
+                                            Ext.MessageBox.alert('Ошибка', action.result.message);
+
+                                            }
+                                        });
+                                }
+                            },
+                            {
+                                text: "Отмена",
+                                handler: function () {
+                                    editWnd.hide();
+                                }
+                            }
+                        ]
+                    });
+
+                var tpl = '<a href="@Url.Action("DownloadScan")?id={Id}">{ScanName}</a>';
+
+                var iconCls = '@ViewBag.ContractId' === '' ? 'icon-padding' : '{ visibility: hidden }';
+
+                var gridPanel = Ext.create('Ext.grid.Panel',
+                    {
+                        region: 'center',
+                        store: store,
+                        loadMask: true,
+                        columnLines: true,
+                        enableLocking: true,
+                        id: 'ContractsGrid',
+                        viewConfig: {
+                            markDirty: false
+                        },
+                        tbar: [
+                            {
+                                xtype: 'button',
+                                hidden: hidden,
+                                text: "Предприятия",
+                                handler: function () {
+                                    window.location = "/PracticeCompanies/Index?focus=@Model.CompanyId&contractId=@ViewBag.ContractId";
+                                }
+                            }, '-',
+                            {
+                                xtype: 'button',
+                                text: "Фильтры",
+                                hidden: hidden,
+                                handler: function () {
+
+                                    filtersWnd.show();
+                                }
+                            },
+                            {
+                                xtype: 'button',
+                                text: "Отменить фильтры",
+                                hidden: hidden,
+                                handler: function () {
+                                    store.clearFilter();
+                                    settings = [];
+                                    localStorage.setItem(localStorageName, JSON.stringify([]));
+                                }
+                            }, '-',
+                            {
+                                xtype: 'button',
+                                text: "Добавить договор",
+                                hidden: hidden,
+                                handler: function () {
+                                    checkEditRole(function () {
+                                        var fieldsContarctInfoPanel = editWnd.query('[isFormField]');
+                                        fieldsContarctInfoPanel.forEach(function(field) {
+                                            field.reset();
+                                        });
+                                        uploadScan = false;
+                                        removeScan = false;
+                                        setCompanyValuesToEditForm();
+                                        editWnd.getComponent('RowIndex').setValue(-1);
+                                        editWnd.getComponent("ksButtonContainer").getComponent('Year').setValue('');
+                                        editWnd.show();
+                                    });
+
+                                }
+                            }
+                        ],
+                        plugins: [
+                            {
+                                ptype: "rowexpander",
+                                rowBodyTpl: new Ext.XTemplate(
+                                    '<p><b>Руководитель: </b>{DirectorCntr}</p>',
+                                    '<p><b>Инициалы руководителя: </b>{DirectorInitialsCntr}</p>',
+                                    '<p><b>ФИО руководителя в родительном падеже: </b>{DirectorGenitiveCntr}</p>',
+                                    '<p><b>Должность руководителя: </b>{PostOfDirectorCntr}</p>',
+                                    '<p><b>Должность руководителя в родительном падеже: </b>{PostOfDirectorGenitiveCntr}</p>',
+                                    '<p><b>Ответственное лицо: </b>{PersonInChargeCntr}</p>',
+                                    '<p><b>Инициалы ответственного лица: </b>{PersonInChargeInitialsCntr}</p>',
+                                    '<p><b>Должность ответственного лица: </b>{PostOfPersonInChargeCntr}</p>',
+                                    '<p><b>Телефон ответственного лица: </b>{PhoneNumber}</p>',
+                                    '<p><b>E-mail: </b>{Email}</p>',
+                                    '<p><b>Комментарий для студентов: </b>{Comment}</p>',
+                                    '<p><b>Номер папки: </b>{FolderNumber}</p>'
+                                )
+                            }
+                        ],
+                        columns: [
+                            { xtype: 'rownumberer', width: 50 },
+                            {
+                                header: 'Номер договора',
+                                dataIndex: 'Number',
+                                width: 120,
+                                cellWrap: true,
+                                locked: true,
+                                scrollable: false,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Дата заключения',
+                                align: 'left',
+                                dataIndex: 'ContractDate',
+                                hidden: hidden,
+                                width: 110,
+                                locked: true,
+                                scrollable: false,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Начало действия договора',
+                                align: 'left',
+                                dataIndex: 'StartDate',
+                                width: 110,
+                                locked: true,
+                                scrollable: false,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Окончание действия договора',
+                                align: 'left',
+                                dataIndex: 'FinishDate',
+                                width: 110,
+                                locked: true,
+                                scrollable: false,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Учебный год и семестр',
+                                dataIndex: 'YearSemester',
+                                width: 170,
+                                cellWrap: true,
+                                sortable: false,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Последний семестр',
+                                dataIndex: 'LastSemester',
+                                hidden: hidden,
+                                width: 150,
+                                sortable: false,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Код направления (ОКСО)',
+                                dataIndex: 'Okso',
+                                width: 180,
+                                cellWrap: true,
+                                sortable: false,
+                                renderer: function (value, metaData, record, rowIndex, colIndex, store, view) {
+                                    metaData.tdAttr = 'data-qtip="' + Ext.String.htmlEncode(record.data.FullOkso.join(',<br/>')) + '"';
+                                    return value.join(',<br/>');
+                                }
+                            },
+                            {
+                                header: 'Код образовательной программы',
+                                dataIndex: 'Profile',
+                                width: 170,
+                                cellWrap: true,
+                                sortable: false,
+                                renderer: function (value, metaData, record, rowIndex, colIndex, store, view) {
+                                    metaData.tdAttr = 'data-qtip="' + Ext.String.htmlEncode(record.data.FullProfile) + '"';
+                                    return value;
+                                }
+                            },
+                            {
+                                header: 'Уровень обучения и курс',
+                                dataIndex: 'Qualification',
+                                width: 220,
+                                cellWrap: true,
+                                sortable: false,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Лимит по договору',
+                                dataIndex: 'Limit',
+                                hidden: hidden,
+                                width: 110,
+                                sortable: false,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Лимит по заявке',
+                                dataIndex: 'CountPeople',
+                                width: 100,
+                                sortable: false,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                xtype: 'checkcolumn',
+                                header: 'Краткосрочный договор',
+                                dataIndex: 'IsShortDated',
+                                hidden: hidden,
+                                sortable: false,
+                                width: 160
+                            },
+                            {
+                                xtype: 'checkcolumn',
+                                header: 'Бессрочный договор',
+                                dataIndex: 'IsEndless',
+                                hidden: hidden,
+                                sortable: false,
+                                width: 150
+                            },
+                            {
+                                header: 'Комментарий учебного отдела',
+                                dataIndex: 'PersonalComment',
+                                hidden: hidden,
+                                width: 160,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Скан договора',
+                                xtype: 'templatecolumn',
+                                sortable: false,
+                                tpl: tpl,
+                                width: 180
+                            },
+                            {
+                                xtype: 'actioncolumn',
+                                region: 'center',
+                                width: 180,
+                                sortable: false,
+                                items: [
+                                     {
+                                        icon: '@Url.Content("~/Content/Images/edit.png")',
+                                        iconCls: iconCls,
+                                        text: 'Редактировать',
+                                        tooltip: 'Редактировать',
+                                        handler: function (grid, rowIndex, colIndex) {
+                                            checkEditRole(function () {
+                                                var rec = grid.getStore().getAt(rowIndex);
+                                                setValuesToEditForm(rec.data);
+                                                uploadScan = false;
+                                                removeScan = false;
+                                                editWnd.getComponent('RowIndex').setValue(rowIndex);
+                                                editWnd.show();
+                                            });
+                                        }
+                                    },
+                                    {
+                                        icon: '@Url.Content("~/Content/Images/calendar.png")',
+                                        iconCls: iconCls,
+                                        text: 'Учебный период',
+                                        tooltip: 'Учебный период',
+                                        handler: function (grid, rowIndex, colIndex) {
+                                            checkEditRole(function () {
+
+                                                var rec = grid.getStore().getAt(rowIndex);
+                                                periodStore.getProxy().extraParams = {
+                                                    contractId: rec.get('Id')
+                                                };
+                                                periodStore.reload();
+                                                periodWnd.getComponent('Id').setValue(rec.get('Id'));
+                                                periodWnd.getComponent('RowIndex').setValue(rowIndex);
+                                                Ext.ComponentQuery.query('#FinishDatePeriods')[0].setVisible(rec.get('IsEndless'));
+                                                Ext.ComponentQuery.query('#FinishDatePeriods')[0].setValue('');
+                                                if (rec.get('IsEndless') && rec.get('FinishDate') != "") {
+                                                    var date = rec.get('FinishDate').replace(/\D/g, '/')
+                                                    Ext.ComponentQuery.query('#FinishDatePeriods')[0].setValue(date);
+                                                }
+                                                periodWnd.show();
+                                            });
+                                        }
+                                    },
+                                    {
+                                        icon: '@Url.Content("~/Content/Images/list_bullets.png")',
+                                        iconCls: '@ViewBag.ProjectEdit' == 'True' ? 'icon-padding' : iconCls,
+                                        text: 'Направления',
+                                        tooltip: 'Направления',
+                                        handler: function (grid, rowIndex, colIndex) {
+                                            checkEditRole(function () {
+                                                var rec = grid.getStore().getAt(rowIndex);
+                                                oksoStore.proxy.setUrl('@Url.Action("Okso")?id=' + rec.get('Id'));
+                                                oksoStore.reload();
+                                                oksoWnd.getComponent('Id').setValue(rec.get('Id'));
+                                                oksoWnd.getComponent('RowIndex').setValue(rowIndex);
+                                                oksoWnd.show();
+                                            });
+                                        }
+                                    },
+                                    {
+                                        icon: '@Url.Content("~/Content/Images/diagram.png")',
+                                        iconCls: '@ViewBag.ProjectEdit' == 'True' ? 'icon-padding' : iconCls,
+                                        text: 'Лимиты',
+                                        tooltip: 'Лимиты',
+                                        handler: function (grid, rowIndex, colIndex) {
+                                            var rec = grid.getStore().getAt(rowIndex);
+                                            oksoListStore.proxy.setUrl('@Url.Action("OksoList")?id=' + rec.get('Id'));
+                                            oksoListStore.reload();
+                                            profileListStore.proxy.setUrl('@Url.Action("ProfileList")?id=' + rec.get('Id'));
+                                            profileListStore.reload();
+                                            periodListStore.proxy.setUrl('@Url.Action("PeriodList")?id=' + rec.get('Id'));
+                                            periodListStore.reload();
+                                            limitsStore.proxy.setUrl('@Url.Action("Limits")?id=' + rec.get('Id'));
+                                            limitsStore.clearFilter();
+                                            limitsStore.reload();
+                                            limitsWnd.getComponent('Id').setValue(rec.get('Id'));
+                                            limitsWnd.getComponent('RowIndex').setValue(rowIndex);
+                                            limitsWnd.show();
+                                        }
+                                    },
+                                    {
+                                        icon: '@Url.Content("~/Content/Images/remove.png")',
+                                        iconCls: 'icon-padding',
+                                        text: 'Удалить',
+                                        tooltip: 'Удалить',
+                                        iconCls: iconCls,
+                                        handler: function (grid, rowIndex, colIndex) {
+
+                                            var remove = function () {
+                                                var rec = grid.getStore().getAt(rowIndex);
+                                                Ext.Ajax.request({
+                                                    //method: 'POST',
+                                                    url: '@Url.Action("DeleteContract")',
+                                                    params: {
+                                                        contractId: rec.get("Id")
+                                                    },
+                                                    success: function (response) {
+                                                        store.removeAt(rowIndex);
+                                                    },
+                                                    failure: function (response) {
+                                                        if (response.responseText != "") {
+                                                            var data = Ext.decode(response.responseText);
+                                                                Ext.MessageBox.show({
+                                                                    title: 'Ошибка',
+                                                                    msg: data.message,
+                                                                    buttons: Ext.MessageBox.OK
+                                                                });
+                                                        }
+                                                    }
+                                                });
+                                            }
+
+                                            var request = function () {
+                                                var rec = grid.getStore().getAt(rowIndex);
+                                                Ext.Ajax.request({
+                                                     url: '@Url.Action("CheckStudentsAdmissionsOnContract")',
+                                                     params: {
+                                                         contractId: rec.get("Id")
+                                                     },
+                                                     success: function (response) {
+                                                         if (response.responseText != "") {
+                                                             var data = Ext.decode(response.responseText);
+                                                             if (data.success) {
+                                                                 remove();
+                                                             }
+                                                             else {
+                                                                 Ext.MessageBox.show({
+                                                                     title: 'Предупреждение',
+                                                                     msg: data.message + "Вы хотите удалить договор? Зачисления студентов будут удалены!",
+                                                                     buttons: Ext.MessageBox.YESNO,
+                                                                     fn: function (btn) {
+                                                                         if (btn === 'yes') {
+                                                                             remove();
+                                                                         }
+                                                                     }
+                                                                 });
+                                                             }
+                                                         }
+                                                     },
+                                                     failure: function (response) {
+                                                     }
+                                                });
+                                            }
+
+                                            var checkFunction = function () {
+                                                Ext.MessageBox.show({
+                                                    title: 'Информационное сообщение',
+                                                    msg: "Вы хотите удалить договор?",
+                                                    buttons: Ext.MessageBox.YESNO,
+                                                    fn: function (btn) {
+                                                        if (btn === 'yes') {
+                                                            request();
+                                                        }
+                                                    }
+                                                });
+                                            }
+
+                                            checkEditRole(checkFunction);
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                header: '',
+                                hidden: hidden,
+                                xtype: 'templatecolumn',
+                                sortable: false,
+                                tpl: '<a href="@Url.Action("ContractStudents")?contractKsId={Id}">{StudentsStr}</a>',
+                                width: 120
+                            }
+                        ]
+
+                    });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+
+                 gridPanel.getStore()
+                .on('load',
+                    function(store, records, options) {
+                        var focus = '@ViewBag.Focus';
+                        if (focus && focus.length > 0) {
+
+                            var focusRow = store.findExact('Id', parseInt(focus));
+                            if (focusRow >= 0) {
+                                var rowData = store.getAt(focusRow);
+                                gridPanel.getView().focusRow(rowData);
+                                gridPanel.getSelectionModel().select(rowData);
+                            }
+                        }
+                        return false;
+                    });
+
+            });
+        </script>
+    </div>
+
+}
+
+

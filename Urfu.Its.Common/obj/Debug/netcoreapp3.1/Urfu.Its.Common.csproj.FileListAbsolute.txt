@@ -1,0 +1,13 @@
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\obj\Debug\netcoreapp3.1\Urfu.Its.Common.AssemblyInfoInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\obj\Debug\netcoreapp3.1\Urfu.Its.Common.AssemblyInfo.cs
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\obj\Debug\netcoreapp3.1\Urfu.Its.Common.csprojAssemblyReference.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\netcoreapp3.1\Urfu.Its.Common.dll.config
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\netcoreapp3.1\Urfu.Its.Common.deps.json
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\netcoreapp3.1\Urfu.Its.Common.dll
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\netcoreapp3.1\Urfu.Its.Common.pdb
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\obj\Debug\netcoreapp3.1\Urfu.Its.Common.dll
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\obj\Debug\netcoreapp3.1\Urfu.Its.Common.pdb
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\netcoreapp3.1\Urfu.Its.Common.runtimeconfig.json
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\netcoreapp3.1\Urfu.Its.Common.runtimeconfig.dev.json
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\obj\Debug\netcoreapp3.1\Urfu.Its.Common.genruntimeconfig.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\obj\Debug\netcoreapp3.1\Urfu.Its.Common.csproj.CoreCompileInputs.cache

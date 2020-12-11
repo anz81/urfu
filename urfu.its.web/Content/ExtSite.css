@@ -1,0 +1,61 @@
+﻿/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding: 15px;
+}
+
+.contrast-text {
+    color: white !important;
+    font-size: 16px;
+}
+.padding-top-70 {
+     padding-top: 70px;
+}
+.x-grid-row.highlight .x-grid-td {
+    background-color: #B6DFDC ;
+}
+
+.x-grid-row.row-disabled {
+    pointer-events: none;
+}
+.action-disabled{
+    pointer-events: none;
+}
+.icon-padding {
+    padding-left: 10px;
+    min-width: 26px; /*так крыво но работает))*/
+}
+.icon-padding-bigicon {
+    padding-left: 10px;
+    min-width: 26px; /*так крыво но работает))*/
+    height: 22px !important;
+    width: 40px !important;
+}
+.icon-padding-mediumicon {
+    padding-left: 5px;
+    min-width: 20px; /*так крыво но работает))*/
+    height: 18px !important;
+    width: 26px !important;
+}
+.icon-padding-squareicon {
+    padding-left: 5px;
+    min-width: 20px; /*так крыво но работает))*/
+    height: 20px !important;
+    width: 26px !important;
+}
+.icon-toppadding {
+    padding-left: 10px;
+    padding-top:3px;
+    min-width: 26px; /*так крыво но работает))*/
+}
+
+.btn-text-color span {
+    color: #157fcc;
+}
+
+
+table[class*="x-grid-item-selected"] .x-grid-td {
+    background-color: #b3b9bc !important;
+    /*color: #ffff00 !important;*/
+}
+.multiline .x-column-header-inner .x-column-header-text { white-space: normal; }
+.x-column-header-inner .x-column-header-text { white-space: pre-wrap; }

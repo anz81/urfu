@@ -1,0 +1,581 @@
+﻿
+@{
+    ViewBag.Title = "Отчет по студентам";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@{
+    <div class="container-fluid">
+        <script type="text/javascript">
+            Ext.onReady(function () {
+
+                Ext.tip.QuickTipManager.init();
+
+                var localStorageName = "PracticeReportStudentFilters";
+
+                function parseJson(json) {
+                    var data = JSON.parse(json.replace(/&quot;/g, '"'));
+                    return data;
+                }
+
+                var yearData = parseJson('@ViewBag.Years');
+                var yearStore = Ext.create('Ext.data.Store', {
+                    data: yearData,
+                });
+
+                var semesterData = parseJson('@ViewBag.Semesters');
+                var semesterStore = Ext.create('Ext.data.Store', {
+                    data: semesterData
+                });
+
+                var divisionsData = parseJson('@ViewBag.Divisions');
+                var divisionStore = Ext.create('Ext.data.Store', {
+                   data: divisionsData
+                });
+                divisionStore.on("load", function (store) {
+                    store.insert(0, { Id: '', Name: 'Не указано' /*'&nbsp'*/ });
+                });
+                divisionStore.load();
+
+                var prevSettings = {};
+                try {
+                    var prevSettingString = JSON.parse(localStorage.getItem(localStorageName) || "[]");
+
+                    for (var i = 0; i < prevSettingString.length; i++) {
+                        prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                    }
+
+                    if (prevSettings["Year"] == null) {
+                        prevSettings["Year"] = @(DateTime.Now.Month < 7? DateTime.Now.Year -1 : DateTime.Now.Year);
+                    }
+                    if (prevSettings["Division"] == null || prevSettings["Division"] == "[]") {
+                        prevSettings["Division"] = divisionStore.getAt(1);
+                    }
+                    if (prevSettings["Semester"] == null) {
+                        prevSettings["Semester"] = @(DateTime.Now.Month < 7?2:1);
+                    }
+                }
+                catch (err) {
+                };
+
+                var setFilters = function () {
+
+                    var settings = [
+                        { property: 'Year', value: yearCmbx.getValue() },
+                        { property: 'Semester', value: semesterCmbx.getValue() },
+                        { property: 'Division', value: divisionCmbx.getValue() },
+                        { property: 'Direction', value: directionCmbx.getValue() },
+                        { property: 'Group', value: groupCmbx.getValue() },
+                        //{ property: 'FamilirizationType', value: prevSettings['FamilirizationType'] },
+                        //{ property: 'Qualification', value: prevSettings['Qualification'] }
+                        { property: 'PracticeName', value: filtersWnd.getComponent("PracticeName").getValue() },
+                        { property: 'StudentName', value: filtersWnd.getComponent("StudentName").getValue() }
+                    ];
+                    store.setFilters(settings);
+                    localStorage.setItem(localStorageName, JSON.stringify(settings));
+                };
+
+                var directionStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        proxy: {
+                            type: 'ajax',
+                            url: '@Url.Action("DirectionList")?institute=' + null,
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        },
+                        listeners: {
+                            load: function (t, records, successful, eOpts) {
+                                t.insert(0, { Id: '', Name: 'Не указано' /*'&nbsp'*/ });
+                                directionCmbx.setValue(prevSettings["Direction"]);
+                                directionCmbx.setDisabled(false);
+                            }
+                        }
+                    });
+
+                var groupStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        proxy: {
+                            type: 'ajax',
+                            url: '@Url.Action("GroupList")?year=' + 0 + '&institute=' + null,
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        },
+                        listeners: {
+                            load: function (t, records, successful, eOpts) {
+                                t.insert(0, { Id: '', Name: 'Не указано' /*'&nbsp'*/ });
+                                groupCmbx.setValue(prevSettings["Group"]);
+                                groupCmbx.setDisabled(false);
+                            }
+                        }
+                    });
+
+                @*var familirizationTypeData = parseJson('@ViewBag.FamilirizationTypes');
+                var familirizationTypeStore = Ext.create('Ext.data.Store', {
+                    data: familirizationTypeData
+                });
+
+                var qualificationData = parseJson('@ViewBag.Qualifications');
+                var qualificationStore = Ext.create('Ext.data.Store', {
+                    data: qualificationData
+                });*@
+
+                var store = Ext.create("Ext.data.Store", {
+                    autoLoad: true,
+                    remoteSort: false,
+                    remoteFilter: true,
+                    autoSync: false,
+                    proxy: {
+                        type: 'ajax',
+                        url: '@Url.Action("ReportStudents")',
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        },
+                        timeout: 1200000
+                    }
+                });
+
+                function reloadOksoStore(institute) {
+                    if (directionCmbx != null) directionCmbx.setDisabled(true);
+                    directionStore.proxy.setUrl('@Url.Action("DirectionList")?institute=' + institute);
+                    directionStore.reload();
+                }
+
+                function reloadGroupStore(year, institute, okso) {
+                    if (groupCmbx != null) groupCmbx.setDisabled(true);
+                    groupStore.proxy.setUrl('@Url.Action("GroupList")?year=' + year + '&institute=' + institute + '&okso=' + okso);
+                    groupStore.reload();
+                }
+
+                function reloadOkso() {
+                    var institute = divisionCmbx.getValue();
+                    reloadOksoStore(institute);
+                    prevSettings["Direction"] = '';
+                }
+
+                function reloadGroups() {
+                    var year = yearCmbx.getValue();
+                    var institute = divisionCmbx.getValue();
+                    var okso = directionCmbx.getValue();
+                    reloadGroupStore(year, institute, okso);
+                    prevSettings["Group"] = '';
+                }
+
+                var filterLabelWidth = 110;
+                var yearCmbx = Ext.create('Ext.form.ComboBox',
+                    {
+                        xtype: 'combobox',
+                        fieldLabel: 'Учебный год',
+                        store: yearStore,
+                        queryMode: 'remote',
+                        valueField: 'Year',
+                        displayField: 'Year',
+                        labelWidth: filterLabelWidth,
+                        width: 200,
+                        value: prevSettings['Year'],
+                        listeners: {
+                            'select': function (combo, records, eOpts) {
+                                reloadGroups();
+
+                                semesterCmbx.setDisabled(false);
+                                divisionCmbx.setDisabled(false);
+                                directionCmbx.setDisabled(false);
+                                groupCmbx.setValue('');
+                                groupCmbx.setDisabled(false);
+                            },
+                            'blur': function (combo, event, eOpts) {
+                                if (combo.getValue() == null) {
+                                    // учебный год не выбран -> остальные фильтры неактивны
+                                    semesterCmbx.setValue('');
+                                    semesterCmbx.setDisabled(true);
+                                    divisionCmbx.setValue('');
+                                    divisionCmbx.setDisabled(true);
+                                    directionCmbx.setValue('');
+                                    directionCmbx.setDisabled(true);
+                                    groupCmbx.setValue('');
+                                    groupCmbx.setDisabled(true);
+                                }
+                                else {
+                                    semesterCmbx.setDisabled(false);
+                                    divisionCmbx.setDisabled(false);
+                                    directionCmbx.setDisabled(false);
+                                    groupCmbx.setValue('');
+                                    groupCmbx.setDisabled(false);
+                                }
+                            }
+                        }
+                    });
+
+                yearStore.on("load", function () {
+                    //yearCmbx.select(yearStore.getAt(yearStore.data.items.length - 1));
+                });
+                yearStore.load();
+
+                var semesterCmbx = Ext.create('Ext.form.ComboBox', {
+                        xtype: 'combobox',
+                        fieldLabel: 'Семестр',
+                        store: semesterStore,
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'local',
+                        labelWidth: filterLabelWidth,
+                        width: 250,
+                        value: prevSettings['Semester']
+                });
+
+                function selectEvent(combo, records, funcIfNotEmpty, funcIfEmpty) {
+                    var ids = [];
+                    var checkEmpty = records[records.length - 1].data.Id == '';
+
+                    if (!checkEmpty) {
+                        records.forEach(function (t) {
+                            if (t.data.Id != '')
+                                ids.push(t.data.Id);
+                        });
+                        funcIfNotEmpty(ids);
+                        combo.setValue(ids);
+                    }
+                    else {
+                        // выбран вариант "Не указано"
+                        combo.setValue('');
+                        ids.push('');
+                        funcIfEmpty();
+                    }
+
+                    // отметить галки в checkbox
+                    var node;
+                    Ext.each(records, function (rec) {
+                        var checked = ids.includes(rec.data.Id);
+                        node = combo.getPicker().getNode(rec);
+                        Ext.get(node).down('input').dom.checked = checked;
+                    });
+                }
+
+                function expandEvent(combo) {
+                    combo.value.forEach(function (item, value, index, values) {
+                        var rec = combo.findRecord('Id', item);
+                        var node = combo.getPicker().getNode(rec);
+                        var extNode = Ext.get(node);
+                        if (extNode != null)
+                            extNode.down('input').dom.checked = true;
+                    });
+                }
+
+                function blurEvent(combo) {
+                    if (combo.value.length == 0)
+                        combo.setValue('');
+                }
+
+                function beforedeselect(combo, rec) {
+                    // снять галки в checkbox
+                    var node = combo.getPicker().getNode(rec);
+                    var extNode = Ext.get(node);
+                    if (extNode != null)
+                        extNode.down('input').dom.checked = false;
+                }
+
+                var divisionCmbx = Ext.create('Ext.form.ComboBox', {
+                    xtype: 'combobox',
+                    fieldLabel: 'Институт',
+                    store: divisionStore,
+                    valueField: 'Id',
+                    displayField: 'Name',
+                    queryMode: 'local',
+                    multiSelect: true,
+                    labelWidth: filterLabelWidth,
+                    width: 600,
+                    value: prevSettings['Division'],
+                    tpl: new Ext.XTemplate('<tpl for=".">', '<div class="x-boundlist-item">', '<input type="checkbox" />', '   ' + '{Name}', '</div>', '</tpl>'),
+                    listeners: {
+                        select: function (combo, records, eOpts) {
+                            selectEvent(combo, records,
+                                function (ids) { // выбран институт
+                                    reloadOkso();
+                                    directionCmbx.setDisabled(false);
+
+                                    var year = yearCmbx.getValue();
+                                    reloadGroupStore(year, ids, '');
+                                    prevSettings["Group"] = '';
+                                    groupCmbx.setDisabled(false);
+                                },
+                                function () { // выбрано "Не указано"
+                                    directionCmbx.getStore().removeAll();
+                                    directionCmbx.getStore().insert(0, { Id: '', Name: 'Не указано' /*'&nbsp'*/ });
+                                    directionCmbx.setValue('');
+                                    directionCmbx.setDisabled(true);
+
+                                    groupCmbx.getStore().removeAll();
+                                    groupCmbx.getStore().insert(0, { Id: '', Name: 'Не указано' /*'&nbsp'*/ });
+                                    groupCmbx.setValue('');
+                                    groupCmbx.setDisabled(true);
+                                }
+                            );
+                        },
+                        blur: function (combo, event, eOpts) {
+                            blurEvent(combo);
+                        },
+                        beforedeselect: function (combo, rec) {
+                            beforedeselect(combo, rec);
+                        },
+                        expand: function (field, eOpts) {
+                            expandEvent(divisionCmbx);
+                        }
+                    }
+                });
+
+                var directionCmbx = Ext.create('Ext.form.ComboBox', {
+                    xtype: 'combobox',
+                    fieldLabel: 'Направление обучения',
+                    store: directionStore,
+                    valueField: 'Id',
+                    displayField: 'Name',
+                    queryMode: 'local',
+                    labelWidth: filterLabelWidth,
+                    width: 600,
+                    multiSelect: true,
+                    value: prevSettings['Direction'],
+                    tpl: new Ext.XTemplate('<tpl for=".">', '<div class="x-boundlist-item">', '<input type="checkbox" />', '   ' + '{Name}', '</div>', '</tpl>'),
+                    listeners: {
+                        select: function (combo, records, eOpts) {
+                            selectEvent(combo, records,
+                                function (ids) { // выбран элемент
+                                    reloadGroups();
+                                    groupCmbx.setDisabled(false);
+                                },
+                                function () { // выбрано "Не указано"
+                                    var year = yearCmbx.getValue();
+                                    var institute = divisionCmbx.getValue();
+                                    reloadGroupStore(year, institute, '');
+                                    prevSettings["Group"] = '';
+                                    groupCmbx.setDisabled(false);
+                                }
+                            );
+                        },
+                        blur: function (combo, event, eOpts) {
+                            blurEvent(combo);
+                        },
+                        beforedeselect: function (combo, rec) {
+                            beforedeselect(combo, rec);
+                        },
+                        expand: function (field, eOpts) {
+                            expandEvent(directionCmbx);
+                        }
+                    }
+                });
+
+                reloadOksoStore(divisionCmbx.getValue());
+                reloadGroupStore(yearCmbx.getValue(), divisionCmbx.getValue(), directionCmbx.getValue());
+
+                var groupCmbx = Ext.create('Ext.form.ComboBox', {
+                    xtype: 'combobox',
+                    fieldLabel: 'Группа',
+                    store: groupStore,
+                    labelWidth: filterLabelWidth,
+                    valueField: 'Id',
+                    displayField: 'Name',
+                    queryMode: 'local',
+                    multiSelect: true,
+                    anyMatch: true,
+                    width: 600,
+                    value: prevSettings["Group"],
+                    tpl: new Ext.XTemplate('<tpl for=".">', '<div class="x-boundlist-item">', '<input type="checkbox" />', '   ' + '{Name}', '</div>', '</tpl>'),
+                    listeners: {
+                        select: function (combo, records, eOpts) {
+                            selectEvent(combo, records,
+                                function (ids) {
+                                },
+                                function () {
+                                }
+                            );
+                        },
+                        blur: function (combo, event, eOpts) {
+                            blurEvent(combo);
+                        },
+                        beforedeselect: function (combo, rec) {
+                            beforedeselect(combo, rec);
+                        },
+                        expand: function (field, eOpts) {
+                            expandEvent(groupCmbx);
+                        }
+                    }
+                });
+
+                //var familirizationTypeCmbx = Ext.create('Ext.form.ComboBox' , {
+                //    //xtype: 'combobox',
+                //    fieldLabel: 'Форма обучения',
+                //    store: familirizationTypeStore,
+                //    valueField: 'Name',
+                //    displayField: 'Name',
+                //    queryMode: 'local',
+                //    labelWidth: 190,
+                //    width: 600,
+                //    value: prevSettings['FamilirizationType']
+                //});
+
+                //var qualificationCmbx = Ext.create('Ext.form.ComboBox', {
+                //    //xtype: 'combobox',
+                //    fieldLabel: 'Уровень обучения',
+                //    store: qualificationStore,
+                //    valueField: 'Name',
+                //    displayField: 'Name',
+                //    queryMode: 'local',
+                //    labelWidth: 190,
+                //    width: 600,
+                //    value: prevSettings['Qualification']
+                //});
+
+                var filtersWnd = Ext.create('Ext.window.Window', {
+                    title: "Фильтры",
+                    closeAction: 'hide',
+                    resizable: false,
+                    autoHeight: true,
+                    bodyPadding: 6,
+                    defaults: {
+                        xtype: 'textfield',
+                        width: 500
+                    },
+                    items: [
+                        yearCmbx,
+                        semesterCmbx,
+                        divisionCmbx,
+                        directionCmbx,
+                        groupCmbx,
+                        //familirizationTypeCmbx,
+                        //qualificationCmbx
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'Название практики',
+                            value: prevSettings["PracticeName"],
+                            labelWidth: filterLabelWidth,
+                            itemId: 'PracticeName',
+                            margin: '0 0 10 0',
+                            width: 600
+                        },
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'ФИО студента',
+                            value: prevSettings["StudentName"],
+                            labelWidth: filterLabelWidth,
+                            itemId: 'StudentName',
+                            margin: '0 0 10 0',
+                            width: 600
+                        }
+                    ],
+                    buttons: [{
+                        text: "ОК",
+                        handler: function () {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    }, {
+                        text: "Отмена",
+                        handler: function () { filtersWnd.hide(); }
+                    }]
+                });
+
+                setFilters();
+
+                var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: store,
+                    loadMask: true,
+                    columnLines: true,
+
+
+                    tbar: [{
+                            xtype: 'button',
+                            text: "Фильтры",
+                            handler: function () {
+                                filtersWnd.show();
+                            }
+                        },
+                        {
+                            xtype: 'button',
+                            text: "Отменить фильтры",
+                            handler: function () {
+                                settings = [];
+
+                                yearCmbx.setValue(@(DateTime.Now.Month < 7? DateTime.Now.Year -1 : DateTime.Now.Year));
+                                semesterCmbx.setValue(@(DateTime.Now.Month < 7?2:1));
+                                divisionCmbx.setValue(divisionStore.getAt(1));
+                                directionStore.removeAll();
+                                directionCmbx.setValue('');
+                                groupStore.removeAll();
+                                groupCmbx.setValue('');
+                                //familirizationTypeCmbx.setValue('');
+                                //qualificationCmbx.setValue('');
+                                filtersWnd.getComponent("PracticeName").setValue('');
+                                filtersWnd.getComponent("StudentName").setValue('');
+                                setFilters();
+
+                                reloadOksoStore(divisionCmbx.getValue());
+                                reloadGroupStore(yearCmbx.getValue(), divisionCmbx.getValue(), '');
+                                directionCmbx.setDisabled(false);
+                                groupCmbx.setDisabled(false);
+                            }
+                        }, '-',
+                        {
+                            xtype: 'button',
+                            text: "Экспорт в Excel",
+                            handler: function () {
+                                var fileUrl = '@Url.Action("DownloadStudentsReportExcel")'
+                                        .concat('?filter=' + encodeURIComponent(localStorage.getItem(localStorageName) || "[]"));
+                                    window.location.href = fileUrl;
+                                    return false;
+                            }
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        { header: 'Фамилия', dataIndex: 'Surname', width: 150, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Имя', dataIndex: 'Name', width: 150, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Отчество', dataIndex: 'PatronymicName', width: 150, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Группа', dataIndex: 'GroupName', width: 130, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Целевой прием', dataIndex: 'IsTarget', width: 100, align: 'center', cellWrap: true, sortable: true, renderer: function (val) { return val ? 'Да' : "Нет" } },
+                        { header: 'Иностранный студент', dataIndex: 'IsInternational', width: 150, align: 'center', cellWrap: true, sortable: true, renderer: function (val) { return val ? 'Да' : "Нет" } },
+                        { header: 'Вид возмещения затрат', dataIndex: 'Compensation', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+
+                        { header: 'Институт', dataIndex: 'Institute', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Департамент', dataIndex: 'Department', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+
+                        { header: 'ОКСО+направление', dataIndex: 'Okso', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Учебный год', dataIndex: 'Year', width: 140, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Семестр', dataIndex: 'Semester', width: 100, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Название практики', dataIndex: 'PracticeName', width: 350, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Тип практики', dataIndex: 'PracticeType', width: 250, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Сроки практики', dataIndex: 'PrcaticeDate', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'С выездом', dataIndex: 'IsExternal', width: 100, align: 'center', cellWrap: true, sortable: true, renderer: function (val) { return val ? 'Да' : "Нет" }},
+                        { header: 'Руководитель от УрФУ', dataIndex: 'Teacher', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Соруководитель от УрФУ', dataIndex: 'Teacher2', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Общая тема', dataIndex: 'Theme', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Уточненная тема', dataIndex: 'FinishTheme', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Статус по заявке от УрФУ', dataIndex: 'UrfuStatus', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Предприятие', dataIndex: 'Company', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Страна', dataIndex: 'Country', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Город', dataIndex: 'City', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Руководитель от предприятия', dataIndex: 'PersonInCharge', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Статус по заявке на предприятие', dataIndex: 'CompanyStatus', width: 200, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                    ],
+                    });
+
+                gridPanel.view.markDirty = false;
+
+                var items = [
+                    gridPanel
+                ];
+
+                Urfu.createViewport('border', items);
+
+            });
+        </script>
+    </div>
+}
+

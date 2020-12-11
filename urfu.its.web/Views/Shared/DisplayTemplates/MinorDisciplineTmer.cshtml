@@ -1,0 +1,67 @@
+﻿@model IList<Urfu.Its.Web.DataContext.MinorDisciplineTmer>
+
+<table class="table table-striped table-hover table-bordered table-condensed">
+    <tr>
+        <th width="200px">
+            Нагрузка
+        </th>
+        <th width="200px">
+            Периоды
+        </th>
+        <th>
+            Кафедра
+        </th>
+
+    </tr>
+    @foreach(var m in Model)
+    {
+        if (m.Periods.Count == 0)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(model => m.Tmer.rmer)
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+        }
+        else
+        {
+            for (var j = 0; j < m.Periods.Count; j++)
+            {
+                <tr>
+                    @if (j == 0)
+                    {
+                        <td rowspan="@m.Periods.Count">
+                            @Html.DisplayFor(model => m.Tmer.rmer)
+                        </td>
+                    }
+                    <td>
+                        <div>
+                            @Html.DisplayFor(model => m.Periods[j].Period.Year)
+                            @Html.DisplayFor(model => m.Periods[j].Period.Semester.Name)
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            @{
+                                var tp = m.Periods.FirstOrDefault(p => p.Id == m.Periods[j].Id);
+                                if (tp != null)
+                                {
+                                    var s = tp.GetDivisionsStr();
+                                    @Html.DisplayFor(model => s)
+                                }
+                            }
+
+                            @if (ViewBag.CanEdit)
+                            {
+                                @Html.ActionLink("Редактировать", "EditDivisions", new { minorDisciplineTmerPeriodId = m.Periods[j].Id })
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+    }
+</table>
+

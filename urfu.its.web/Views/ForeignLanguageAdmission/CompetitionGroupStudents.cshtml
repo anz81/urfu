@@ -1,0 +1,456 @@
+﻿@using Urfu.Its.Common
+@using Urfu.Its.Web.DataContext
+@model ForeignLanguageProperty
+
+@{
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+    var filterName = "ForeignLanguageCompetitionGroupStudentsFilters";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+
+        function downloadReport() {
+            var fileUrl = '@Url.Action("DownloadMinorStudentsReport", new {id = ViewBag.MinorPeriodId})'
+                .concat('?filter=' + encodeURIComponent(localStorage.getItem("@filterName") || "[]"));
+            window.location.href = fileUrl;
+            return false;
+        }
+
+        var statuses =
+            @Html.Raw(Json.Encode(EnumHelper<AdmissionStatus>.GetValues(AdmissionStatus.Admitted).Select(m => new {Value = m, Text = EnumHelper<AdmissionStatus>.GetDisplayValue(m)}).ToList()));
+        var statesStore = Ext.create('Ext.data.Store',
+        {
+            fields: ['Value', 'Text'],
+            data: statuses
+        });
+
+        Ext.onReady(function() {
+            Ext.tip.QuickTipManager.init();
+            var hideStudentsStoreName = 'hideStudentsFLAdmission';
+            var store = Ext.create("Ext.data.BufferedStore",
+            {
+                fields: [
+                    "Id", "GroupName", "Surname", "Name", "PatronymicName", "Rating", "ForeignLanguageRating",
+                    "ForeignLanguageLevel", "ForeignLanguageTargetLevel", "IsTarget", "IsInternational", "Compensation",
+                    "Priority", "Status", "PersonalNumber", "StudentStatus", "AnotherAdmission", "VariantId",
+                    "Published", "Modified", "OtherAdmission", "studentSelection"
+                ],
+                autoLoad: false,
+                pageSize: 300,
+                remoteSort: true,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '@Url.Action("CompetitionGroupStudentsAjax")',
+                    extraParams: {
+                        id: '@ViewBag.MinorPeriodId',
+                        hideStudents: sessionStorage.getItem(hideStudentsStoreName) || false
+                    },
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    }
+                }
+            });
+
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("@filterName") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+
+            }
+
+            var filtersWnd = null;
+            function loadStore() {
+                store.proxy.setUrl('@Url.Action("CompetitionGroupStudentsAjax")' +
+                    '?filter=' +
+                    encodeURIComponent(localStorage.getItem("@filterName")));
+                store.load();
+            }
+            var setFilters = function() {
+                var settings = [
+                    { property: 'GroupName', value: filtersWnd.getComponent("GroupNameField").getValue() },
+                    { property: 'Surname', value: filtersWnd.getComponent("SurnameField").getValue() },
+                    { property: 'Name', value: filtersWnd.getComponent("NameField").getValue() },
+                    { property: 'StudentStatus', value: filtersWnd.getComponent("StudentStatusField").getValue() },
+                    { property: 'Status', value: filtersWnd.getComponent("StatusField").getValue() },
+                    { property: 'PersonalNumber', value: filtersWnd.getComponent("PersonalNumber").getValue() },
+                    { property: 'PatronymicName', value: filtersWnd.getComponent("PatronymicNameField").getValue() },
+                    { property: 'studentSelection', value: filtersWnd.getComponent("studentSelection").getValue() },
+                ];
+                localStorage.setItem("@filterName", JSON.stringify(settings));
+                loadStore();
+            };
+
+        filtersWnd = Ext.create('Ext.window.Window',
+        {
+            title: "Фильтры",
+            closeAction: 'hide',
+            resizable: false,
+            autoHeight: true,
+            bodyPadding: 6,
+            defaults: {
+                xtype: 'textfield',
+                width: 500
+            },
+            items: [
+                { fieldLabel: "Название группы", itemId: "GroupNameField", value: prevSettings["GroupName"] },
+                { fieldLabel: "Фамилия", itemId: "SurnameField", value: prevSettings["Surname"] },
+                { fieldLabel: "Имя", itemId: "NameField", value: prevSettings["Name"] },
+                { fieldLabel: "Статус", itemId: "StudentStatusField", value: prevSettings["StudentStatus"] },
+                { fieldLabel: "Номер", itemId: "PersonalNumber", value: prevSettings["PersonalNumber"] },
+                { fieldLabel: "Отчество", itemId: "PatronymicNameField", value: prevSettings["PatronymicName"] },
+                { fieldLabel: "Выбор ЛК", itemId: "studentSelection", value: prevSettings["studentSelection"] },
+                {
+                    fieldLabel: "Состояние",
+                    itemId: "StatusField",
+                    value: prevSettings["Status"],
+                    xtype: "combobox",
+                    store: statesStore,
+                    valueField: 'Value',
+                    displayField: 'Text',
+                    queryMode: 'local'
+
+                }
+            ],
+            buttons: [
+                {
+                    text: "OK",
+                    handler: function() {
+                        setFilters();
+                        filtersWnd.hide();
+                    }
+                },
+                {
+                    text: "Отмена",
+                    handler: function() { filtersWnd.hide(); }
+                }
+            ]
+        });
+
+        setFilters();
+
+        var selRecord = [];
+        var gridPanel = null;
+
+        function setAdmissionStatus(rec, status) {
+            var request = function() {
+                Ext.Ajax.request({
+                    url: '@Url.Action("SetCompetitionGroupAdmissionStatus", new {propertyId = Model.Id,})',
+                    params: {
+                        studentIds: rec.map(function(l) { return l.get("Id") }),
+                        minorPeriodId: @ViewBag.MinorPeriodId,
+                        status: status
+                    },
+                    success: function(response) {
+                        var data = Ext.decode(response.responseText);
+                        if (data.msg)
+                            Ext.MessageBox.show({
+                                title: 'Информационное сообщение',
+                                msg: data.msg,
+                                buttons: Ext.MessageBox.OK,
+                                icon: Ext.MessageBox.INFO
+                            });
+                        if (data.reload)
+                            location.reload();
+
+
+                        for (var i in rec) {
+                            rec[i].set("Status", status);
+                            rec[i].set("Published", false);
+                            // rec.Save();
+                        }
+                        statusChanged(rec);
+                        //store.commitChanges();
+                        gridPanel.getView().refresh();
+                    }
+                });
+            }
+            if (rec[0].data.Status === 1 && (status === 0 || status === 2)) {
+
+                request();
+            } else {
+                request();
+            }
+        }
+
+
+        var indeterminateButton = Ext.create('Ext.Button',
+        {
+            xtype: 'button',
+            disabled: true,
+            text: 'Нет решения',
+            handler: function() { setAdmissionStatus(selRecord, 0); }
+        });
+
+        var admittedButton = Ext.create('Ext.Button',
+        {
+            xtype: 'button',
+            disabled: true,
+            text: 'Зачислен',
+            handler: function() { setAdmissionStatus(selRecord, 1); }
+        });
+
+        var deniedButton = Ext.create('Ext.Button',
+        {
+            xtype: 'button',
+            disabled: true,
+            text: 'Не зачислен',
+            handler: function() { setAdmissionStatus(selRecord, 2); }
+        });
+
+        var sendButton = Ext.create('Ext.Button',
+        {
+            xtype: 'button',
+            disabled: true,
+            text: 'Отправить в ЛК',
+            handler: function() {
+                setTimeout(function() {
+                        selRecord.forEach(function(el, index, array) {
+                            el.set("Published", true);
+                        });
+                    },
+                    0);
+                Ext.Ajax.request({
+                    url: '@Url.Action("PublishCompetitionGroupAdmission")',
+                    params: { studentId: selRecord.map(function(l) { return l.get("Id"); }), propertyId: @Model.Id },
+                    success: function(response) {
+                        Ext.toast({ html: "Сообщение отправлено", align: 't' });
+                        gridPanel.getView().refresh();
+                    }
+                });
+
+            }
+        });
+
+
+        function statusChanged(rec) {
+            if (rec == null)
+                return;
+            for (var i in rec) {
+                var anotherAdmission = rec[i].get("AnotherAdmission");
+                var status = rec[i].get("Status");
+                if (!anotherAdmission) {
+                    indeterminateButton.setDisabled(status == 0 || !@ViewBag.CanEdit);
+                    admittedButton.setDisabled(status == 1 || !@ViewBag.CanEdit);
+                    deniedButton.setDisabled(status == 2 || !@ViewBag.CanEdit);
+                    sendButton.setDisabled(!@ViewBag.CanEdit);
+                } else {
+                    indeterminateButton.disable();
+                    admittedButton.disable();
+                    deniedButton.disable();
+                    sendButton.disable();
+                }
+            }
+        }
+
+        gridPanel = Ext.create('Ext.grid.Panel',
+        {
+            multiSelect: true,
+            region: 'center',
+            store: store,
+            loadMask: true,
+            columnLines: true,
+            listeners: {
+                selectionchange: function(el, records) {
+                    selRecord = records.slice();
+                    statusChanged(selRecord);
+                }
+            },
+            dockedItems: [
+                {
+                    xtype: 'toolbar',
+                    dock: 'top',
+                    items: [
+                        {
+                            xtype: 'button',
+                            text: 'Фильтры...',
+                            handler: function () { filtersWnd.show(); }
+                        },
+                        {
+                            xtype: 'button',
+                            text: "Отменить фильтры",
+                            handler: function () {
+                                filtersWnd.items.items.forEach(function (element, index, array) {
+                                    element.setValue('');
+                                });
+                                localStorage.setItem("@filterName", []);
+                                loadStore();
+                            }
+                        },
+                        '-',
+                        indeterminateButton,
+                        admittedButton,
+                        deniedButton,
+                        '-',
+                        sendButton
+                    ]
+                },
+                {
+                    xtype: 'toolbar',
+                    dock: 'top',
+                    items: [
+                        {
+                            xtype: 'checkbox',
+                            boxLabel: 'Скрыть неактивных студентов',
+                            itemId: 'HideNotactiveStudentsFLAdmission',
+                            value: sessionStorage.getItem(hideStudentsStoreName) || false,
+                            listeners: {
+                                change: function (t, newValue, oldValue, eOpts) {
+                                    store.getProxy().setExtraParam('hideStudents', newValue);
+                                    sessionStorage.setItem(hideStudentsStoreName, newValue);
+                                    console.log('alert', newValue);
+                                    setFilters();
+                                }
+                            }
+                        },
+                    ]
+                }
+            ],
+            viewConfig: {
+                getRowClass: function(record) {
+                    return !record.get('Published')
+                        ? 'highlight'
+                        : '';
+                },
+                markDirty: false
+            },
+            columns: [
+                { xtype: 'rownumberer', width: 50 },
+                {
+                    header: 'Название группы',
+                    dataIndex: 'GroupName',
+                    width: 160,
+                    renderer: Ext.util.Format.htmlEncode
+                },
+                {
+                    header: 'Фамилия',
+                    dataIndex: 'Surname',
+                    width: 200,
+                    renderer: function(value, metaData, record) {
+                        return '<a href="/PersonalInfo/Student?studentId=' + record.data.Id + '">' + value + '</a>';
+                    }
+                },
+                {
+                    header: 'Имя',
+                    dataIndex: 'Name',
+                    width: 200,
+                    renderer: Urfu.renders.htmlEncode
+                },
+                {
+                    header: 'Отчество',
+                    dataIndex: 'PatronymicName',
+                    width: 200,
+                    renderer: Ext.util.Format.htmlEncode
+                },
+                {
+                    header: 'Статус',
+                    dataIndex: 'StudentStatus',
+                    width: 200,
+                    renderer: Ext.util.Format.htmlEncode
+                },
+                {
+                    header: 'Личный номер студента',
+                    dataIndex: 'PersonalNumber',
+                    width: 120,
+                    renderer: Ext.util.Format.htmlEncode
+                },
+                {
+                    header: 'Рейтинг',
+                    dataIndex: 'Rating',
+                    width: 90
+                },
+                {
+                    header: 'Баллы',
+                    dataIndex: 'ForeignLanguageRating',
+                    width: 120
+                },
+                {
+                    header: 'Уровень',
+                    dataIndex: 'ForeignLanguageLevel',
+                    width: 120,
+                    renderer: function (value, element, record) {
+                        if (record.data['ForeignLanguageLevel'] != null)
+                            return record.data['ForeignLanguageLevel'] + ' (' + Ext.util.Format.number(record.data['coefficient'], '0.00') +')' ;
+                    }
+                },
+                {
+                    header: 'Желаемый уровень',
+                    dataIndex: 'ForeignLanguageTargetLevel',
+                    width: 200
+                },
+                {
+                    header: 'Целевой',
+                    dataIndex: 'IsTarget',
+                    width: 100,
+                    align: 'center',
+                    renderer: function(val) { return val ? 'Да' : "Нет" }
+                },
+                {
+                    header: 'Иностранный студент',
+                    dataIndex: 'IsInternational',
+                    width: 200,
+                    align: 'center',
+                    renderer: function(val) { return val ? 'Да' : "Нет" }
+                },
+                {
+                    header: 'Вид возмещения затрат',
+                    align: 'center',
+                    dataIndex: 'Compensation',
+                    width: 210,
+                    renderer: Urfu.renders.htmlEncode
+                },
+                {
+                    header: 'Состояние',
+                    width: 150,
+                    dataIndex: 'Status',
+                    xtype: 'templatecolumn',
+                    tpl: new Ext.XTemplate(
+                        '<tpl for="." if="!!AnotherAdmission">',
+                        "Зачислен в {AnotherAdmission:htmlEncode}",
+                        '<tpl else>',
+                        '{[this.getAdmissionStatus(values.Status)]}',
+                        "</tpl>",
+                        {
+                            getAdmissionStatus: function(status) {
+                                return { 0: "Нет решения", 1: "Зачислен", 2: "Не зачислен" }[status];
+                            }
+                        }
+                    )
+                },
+                {
+                    header: 'Другой ИЯ',
+                    align: 'center',
+                    dataIndex: 'OtherAdmission',
+                    width: 210,
+                    renderer: Urfu.renders.htmlEncode
+                },
+                {
+                    header: 'Выбор ЛК',
+                    dataIndex: 'studentSelection',
+                    width: 210,
+                    renderer: Urfu.renders.htmlEncode
+                }
+            ]
+        });
+
+        var items = [
+            gridPanel
+        ];
+
+        Urfu.createViewport('border', items);
+    });
+    </script>
+}
+
+
+
+
+

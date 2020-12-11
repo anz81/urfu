@@ -1,0 +1,1 @@
+vdocs --command UpdateTemplate --documentType ModuleChangeList -t "..\..\..\..\Urfu.Its.VersionedDocs\Templates\ModuleChangeList.docx" -f %*

@@ -1,0 +1,31 @@
+{
+  "Annotation": "TestAnnotation",
+  "Info": {
+    "Name": "TestName"
+  },
+  "Authors": [
+    {
+      "Id": 1,
+      "Fio": "TestFio",
+      "Post": "TestPost",
+      "Degree": "TestDegree",
+      "TeacherId": "TestTeacherId",
+      "AuthorId": null      
+    },
+    {
+      "Id": 2,
+      "Fio": "TestFio2",
+      "Post": "TestPost2",
+      "Degree": "TestDegree2",
+      "TeacherId": null,
+      "AuthorId": 2      
+    }
+  ],   
+  "ArrayWithObjectHierarchy": [
+    {
+      "InnerObject": {
+        "Property": 1        
+      }      
+    }
+  ]
+}

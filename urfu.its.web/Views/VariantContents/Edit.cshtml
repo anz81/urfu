@@ -1,0 +1,120 @@
+﻿@using Urfu.Its.Web.DataContext
+@model Urfu.Its.Web.DataContext.VariantContent
+
+@{
+    ViewBag.Title = ViewBag.IsBase ? "Редактирование модуля в версии ОП": "Редактирование модуля в траектории";
+}
+
+<h2>@ViewBag.Title</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.Id)
+        @Html.HiddenFor(model => model.Selected)
+        @Html.HiddenFor(model => model.ModuleTypeId)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.moduleId, "Модуль", new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("moduleId", String.Empty)
+                @Html.ValidationMessageFor(model => model.moduleId)
+            </div>
+        </div>
+
+        <div class="form-group"> 
+            @Html.LabelFor(model => model.Selectable, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Selectable)
+                @Html.ValidationMessageFor(model => model.Selectable)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.RequirmentsIds, "Пререквизиты", new {@class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.ListBox("RequirmentsIds", null, new { size = 15, style = "max-width: 600px;" })
+                @*@Html.ListBoxFor(x => x.Requirments,
+          new MultiSelectList(Model.PrecursosrAvailable, "Id", "Module.title", Model.Requirments),
+                 new { Multiple = "multiple" })  *@
+                @Html.ValidationMessageFor(model => model.RequirmentsIds)
+            </div>
+        </div>
+
+
+
+        <div class="form-group">
+            @Html.Label("Эффективные пререквизиты")
+            <table class="table table-striped table-hover table-bordered table-condensed">
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Group.GroupType)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Module.number)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Module.title)
+                    </th>
+                    <th>Пререквизиты</th>
+                    <th></th>
+                </tr>
+                @foreach (VariantContent item in ViewBag.EffectiveRequirments)
+                {
+
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Group.GroupType)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Module.number)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Module.title)
+                        </td>
+                        <td>
+                            @string.Join("," + Environment.NewLine, item.Requirments.Select(r => r.Module.shortTitle))
+                        </td>
+                        <td>
+                            @Html.ActionLink("Редактировать", "Edit", new { id = item.Id })
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.VariantGroupId, "Группа", new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownList("VariantGroupId", String.Empty)
+                    @Html.ValidationMessageFor(model => model.VariantGroupId)
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Сохранить" class="btn btn-default" />
+                </div>
+            </div>
+        </div>
+}
+@*
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>*@
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        /*$('option').mousedown(function (e) {
+            e.preventDefault();
+            $(this).prop('selected', !$(this).prop('selected'));
+            return true;
+        });*/
+    </script>
+}

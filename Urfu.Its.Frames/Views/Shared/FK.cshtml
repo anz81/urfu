@@ -1,0 +1,328 @@
+﻿@using Urfu.Its.Web.DataContext
+@model Urfu.Its.Frames.Controllers.StudentPageVM
+@{
+    Layout = null;
+    var firstLine = Model.Semesters.OrderByDescending(r => r.Year).ThenBy(r => r.SemesterName).FirstOrDefault();
+    var currentYear = firstLine?.Year ?? 2016;
+    var currentSemester = firstLine?.SemesterName ?? "Осенний";
+    var curentCG = firstLine?.Id ?? 0;
+    var currentMinPriorities = firstLine?.MinimumPriorities ?? 10;
+    int globalCounter = 0;
+}
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет. Секции ФК</title>
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+          crossorigin="anonymous">
+  
+
+    <script>
+        globalparams = {};
+        function testWarning(competitionGroupId, minpriorities) {
+            var nonemptycount = 0;
+            var totalselectors = 0;
+            $(".cg" + competitionGroupId).each(function(i,s) {
+                totalselectors++;
+                if (s.value !== "")
+                    nonemptycount ++;
+            });
+
+            if (nonemptycount < minpriorities && totalselectors!==0) {
+                $("#numberWarning" + competitionGroupId).show();
+            } else {
+                $("#numberWarning" + competitionGroupId).hide();
+            }
+        }
+
+        function rebuildOptions(competitionGroupId, maxprioroty) {
+
+            if (!competitionGroupId)
+                return;
+
+            var used = $(".cg" + competitionGroupId).map(function(i, s) { return s.value; });
+            $(".cg" + competitionGroupId+" option:not(:selected)").remove();
+            for (var i = 1; i <= maxprioroty; i++) {
+                var priority = i.toString();
+                if (jQuery.inArray(priority, used) <0) {
+                    $(".cg" + competitionGroupId).append($("<option>&mdash;</option>")
+                        .attr("value",priority)
+                        .text(priority));
+                }
+            }
+
+            if(!(used[0] === ""))
+            $(".cg" + competitionGroupId+'[value!=""]').append($("<option value=''>&mdash;</option>"));
+        }
+
+        @*@{ string url = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, "/frm/fk/update"); }*@
+
+        @{
+                string url = string.Format("{0}://{1}", Request.Url.Scheme, Request.Url.Authority);
+                string updateURL = string.Format("{0}{1}", url, "/frm/fk/update");
+                
+        }
+
+        function priorityChanged(value, moduleId,competitionGroupId,selector,minpriorities, maxprioroty) {
+            $.get("@updateURL",
+                {
+                    priority: value,
+                    moduleId: moduleId,
+                    competitionGroupId: competitionGroupId,
+                    studentId: '@Model.StudentId'
+                })
+                .done(function () {
+
+                    // если выбрали ОФК, то надо обновить страницу, т.к. остальные приоритеты были сброшены
+                    if (moduleId == "pstcim18hc2jg0000li0lelganc4f93s") {
+                        location.reload();
+                    }
+
+                    $(".cg" + competitionGroupId).each(function(i,s) {
+                        if (s.id === selector.id || value === "")
+                            return;
+                        if (s.value === value) {
+                            s.value = "";
+                            s.dispatchEvent(new Event('change'));
+                        }
+                    });
+
+                    testWarning(competitionGroupId, minpriorities);
+                    rebuildOptions(competitionGroupId,maxprioroty);
+
+                    toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": false,
+                        "positionClass": "toast-top-center",
+                        "preventDuplicates": true,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "5000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    };
+                    toastr.success("Ваш выбор принят");
+                })
+                .fail(function(request,status) {
+                    try {
+                        alert(request.responseText||"Ошибка связи с сервером");
+                    } catch (e) {
+                        alert("Неизвестная ошибка");
+                    }
+                    location.reload();
+                });
+        };
+
+        @{ 
+            string infoURL = string.Format("{0}{1}",url,"/frm/fk/info");
+        }
+
+        function getInfo(competitionGroupId, moduleId, id) {
+            if ($("#infoSwitch" + id).html() === "+") {
+                $.get("@infoURL",
+                    {
+                        moduleId: moduleId,
+                        competitionGroupId: competitionGroupId,
+                        studentId: '@Model.StudentId'
+                    })
+                    .done(function(data) {
+                        $("#info" + id).html(data);
+                        $("#infoSwitch" + id).html("&mdash;");
+                    })
+                    .fail(function() {
+                        alert("error");
+                    });
+            } else {
+                $("#info" + id).html("");
+                $("#infoSwitch" + id).html("+");
+            }
+        };
+
+        function changeYear(year,semester) {
+            globalparams.currentYear = year;
+            globalparams.currentSemester = semester;
+            $(".semesterPane").hide();
+            $(".year" + year+"."+semester).show();
+        }
+    </script>
+</head>
+<body>
+
+    @if (Model.GroupHistoryNotFound)
+    {
+        <h2>Отсутствует академическая группа</h2>
+    }
+
+    @if (Model.IsEmpty && !Model.GroupHistoryNotFound)
+    {
+        <h2>Данная страница доступна только студентам</h2>
+    }
+
+    @if (!Model.IsEmpty && !Model.GroupHistoryNotFound)
+    {
+        <div>
+            <p>@Model.Name @Model.PatronymicName @Model.Surname</p>
+            <p> @Model.GroupName <a href="@Url.Content("~/Content/Инструкция по секциям ФК (для студентов).pdf")" style="display: inline-block;"><span class="pdfIcon"></span> Инструкция </a></p>
+        </div>
+        if (Model.IsSportsmen)
+        {
+            <div>
+                Выбор приоритетов не доступен для студентов с признаком "Спортсмен".
+            </div>
+        }
+        else
+        {
+            if (Model.Semesters.Count == 0)
+            {
+                <div>
+                    Выбор приоритетов будет доступен бакалаврам/специалистам 1,2,3 курса с @(Model.BeginDateStr == "" ? "..." : Model.BeginDateStr) по @(Model.EndDateStr== "" ? "..." : Model.EndDateStr)
+                </div>
+            }
+            else
+            {
+                <div>
+                    <p class="strong">
+                        Год
+                        <select onchange="changeYear(value,globalparams.currentSemester);" autocomplete="off">
+                            @foreach (var y in Model.Semesters.Select(s => s.Year).Distinct().OrderBy(s => s))
+                            {
+                            <option value="@y" @(y == currentYear ? "selected=\" selected\"" : "" )>@y</option>
+                            }
+                        </select>
+                        Семестр
+
+                        <select onchange="changeYear(globalparams.currentYear,value);" autocomplete="off">
+                            @foreach (var y in Model.Semesters.Select(s => s.SemesterName).Distinct().OrderBy(s => s))
+                            {
+                                <option @(y= =currentSemester ? "selected=\" selected\"" : "" )>@y</option>
+                            }
+                        </select>
+                    </p>
+                </div>
+
+                foreach (var semester in Model.Semesters)
+                {
+                    <div class="semesterPane @("year" + semester.Year) @(semester.SemesterName)" style="display: none;">
+                        @if (semester.SelectionDeadline.HasValue)
+                        {
+                            <p>Выбрать до @(semester.SelectionDeadline?.ToShortDateString())</p>
+                        }
+                        <div class="alert-danger" id="numberWarning@(semester.Id)" @Html.Raw(semester.Rows.Count(r => r.Priority.HasValue) < semester.MinimumPriorities ? "" : "style=\"display: none;\"")>
+                            Необходимо установить минимум @semester.MinimumPriorities @semester.PriorityWording (исключая ОФК)
+                        </div>
+
+                        <div class="alert-danger" @Html.Raw("")>
+                            При наличии хронических заболеваний необходимо выбирать только секцию <b>"Оздоровительная физическая культура"</b>
+                        </div>
+
+                        @if (Model.IsAdmittedOFK)
+                        {
+                            <div class="alert-danger" @Html.Raw("")>
+                                Переход из секции/в секцию <b>"Оздоровительная физическая культура"</b> осуществляется при наличии справки от спорт.врача МСЧ УрФУ  и заявления, заверенного преподавателем, за которым закреплён студент. Возможность перевода через Личный кабинет отсутствует.
+                            </div>
+                        }
+
+                        <table class="table table-striped table-hover table-bordered table-condensed">
+                            <tr>
+                                <th style="width: 30%;">
+                                    Секции ФК
+                                </th>
+                                <th style="width: 20%;" title="Количество мест" class="centered">
+                                    <span class="glyphicon glyphicon-user" aria-hidden="true" title="Количество мест" data-toggle="tooltip" data-placement="bottom" style="font-size: larger;"><br><small>Места</small></span>
+                                </th>
+                                <th style="width: 23%;" title="Приоритет" class="centered">
+                                    <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true" title="Приоритет" data-toggle="tooltip" data-placement="bottom" style="font-size: larger;"></span>
+                                </th>
+                                <th style="width: 23%">
+                                    Статус
+                                </th>
+                            </tr>
+                            @{
+                                var usedPriorities = new HashSet<int?>(semester.Rows.Select(r => r.Priority));
+                            }
+                            @foreach (var row in semester.Rows)
+                            {
+                                <tr>
+                                    <td onclick="getInfo(@semester.Id,'@row.ModuleId',@(globalCounter));">
+                                        <a class="strong" id="infoSwitch@(globalCounter)">+</a>
+                                        @row.ShortTitle
+                                    </td>
+                                    <td class="centered">
+                                        @row.PlacesAvailable
+                                    </td>
+                                    <td class="centered">
+                                        @if (row.Editable && !row.WithoutPriorities && (row.PlacesAvailable > 0 || row.Priority.HasValue))
+                                        {
+                                            <select onchange="priorityChanged(value, '@row.ModuleId', @semester.Id, this, @semester.MinimumPriorities, @semester.MaxPrioroty);" class="cg@(semester.Id)" id="@(globalCounter)" autocomplete="off">
+                                                <option value='' @(!row.Priority.HasValue ? "selected=\" selected\"" : "" )>&mdash;</option>
+                                                @for (int i = 1; i <= semester.MaxPrioroty; i++)
+                                                {
+                                                    if (!usedPriorities.Contains(i) || i == row.Priority)
+                                                    {
+                                                        <option @(i= =row.Priority ? "selected=\" selected\"" : "" )>@i</option>
+                                                    }
+                                                }
+                                            </select>
+                                        }
+                                        else
+                                        {
+                                            <div>@row.Priority</div>
+                                        }
+                                    </td>
+                                    <td class="centered">
+                                        @switch (row.Status)
+                                        {
+                                            case AdmissionStatus.Admitted:
+                                                <span class="glyphicon glyphicon-ok" aria-hidden="true" title="Зачислен" data-toggle="tooltip" data-placement="bottom" style="color: green;"></span>
+                                                break;
+                                            case AdmissionStatus.Denied:
+                                                <span class="glyphicon glyphicon-minus" aria-hidden="true" title="Не зачислен" data-toggle="tooltip" data-placement="bottom" style="color: red;"></span>
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4"><div id="info@(globalCounter++)" /></td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+
+                }
+            }
+
+        }
+
+    }
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous">
+
+    globalparams.currentYear = @(currentYear);
+    globalparams.currentSemester = '@(currentSemester)';
+    globalparams.curentCG = '@(curentCG)';
+    globalparams.currentMinPriorities = '@(currentMinPriorities)';
+    $(document).ready(function () {
+    changeYear(globalparams.currentYear, globalparams.currentSemester  );
+    testWarning(globalparams.curentCG, globalparams.currentMinPriorities);
+    $(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+    });
+    });
+    //Привет, студент! Круто, что ты это читаешь.
+    </script>
+</body>
+</html>

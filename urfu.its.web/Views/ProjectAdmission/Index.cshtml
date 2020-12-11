@@ -1,0 +1,268 @@
+﻿@model Urfu.Its.Web.DataContext.ProjectCompetitionGroup
+@{
+    ViewBag.Title = "Зачисление на Проектную группу " + Model.ToString();
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+    var filterName = "ProjectCompetitionGroupsForAdmissionsFilters";
+}
+@section scripts
+{
+    <script type="text/javascript">
+
+        Ext.onReady(function () {
+            Ext.tip.QuickTipManager.init();
+
+            Ext.define('ComboBoxModel', {
+                extend: 'Ext.data.Model',
+                fields:
+                [
+                    { type: 'string', name: 'Id' },
+                    { type: 'string', name: 'Name' }
+                ]
+            });
+
+            var store = Ext.create("Ext.data.BufferedStore",
+            {
+                fields: ["Id", "number", "title","type", "testUnits", "limit", "selection", "addmission"],
+                autoLoad: true,
+                pageSize: 25,
+                remoteSort: true,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '@Url.Action("Index",new {competitionGroupId = Model.Id})',
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    }
+                }
+            });
+
+
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("@filterName") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+
+            }
+
+            var filtersWnd = null;
+            var setFilters = function () {
+                var settings = [
+                    { property: 'title', value: filtersWnd.getComponent("title").getValue() },
+                    { property: 'number', value: filtersWnd.getComponent("number").getValue() },
+                ];
+                store.setFilters(settings);
+                localStorage.setItem("@filterName", JSON.stringify(settings));
+            };
+
+            filtersWnd = Ext.create('Ext.window.Window', {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "Название проекта", itemId: "title", value: prevSettings["title"] },
+                    { fieldLabel: "Номер", itemId: "number", value: prevSettings["number"] },
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function () {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+            setFilters();
+            var sendButton;
+
+            var tpl = '<a href="/ProjectAdmission/CompetitionGroupStudents/{Id}">Студенты</a>';
+            @if (ViewBag.IsInMassPublishRole) {
+                <text>
+                   var publishAdmWnd = Ext.create('Ext.window.Window', {
+                       title: "Отправить зачисления в ЛК",
+                       closeAction: 'hide',
+                       resizable: false,
+                       autoHeight: true,
+                       bodyPadding: 6,
+                       items: [
+                           { xtype:"box", html: "Отправить все результаты зачислений в ЛК студента?" },
+
+                       ],
+                       buttons: [
+                           {
+                               text: "OK",
+                               handler: function () {
+                                   Ext.MessageBox.show({
+                                       msg: 'Отправка сообщений, пожалуйста подождите...',
+                                       progressText: 'Отправка...',
+                                       width: 300,
+                                       wait: true,
+                                       waitConfig: { interval: 200 }
+                                   });
+
+                                   Ext.Ajax.request({
+                                       url: '@Url.Action("PublishCompetitionGroupAdmissions",new {competitionGroupId = Model.Id})' ,
+                                       params: { },
+                                       success: function (response) {
+                                           if (response.status === 200) {
+                                               Ext.toast({ html: "Сообщения отправлены", align: 't' });
+                                           } else {
+                                               Ext.toast({ html: "Сообщения не отправлены", align: 't' });
+                                           }
+                                           Ext.MessageBox.hide();
+                                       },
+                                       failure: function(response) {
+                                           Ext.MessageBox.hide();
+                                           Ext.toast({ html: "Ошибка. Повторите попытку позже", align: 't' });
+                                       }
+
+                                   });
+
+
+
+                                   publishAdmWnd.hide();
+                               }
+                           },
+                           {
+                               text: "Отмена",
+                               handler: function () { publishAdmWnd.hide(); }
+                           }
+                       ]
+                   });
+
+
+                sendButton = Ext.create('Ext.Button',
+                {
+                    xtype: 'button',
+                    //disabled: true,
+                    text: 'Отправить зачисления в ЛК',
+                    handler: function() {
+                        publishAdmWnd.show();
+                    }
+                });
+                </text>
+            }
+
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+            {
+                region: 'center',
+                store: store,
+                tbar: [
+                    {
+                        xtype: 'button',
+                        text: 'Фильтры...',
+                        handler: function () { filtersWnd.show(); }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Отменить фильтры",
+                        handler: function() {
+                            localStorage.setItem("@filterName", []);
+                            store.clearFilter();
+                        }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Перейти к автоматическому зачислению",
+                        disabled: '@ViewBag.CanAutoAdmit' == 'False',
+                        handler: function () {
+                            window.location = "/ProjectAdmission/PrepareAuto?competitionGroupId=@Model.Id";
+                        }
+                    },
+                    '-',
+                    sendButton
+
+
+                ],
+                loadMask: true,
+                columns: [
+                    { xtype: 'rownumberer', width: 50 },
+                    {
+                        header: 'Уровень',
+                        dataIndex: 'Level',
+                        width: 110,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Название проекта',
+                        dataIndex: 'title',
+                        width: 300,
+                        cellWrap: true,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Зачетные единицы',
+                        align: 'right',
+                        dataIndex: 'testUnits',
+                        width: 120,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Лимит',
+                        align: 'right',
+                        dataIndex: 'limit',
+                        width: 150,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Кол-во заявлений',
+                        align: 'right',
+                        dataIndex: 'selection',
+                        width: 150,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Зачислено всего',
+                        align: 'right',
+                        dataIndex: 'addmission',
+                        width: 130,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Свободно мест',
+                        align: 'right',
+                        dataIndex: 'vacancy',
+                        width: 130,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+
+                    {
+                        xtype: 'templatecolumn',
+                        sortable: false,
+                        tpl: tpl,
+                        width: 420
+                    }
+
+                ]
+            });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+    </script>
+}
+
+
+
+

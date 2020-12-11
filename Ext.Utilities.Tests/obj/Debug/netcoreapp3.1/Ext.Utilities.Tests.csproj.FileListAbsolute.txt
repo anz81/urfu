@@ -1,0 +1,12 @@
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities.Tests\obj\Debug\netcoreapp3.1\Ext.Utilities.Tests.csprojAssemblyReference.cache
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities.Tests\obj\Debug\netcoreapp3.1\Ext.Utilities.Tests.AssemblyInfoInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities.Tests\obj\Debug\netcoreapp3.1\Ext.Utilities.Tests.AssemblyInfo.cs
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities.Tests\obj\Debug\netcoreapp3.1\Ext.Utilities.Tests.csproj.CoreCompileInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities.Tests\bin\Debug\netcoreapp3.1\Ext.Utilities.dll
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities.Tests\bin\Debug\netcoreapp3.1\Ext.Utilities.Tests.deps.json
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities.Tests\bin\Debug\netcoreapp3.1\Ext.Utilities.Tests.dll
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities.Tests\bin\Debug\netcoreapp3.1\Ext.Utilities.pdb
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities.Tests\obj\Debug\netcoreapp3.1\Ext.Utilities.Tests.csproj.CopyComplete
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities.Tests\bin\Debug\netcoreapp3.1\Ext.Utilities.Tests.pdb
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities.Tests\obj\Debug\netcoreapp3.1\Ext.Utilities.Tests.dll
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities.Tests\obj\Debug\netcoreapp3.1\Ext.Utilities.Tests.pdb

@@ -1,0 +1,9 @@
+D:\-urfu\its\Urfu.Its.Web\TemplateEngine\obj\Debug\netcoreapp3.1\TemplateEngine.AssemblyInfoInputs.cache
+D:\-urfu\its\Urfu.Its.Web\TemplateEngine\obj\Debug\netcoreapp3.1\TemplateEngine.AssemblyInfo.cs
+D:\-urfu\its\Urfu.Its.Web\TemplateEngine\obj\Debug\netcoreapp3.1\TemplateEngine.csproj.CoreCompileInputs.cache
+D:\-urfu\its\Urfu.Its.Web\TemplateEngine\obj\Debug\netcoreapp3.1\TemplateEngine.csprojAssemblyReference.cache
+D:\-urfu\its\Urfu.Its.Web\TemplateEngine\bin\Debug\netcoreapp3.1\TemplateEngine.deps.json
+D:\-urfu\its\Urfu.Its.Web\TemplateEngine\bin\Debug\netcoreapp3.1\TemplateEngine.dll
+D:\-urfu\its\Urfu.Its.Web\TemplateEngine\bin\Debug\netcoreapp3.1\TemplateEngine.pdb
+D:\-urfu\its\Urfu.Its.Web\TemplateEngine\obj\Debug\netcoreapp3.1\TemplateEngine.dll
+D:\-urfu\its\Urfu.Its.Web\TemplateEngine\obj\Debug\netcoreapp3.1\TemplateEngine.pdb

@@ -1,0 +1,60 @@
+﻿@model Urfu.Its.Web.DataContext.Minor
+
+@{
+    ViewBag.Title = "Пререквизиты для майнора";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<h3>Майнор: @Model.Module.title</h3>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true)
+
+        @Html.HiddenFor(model => model.ModuleId)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Requirments, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+            @if (ViewBag.CanEdit)
+            {
+                @Html.DropDownListFor(model => model.RequirmentId, (IEnumerable<SelectListItem>)ViewBag.MinorSelector, htmlAttributes: new { @class = "control-label", @width = "500px" })
+                @Html.ValidationMessageFor(model => model.RequirmentId)
+            }
+            else
+            {
+                @Html.DisplayFor(model => model.Requirment);
+            }
+                
+            </div>
+        </div>
+
+        <div class="form-group">
+
+            @Html.LabelFor(model => model.Module.RequiredFor, new { @class = "control-label col-md-2" })
+
+            @foreach (var r in Model.Module.RequiredFor)
+            {
+                @Html.DisplayFor(model => r.Module.title, new { @class = "control-label col-md-2" })
+            }
+        </div>
+
+        @if (ViewBag.CanEdit)
+        {
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Сохранить" class="btn btn-default" />
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Вернуться к списку", "Index")
+</div>

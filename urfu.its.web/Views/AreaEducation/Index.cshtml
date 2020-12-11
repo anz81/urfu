@@ -1,0 +1,451 @@
+﻿@{
+    ViewBag.Title = "Справочник Области образования";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+@section scripts
+{
+    <script type="text/javascript">
+
+        Ext.onReady(function () {
+            Ext.tip.QuickTipManager.init();
+
+            function parseJson(json) {
+                var data = JSON.parse(json.replace(/&quot;/g, '"'));
+                return data;
+            }
+
+            var dataQualifications = parseJson('@ViewBag.Qualifications');
+            var qualificationsStore = Ext.create("Ext.data.Store",
+            {
+                data: dataQualifications
+            });
+
+            var store = Ext.create("Ext.data.Store",
+                {
+                    autoLoad: true,
+                    remoteSort: true,
+                    remoteFilter: true,
+                    pageSize: 300,
+                    proxy: {
+                        type: 'ajax',
+                        url: window.location.pathname,
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        }
+                    },
+                    listeners: {
+                        load: function (t, records, successful, operation, eOpts) {
+
+                            var _records = records;
+                            _records.forEach(function (item, index, array) {
+                                item.data.Orders.forEach(function (item2, index2, array2) {
+                                    if (item2.Date != '') {
+                                        var dateArr = item2.Date.split('.');
+                                        var correctDate = dateArr[1] + '/' + dateArr[0] + '/' + dateArr[2];
+                                        records[index].data.Orders[index2].Date = correctDate;
+                                    }
+                                });
+                            });
+                        }
+                    }
+                });
+            
+            function createEditWindow(id, record) {
+                return Ext.create('Ext.window.Window',
+                    {
+                        title: "Область образования",
+                        closeAction: 'hide',
+                        resizable: false,
+                        x: 100,
+                        y: 100,
+                        autoHeight: true,
+                        width: 450,
+                        modal: true,
+                        bodyPadding: 6,
+                        rowHeight: 100,
+                        viewModel: {
+                            data: Ext.apply({}, record ? record.data : {})
+                        },
+                        items: {
+                            xtype: 'form',
+                            items: [
+                                {
+                                    xtype: 'textfield',
+                                    name: 'Code',
+                                    fieldLabel: 'Код',
+                                    bind: '{Code}',
+                                    allowBlank: false,
+                                    editable: true,
+                                    width: 400
+                                },
+                                {
+                                    xtype: 'textarea',
+                                    name: 'Title',
+                                    fieldLabel: 'Название',
+                                    bind: '{Title}',
+                                    allowBlank: false,
+                                    editable: true,
+                                    width: 400
+                                }
+                            ],
+                            buttons: [
+                            {
+                                text: "Сохранить",
+                                hidden: '@ViewBag.CanEdit' == 'False',
+                                handler: function () {
+                                    var window = this.up('window');
+                                    var form = window.down('form');
+                                    
+                                    var isValid = true;
+                                    form.items.items.forEach(function (element, index, array) {
+                                        if (!element.isValid()) isValid = false;
+                                    });
+                                    if (!isValid) {
+                                        return;
+                                    }
+                                  
+                                    Ext.Ajax.request({
+                                        url: '@Url.Action("Update")',
+                                        params: {
+                                            id: id,
+                                            code: form.items.items.find(p => p.name == "Code").getValue(),
+                                            title: form.items.items.find(p => p.name == "Title").getValue(),
+                                        },
+                                        success: function (response) {
+                                            if (response.responseText != "") {
+                                                var data = Ext.decode(response.responseText);
+                                                if (data.success) {
+                                                    Ext.MessageBox.show({
+                                                        title: 'Уведомление',
+                                                        msg: data.message,
+                                                        buttons: Ext.MessageBox.OK
+                                                    });
+                                                    window.close();
+                                                    store.reload();
+                                                }
+                                                else {
+                                                    Ext.MessageBox.show({
+                                                        title: 'Ошибка',
+                                                        msg: data.message,
+                                                        buttons: Ext.MessageBox.OK
+                                                    });
+                                                }
+                                            }
+                                        },
+                                        failure: function (response) {
+                                            Ext.MessageBox.show({
+                                                title: 'Информационное сообщение',
+                                                msg: 'Ошибка',
+                                                buttons: Ext.MessageBox.OK
+                                            });
+                                        }
+                                    });
+                                }
+                            },
+                            {
+                                text: "Отмена",
+                                hidden: '@ViewBag.CanEdit' == 'False',
+                                handler: function () {
+                                    var window = this.up('window');
+                                    window.close();
+                                }
+                            }
+                        ]
+                        }
+                    })
+            };
+
+            function createAddOrderWindow(id, record) {
+                return Ext.create('Ext.window.Window',
+                    {
+                        title: "Приказы",
+                        closeAction: 'hide',
+                        overflowY: 'auto',
+                        resizable: true,
+                        x: 100,
+                        y: 100,
+                        autoHeight: true,
+                        width: 800,
+                        modal: true,
+                        bodyPadding: 6,
+                        rowHeight: 100,
+                        viewModel: {
+                            data: Ext.apply({}, record ? record.data : {}),
+                            stores: {
+                                ordersStore: {
+                                    data: record.data.Orders
+                                },
+                            }
+                        },
+                        items: {
+                            xtype: 'form',
+                            items: [
+                                {
+                                    xtype: 'button',
+                                    text: 'Добавить',
+                                    hidden: '@ViewBag.CanEdit' == 'False',
+                                    handler: function () {
+                                        var ordersStore2 = this.lookupViewModel().getStore('ordersStore');
+                                        ordersStore2.add({ OrderId: '-1', Number: '', Date: '' });
+                                    }
+                                },
+                                Ext.create('Ext.grid.Panel', {
+                                    name: 'orderTable',
+                                    region: 'center',
+                                    bind: {
+                                        store: '{ordersStore}'
+                                    },
+                                    loadMask: true,
+                                    width: 800,
+                                    columnLines: true,
+                                    margin: '10 0 0 0',
+                                    plugins: [{
+                                        ptype: 'cellediting',
+                                        clicksToEdit: 1
+                                    }],
+                                    columns: [
+                                        {
+                                            header: 'Номер приказа',
+                                            dataIndex: 'Number',
+                                            width: 200,
+                                            cellWrap: true,
+                                            editor: {
+                                                xtype: 'textfield'
+                                            },
+                                        },
+                                        {
+                                            xtype: 'datecolumn',
+                                            dataIndex: 'Date',
+                                            header: 'Дата',
+                                            sortable: false,
+                                            width: 160,
+                                            format: 'd/m/Y',
+                                            editor: {
+                                                xtype: 'datefield',
+                                                startDay: 1,
+                                                format: 'd/m/Y'
+                                            }
+                                        },
+                                        {
+                                            dataIndex: 'Qualification',
+                                            header: 'Уровень обучения',
+                                            sortable: false,
+                                            width: 250,
+                                            editor: {
+                                                xtype: 'combobox',
+                                                editable: false,
+                                                store: qualificationsStore,
+                                                allowBlank: false,
+                                                valueField: 'Name',
+                                                displayField: 'Name',
+                                                listeners: {
+                                                    'select': function (combo, records, eOpts) {
+                                                        combo.value = records.data.Name;
+                                                    },
+                                                }
+                                            },
+                                        },
+                                        {
+                                            xtype: 'actioncolumn',
+                                            resizable: false,
+                                            sortable: false,
+                                            hidden: '@ViewBag.CanEdit' == 'False',
+                                            width: 50,
+                                            items: [
+                                                {
+                                                    icon: '@Url.Content("/Content/Images/remove.png")',
+                                                    iconCls: 'icon-padding',
+                                                    tooltip: 'Удалить',
+
+                                                    handler: function (grid, rowIndex, colIndex, item, e, record) {
+                                                        var ordersStore2 = this.lookupViewModel().getStore('ordersStore');
+                                                        ordersStore2.remove(record);
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                })
+                            ]
+                        },
+                        buttons: [
+                            {
+                                text: "Сохранить",
+                                hidden: '@ViewBag.CanEdit' == 'False',
+                                handler: function () {
+                                    var window = this.up('window');
+                                                
+                                    var orders = this.lookupViewModel().getStore('ordersStore').data.items.filter(o => o.data.Number.trim() != '').map(function (elem) {
+                                        var correctDate = elem.data.Date;
+                                        if (correctDate != '') {
+                                            try { // ранее введенные даты имеют тип строки 
+                                                var dateArr = correctDate.split('/');
+                                                var correctDate = dateArr[1] + '/' + dateArr[0] + '/' + dateArr[2];
+                                            }
+                                            catch{}
+                                        }
+
+                                        return {
+                                            Id: elem.data.OrderId,
+                                            Date: correctDate,
+                                            Number: elem.data.Number,
+                                            AreaEducationId: id,
+                                            QualificationName: elem.data.Qualification
+                                        };
+                                    });
+                                    
+                                    Ext.Ajax.request({
+                                        url: '@Url.Action("UpdateOrders")/' + id,
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        params: Ext.JSON.encode(orders),
+                                        success: function (response) {
+                                            store.reload();
+                                            window.close();
+                                        },
+                                        failure: function (response) {
+                                            Ext.MessageBox.show({
+                                                title: 'Информационное сообщение',
+                                                msg: 'Ошибка',
+                                                buttons: Ext.MessageBox.OK
+                                            });
+                                        }
+                                    });
+                                }
+                            },
+                            {
+                                text: "Отмена",
+                                hidden: '@ViewBag.CanEdit' == 'False',
+                                handler: function () {
+                                    var window = this.up('window');
+
+                                    Ext.MessageBox.show({
+                                        title: 'Уведомление',
+                                        msg: "Изменения не сохранены. Выйти?",
+                                        buttons: Ext.MessageBox.YESNO,
+                                        fn: function (btn) {
+                                            if (btn === 'yes') {
+                                                window.close();
+                                            }
+                                        },
+                                        icon: Ext.MessageBox.QUESTION
+                                    });
+                                }
+                            }
+                        ]
+                    })
+            };
+            
+            var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: store,
+                    loadMask: true,
+                    columnLines: true,
+                    tbar: [
+                        {
+                            xtype: 'button',
+                            text: 'Добавить',
+                            hidden: '@ViewBag.CanEdit' == 'False',
+                            handler: function () { createEditWindow('-1', {}).show(); }
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        {
+                            header: 'Код',
+                            dataIndex: 'Code',
+                            width: 100,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Название',
+                            dataIndex: 'Title',
+                            width: 300,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Приказы',
+                            dataIndex: 'OrdersStr',
+                            width: 400,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            xtype: 'actioncolumn',
+                            resizable: false,
+                            sortable: false,
+                            hidden: '@ViewBag.CanEdit' == 'False',
+                            width: 100,
+                            items: [
+                                {
+                                    icon: '@Url.Content("/Content/Images/edit.png")',
+                                    iconCls: 'icon-padding',
+                                    tooltip: 'Редактировать',
+                                    handler: function (grid, rowIndex, colIndex, item, e, record) {
+                                        var rec = grid.getStore().getAt(rowIndex);
+                                        createEditWindow(rec.get('Id'), rec).show();
+                                    }
+                                },
+                                {
+                                    icon: '@Url.Content("/Content/Images/document-add2.png")',
+                                    iconCls: 'icon-padding',
+                                    tooltip: 'Добавить приказ',
+                                    handler: function (grid, rowIndex, colIndex, item, e, record) {
+                                        var rec = grid.getStore().getAt(rowIndex);
+                                        createAddOrderWindow(rec.get('Id'), rec).show();
+                                    }
+                                },
+                                {
+                                    icon: '@Url.Content("/Content/Images/remove.png")',
+                                    iconCls: 'icon-padding',
+                                    tooltip: 'Удалить',
+
+                                    handler: function (grid, rowIndex, colIndex, item, e, record) {
+
+                                        Ext.MessageBox.show({
+                                            title: 'Уведомление',
+                                            msg: "Удалить запись?",
+                                            buttons: Ext.MessageBox.YESNO,
+                                            fn: function (btn) {
+                                                if (btn === 'yes') {
+                                                    Ext.Ajax.request({
+                                                        method: 'GET',
+                                                        url: '@Url.Action("Remove")',
+                                                        success: function(response) {
+                                                            Ext.MessageBox.show({
+                                                                title: 'Информационное сообщение',
+                                                                msg: 'Запись удалена успешно',
+                                                                buttons: Ext.MessageBox.OK
+                                                            });
+                                                            store.reload();
+                                                        },
+                                                        failure: function(d) {
+                                                            Ext.MessageBox.show({
+                                                                title: 'Ошибка',
+                                                                msg: 'Удаление невозможно. Существуют направления в этой области образования',
+                                                                buttons: Ext.MessageBox.OK
+                                                            });
+                                                        },
+                                                        params: { id: record.get('Id') }
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+
+        });
+    </script>
+}

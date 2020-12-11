@@ -1,0 +1,236 @@
+﻿@{
+    ViewBag.Title = "Справочник Категории (группы) компетенций";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+<style>
+    .no-padding .x-grid-cell-inner {
+        padding: 0
+    }
+
+    .x-form-item-default.x-item-disabled {
+        filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+        opacity: 1;
+    }
+
+    .x-item-disabled,
+    .x-item-disabled * {
+        cursor: default;
+        pointer-events: none;
+        color: rgb(90,90,97)
+    }
+</style>
+
+@section scripts
+{
+    <script type="text/javascript">
+    
+    Ext.onReady(function() {
+
+        Ext.tip.QuickTipManager.init();
+
+        Ext.define('ComboBoxModel',
+        {
+            extend: 'Ext.data.Model',
+            fields:
+            [
+                { type: 'string', name: 'Id' },
+                { type: 'string', name: 'Name' }
+            ]
+        });
+
+        var store = Ext.create("Ext.data.Store",
+        {
+            autoLoad: true,
+            remoteSort: true,
+            remoteFilter: true,
+
+            proxy: {
+                type: 'ajax',
+                url: window.location.pathname,
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    totalProperty: 'total'
+                }
+            }
+            });
+     
+        var gridPanel = Ext.create('Ext.grid.Panel',
+        {
+            multiSelect: true,
+            region: 'center',
+            store: store,
+            loadMask: true,
+            columnLines: true,
+            tbar: [
+                {
+                    xtype: 'button',
+                    text: 'Добавить',
+                    hidden: '@ViewBag.CanEdit' == 'False',
+                    handler: function() { createRecordWindow(store).show(); }
+                }
+            ],
+            columns: [
+                { xtype: 'rownumberer', width: 50 },
+                {
+                    header: 'Название группы компетенций',
+                    dataIndex: 'Name',
+                    width: 600,
+                    cellWrap: true,
+                    renderer: Urfu.renders.htmlEncode
+                },
+                {
+                    xtype: 'actioncolumn',
+                    resizable: false,
+                    sortable: false,
+                    hidden: '@ViewBag.CanEdit' == 'False',
+                    width: 80,
+                    items: [
+                        {
+                            icon: '@Url.Content("/Content/Images/edit.png")',
+                            tooltip: 'Редактировать',
+                            iconCls: 'icon-padding',
+                            handler: function(grid, rowIndex, colIndex,item,e,record) {
+                                createRecordWindow(store, record).show();
+                            }
+                        }, {
+                            icon: '@Url.Content("/Content/Images/remove.png")',
+                            tooltip: 'Удалить',
+                            iconCls: 'icon-padding',
+                            handler: function(grid, rowIndex, colIndex, item, e, record) {
+                                
+                                if (confirm('Вы действительно желаете удалить запись?')) {
+                                    Ext.Ajax.request({
+                                        method: 'GET',
+                                        url: '@Url.Action("Delete")',
+                                        success: function(response) {
+                                            store.load();
+                                        },
+                                        failure: function(d) {
+                                            if (d.error)
+                                                alert(d.error);
+                                            console.error(d);
+                                        },
+                                        params: { id: record.get('Id') }
+                                    });
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+        d = null;
+        var items = [
+            gridPanel
+        ];
+      
+        Urfu.createViewport('border', items);
+
+        function createRecordWindow(store, record) {
+            return Ext.create('Ext.window.Window',
+            {
+                title: record ? 'Редактирование категории компетенций' : 'Добавление категории компетенций',
+                resizable: false,
+                autoHeight: true,
+                width: 525,
+                bodyPadding: 6,
+                x: 100,
+                y: 100,
+                modal: true,
+                name: 'editForm',
+                viewModel: {
+                    data: Ext.apply({}, record ? record.data : {})
+                },
+                items: {
+                    xtype: 'form',
+                    id: 'form',
+                    layout: {
+                        type: 'vbox',
+                        //align: 'stretch'
+                    },
+                    defaults: {
+                        xtype: 'textfield',
+                        labelWidth: 160,
+                        autoWidth: true,
+                        width: 500
+                    },
+                    items: [
+                        {
+                            fieldLabel: 'Идентификатор',
+                            name: 'Id',
+                            bind: '{Id}',
+                            readOnly: true,
+                            hidden: true,
+                        },
+                        {
+                            xtype: 'textarea',
+                            fieldLabel: 'Наименование',
+                            maxLength: 400,
+                            name: 'Name',
+                            bind: '{Name}',
+                            allowBlank: false,
+                            editable: true
+                        }
+                    ]
+                },
+
+                buttons: [
+                    {
+                        text: "OK",
+                        formBind: true,
+                        handler: function() {
+                            var window = this.up('window');
+                            var form = window.down('form');
+                            var data = form.getValues();
+                            if (record)
+                                data.Id = record.get('Id');
+                            if (record || form.isValid()) {
+                                Ext.Ajax.request({
+                                    url: record ? '@Url.Action("Edit")' : '@Url.Action("Create")',
+                                    success: function(response) {
+                                        var d = Ext.JSON.decode(response.responseText);
+                                        if (!d.success) {
+                                            if (d.errors) {
+                                                var basicForm = form.getForm();
+                                                for (var key in d.errors) {
+                                                    if (d.errors.hasOwnProperty(key)) {
+                                                        var field = basicForm.findField(key);
+                                                        if (field)
+                                                            field.markInvalid(d.errors[key]);
+                                                    }
+                                                }
+                                            }
+                                            if (d.error) {
+                                                Ext.MessageBox.show({
+                                                    title: 'Ошибка',
+                                                    msg: d.error,
+                                                    buttons: Ext.MessageBox.OK
+                                                });
+                                            }
+                                        } else {
+                                            window.close();
+                                            store.load();
+                                        }
+                                    },
+                                    failure: function(d) {
+                                        if (d.error)
+                                            alert(d.error);
+                                        console.error(d);
+                                    },
+                                    jsonData: data
+                                });
+                            }
+                        }
+                    }, {
+                        text: "Отмена",
+                        handler: function() { this.up('window').close(); }
+                    }
+                ]
+            });
+        }
+
+        });
+    </script>
+}

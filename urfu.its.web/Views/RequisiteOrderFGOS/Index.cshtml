@@ -1,0 +1,349 @@
+﻿@{
+    ViewBag.Title = "Справочник Реквизиты приказа";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.define('RequisiteOrder',
+            {
+                extend: 'Ext.data.Model',
+                fields: [
+                    { name: 'id', type: 'int' },
+                    { name: 'directionId', type: 'string' },
+                    { name: 'directionOkso', type: 'string' },
+                    { name: 'directionName', type: 'string' },
+                    { name: 'date', type: 'string' },
+                    { name: 'order', type: 'string' }
+                ]
+            });
+
+        Ext.onReady(function() {
+            Ext.tip.QuickTipManager.init();
+
+            var store = Ext.create("Ext.data.Store",
+                {
+                    model: 'RequisiteOrder',
+                    autoLoad: true,
+                    //pageSize: 300,
+                    remoteSort: true,
+                    remoteFilter: true,
+
+                    proxy: {
+                        type: 'ajax',
+                        url: window.location.pathname,
+                        reader: {
+                            type: 'json'
+                        }
+                    }
+                });
+            var prevSettings = {};
+
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("RequisiteOrderFGOSFilters") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+
+            }
+
+            var filtersWnd = null;
+
+            var setFilters = function() {
+                var settings = [
+                    { property: 'directionOkso', value: filtersWnd.getComponent("directionOkso").getValue() },
+                    { property: 'directionName', value: filtersWnd.getComponent("directionName").getValue() },
+                ];
+
+                localStorage.setItem("RequisiteOrderFGOSFilters", JSON.stringify(settings));
+                store.setFilters(settings);
+                store.load();
+
+            };
+
+
+            filtersWnd = Ext.create('Ext.window.Window',
+                {
+                    title: "Фильтры",
+                    closeAction: 'hide',
+                    resizable: false,
+                    autoHeight: true,
+                    bodyPadding: 6,
+                    defaults: {
+                        xtype: 'textfield',
+                        width: 500
+                    },
+                    items: [
+                        {
+                            fieldLabel: "ОКСО направления",
+                            itemId: "directionOkso",
+                            value: prevSettings["directionOkso"]
+                        },
+                        {
+                            fieldLabel: "Название направления",
+                            itemId: "directionName",
+                            value: prevSettings["directionName"]
+                        },
+                    ],
+                    buttons: [
+                        {
+                            text: "OK",
+                            handler: function() {
+                                setFilters();
+                                filtersWnd.hide();
+                            }
+                        },
+                        {
+                            text: "Отмена",
+                            handler: function() { filtersWnd.hide(); }
+                        }
+                    ]
+                });
+
+            setFilters();
+
+            var gridPanel = null;
+
+            gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    multiSelect: true,
+                    region: 'center',
+                    store: store,
+                    loadMask: true,
+                    columnLines: true,
+                    tbar: [
+                        {
+                            xtype: 'button',
+                            text: 'Добавить',
+                            handler: function() { createRecordWindow(store).show(); }
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Фильтры...',
+                            handler: function() { filtersWnd.show(); }
+                        },
+                        {
+                            xtype: 'button',
+                            text: "Отменить фильтры",
+                            handler: function() {
+                                store.clearFilter();
+                                store.load();
+                                localStorage.setItem("RequisiteOrderFGOSFilters", "{}");
+
+                            }
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        {
+                            header: 'Ид',
+                            dataIndex: 'Id',
+                            width: 100,
+                            renderer: Urfu.renders.htmlEncode
+                        },
+                        {
+                            header: 'ОКСО направления',
+                            dataIndex: 'directionOkso',
+                            width: 150,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+
+                        },
+                        {
+                            header: 'ОКСО направления',
+                            dataIndex: 'directionName',
+                            width: 400,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+
+                        },
+                        {
+                            header: 'Дата',
+                            dataIndex: 'date',
+                            width: 130,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+
+                        },
+                        {
+                            header: '№ Приказа',
+                            dataIndex: 'order',
+                            width: 150,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+
+                        },
+                        {
+                            xtype: 'actioncolumn',
+                            resizable: false,
+                            sortable: false,
+                            width: 60,
+                            items: [
+                                {
+                                    icon: '@Url.Content("/Content/Images/edit.png")',
+                                    tooltip: 'Редактировать',
+                                    iconCls: 'icon-padding',
+                                    handler: function(grid, rowIndex, colIndex, item, e, record) {
+                                        createRecordWindow(store, record).show();
+                                    }
+                                }, {
+                                    icon: '@Url.Content("/Content/Images/remove.png")',
+                                    tooltip: 'Удалить',
+                                    handler: function(grid, rowIndex, colIndex, item, e, record) {
+
+                                        if (confirm('Вы действительно желаете удалить запись?')) {
+                                            Ext.Ajax.request({
+                                                method: 'GET',
+                                                url: '@Url.Action("Delete")',
+                                                success: function(response) {
+                                                    store.load();
+                                                },
+                                                failure: function(d) {
+                                                    if (d.error)
+                                                        alert(d.error);
+                                                    console.error(d);
+                                                },
+                                                params: { id: record.get('Id') }
+                                            });
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                });
+            d = null;
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+
+            function createRecordWindow(store, record) {
+                return Ext.create('Ext.window.Window',
+                    {
+                        title: record
+                            ? 'Редактирование Реквизиты приказа'
+                            : 'Добавление Реквизиты приказа',
+                        resizable: false,
+                        autoHeight: true,
+
+                        bodyPadding: 6,
+                        modal: true,
+                        name: 'editForm',
+                        viewModel: {
+                            data: Ext.apply({}, record ? record.data : {}),
+                            stores: {
+                                directions: {
+                                    autoLoad: true,
+                                    proxy: {
+                                        type: 'ajax',
+                                        url: '@Url.Action("UserDirections", "EduResult")',
+                                        reader: { type: 'json' }
+                                    }
+                                },
+                            }
+                        },
+                        items: {
+                            xtype: 'form',
+                            id: 'form',
+                            layout: {
+                                type: 'vbox',
+                                align: 'stretch'
+                            },
+                            defaults: {
+                                xtype: 'textfield',
+                                labelWidth:
+                                    190,
+                                width:
+                                    600
+                            },
+                            items: [
+                                {
+                                    fieldLabel: 'Идентификатор',
+                                    name: 'id',
+                                    bind: '{id}',
+                                    readOnly: true,
+                                    hidden: true,
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    name: 'directionId',
+                                    fieldLabel: 'Направление',
+                                    bind: {
+                                        store: '{directions}',
+                                        value: '{directionId}'
+                                    },
+                                    allowBlank: false,
+                                    editable: true,
+                                    queryMode: 'local',
+                                    displayField: 'oksoAndTitle',
+                                    valueField: 'id'
+                                },
+                                {
+                                    xtype: 'datefield',
+                                    fieldLabel: 'Дата',
+                                    format: 'd.m.Y',
+                                    value: record?record.data.date:'',
+                                    name: 'date',
+                                    bind: '{date}',
+                                    allowBlank: false,
+                                    editable: true,
+                                },
+                                {
+                                    name: 'order',
+                                    bind: '{order}',
+                                    fieldLabel: '№ Приказа'
+                                }
+                            ]
+                        },
+
+                        buttons: [
+                            {
+                                text: "OK",
+                                formBind: true,
+                                handler: function() {
+                                    var window = this.up('window');
+                                    var form = window.down('form');
+                                    var data = form.getValues();
+                                    if (record)
+                                        data.id = record.get('id');
+                                    if (record || form.isValid()) {
+                                        Ext.Ajax.request({
+                                            url: record ? '@Url.Action("Edit")' : '@Url.Action("Create")',
+                                            success: function(response) {
+                                                var d = Ext.JSON.decode(response.responseText);
+                                                if (!d.success) {
+                                                    if (d.errors) {
+                                                        var basicForm = form.getForm();
+                                                        for (var key in d.errors) {
+                                                            if (d.errors.hasOwnProperty(key)) {
+                                                                var field = basicForm.findField(key);
+                                                                if (field)
+                                                                    field.markInvalid(d.errors[key]);
+                                                            }
+                                                        }
+                                                    }
+                                                } else {
+                                                    window.close();
+                                                    store.load();
+                                                }
+                                            },
+                                            failure: function(d) {
+                                                if (d.error)
+                                                    alert(d.error);
+                                                console.error(d);
+                                            },
+                                            jsonData: data
+                                        });
+                                    }
+                                }
+                            }, {
+                                text: "Отмена",
+                                handler: function() { this.up('window').close(); }
+                            }
+                        ]
+                    });
+            }
+        });
+    </script>
+}

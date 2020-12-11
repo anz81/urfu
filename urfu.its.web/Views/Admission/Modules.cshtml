@@ -1,0 +1,290 @@
+﻿@{
+    ViewBag.Title = "Версии образовательных программ";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function() {
+            Ext.tip.QuickTipManager.init();
+
+            var store = Ext.create("Ext.data.BufferedStore",
+            {
+                fields: [
+                    "Id", "moduleName", "DirectionOkso", "DirectionTitle", "Name", "HeadFullName", "qualification",
+                    "DivisionTitle", "ChairTitle", "Profile", "familirizationType",
+                    "familirizationCondition", "Year"
+                ],
+                groupField: 'moduleName',
+                autoLoad: true,
+                pageSize: 300,
+                remoteSort: true,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '/Admission/Modules',
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    }
+                }
+            });
+
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("AdmissionModulesFilters") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+
+            }
+
+            var VariantStateStore = [["", "(Не выбрано)"]];
+            if (Urfu.ProgramState)
+                VariantStateStore = VariantStateStore
+                    .concat(Object.keys(Urfu
+                            .ProgramState)
+                        .map(function(key) { return [key, Urfu.ProgramState[key]]; }));
+
+
+            var fTypeCmbx = Ext.create('Ext.form.ComboBox',
+            {
+                xtype: 'combobox',
+                header: "Форма освоения",
+                store: Ext.create('Ext.data.Store',
+                {
+                    fields: ['name'],
+                    data: [
+                        { "name": "Очная" },
+                        { "name": "Очно-заочная" },
+                        { "name": "Заочная" }
+                    ]
+                }),
+                displayField: 'name',
+                value: prevSettings["familirizationType"] || "Очная",
+                valueField: 'name',
+                mode: 'local',
+                editable: false,
+                disableKeyFilter: false
+            });
+            var fCndCmbx = Ext.create('Ext.form.ComboBox',
+            {
+                xtype: 'combobox',
+                header: "Условие освоения",
+                store: Ext.create('Ext.data.Store',
+                {
+                    fields: ['name'],
+                    data: [
+                        { "name": "Полный срок" },
+                        { "name": "Сокращенная программа" },
+                        { "name": "Ускоренная программа" }
+                    ]
+                }),
+                displayField: 'name',
+                value: prevSettings["familirizationCondition"] || "Полный срок",
+                valueField: 'name',
+                mode: 'local',
+                editable: false,
+                disableKeyFilter: false
+            });
+
+            var filtersWnd = null;
+            var setFilters = function() {
+                var settings = [
+                    { property: 'DirectionOkso', value: filtersWnd.getComponent("DirectionOksoField").getValue() },
+                    { property: 'moduleName', value: filtersWnd.getComponent("moduleNameField").getValue() },
+                    { property: 'DirectionTitle', value: filtersWnd.getComponent("DirectionTitleField").getValue() },
+                    { property: 'Name', value: filtersWnd.getComponent("NameField").getValue() },
+                    { property: 'HeadFullName', value: filtersWnd.getComponent("HeadFullNameField").getValue() },
+                    { property: 'qualification', value: filtersWnd.getComponent("qualificationField").getValue() },
+                    { property: 'DivisionTitle', value: filtersWnd.getComponent("DivisionTitleField").getValue() },
+                    { property: 'ChairTitle', value: filtersWnd.getComponent("ChairTitleField").getValue() },
+                    { property: 'Profile', value: filtersWnd.getComponent("ProfileField").getValue() },
+                    { property: 'familirizationType', value: fTypeCmbx.getRawValue(), verb: 'Equals' },
+                    { property: 'familirizationCondition', value: fCndCmbx.getRawValue(), verb: 'Equals' },
+                    { property: 'Year', value: filtersWnd.getComponent("YearField").getValue() }
+                ];
+                store.setFilters(settings);
+                localStorage.setItem("AdmissionModulesFilters", JSON.stringify(settings));
+            };
+
+            filtersWnd = Ext.create('Ext.window.Window',
+            {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "ОКСО", itemId: "DirectionOksoField", value: prevSettings["DirectionOkso"] },
+                    { fieldLabel: "Название модуля", itemId: "moduleNameField", value: prevSettings["moduleName"] },
+                    {
+                        fieldLabel: "Название направления",
+                        itemId: "DirectionTitleField",
+                        value: prevSettings["DirectionTitle"]
+                    },
+                    { fieldLabel: "Название версии ОП", itemId: "NameField", value: prevSettings["Name"] },
+                    //{ fieldLabel: "Состояние", itemId: "StateField", xtype: "combobox", store: VariantStateStore, value: prevSettings["State"] },
+                    {
+                        fieldLabel: "ФИО руководителя",
+                        itemId: "HeadFullNameField",
+                        value: prevSettings["HeadFullName"
+                        ]
+                    },
+                    {
+                        fieldLabel: "Уровень обучения",
+                        itemId: "qualificationField",
+                        value: prevSettings["qualification"]
+                    },
+                    { fieldLabel: "Подразделение", itemId: "DivisionTitleField", value: prevSettings["DivisionTitle"] },
+                    { fieldLabel: "Кафедра", itemId: "ChairTitleField", value: prevSettings["ChairTitle"] },
+                    { fieldLabel: "Название профиля", itemId: "ProfileField", value: prevSettings["Profile"] },
+                    { fieldLabel: "Год", itemId: "YearField", value: prevSettings["Year"] }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function() {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function() { filtersWnd.hide(); }
+                    }
+                ]
+            });
+            setFilters();
+
+            fTypeCmbx.on('select', setFilters);
+            fCndCmbx.on('select', setFilters);
+
+            var tpl =
+                '<a href=\'@Url.Action("ModuleStudents")?programId={Id}&moduleId={moduleId}&directionId={directionId}\'>Студенты</a>';
+            function showEmpDetails(val, meta, rec, rIndex, cIndex, store) {
+                return "<a href='#'>" + val + "</a>";
+                //or apply any css class of your choice using
+                //meta.css = ‘awesome-font-style’
+                //return val;
+            }
+            var gridPanel = Ext.create('Ext.grid.Panel',
+            {
+                region: 'center',
+                store: store,
+                loadMask: true,
+                tbar: [
+                    {
+                        xtype: 'button',
+                        text: 'Фильтры...',
+                        handler: function() { filtersWnd.show(); }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Отменить фильтры",
+                        handler: function() {
+                            store.clearFilter();
+                            localStorage.setItem("AdmissionModulesFilters", "[]");
+                        }
+                    }, fTypeCmbx, fCndCmbx
+                ],
+
+                columns: [
+                    //{
+                    //    xtype: 'rownumberer', width: 50,
+                    //    groupable:false
+                    //},
+                    Ext.create('Ext.grid.RowNumberer',{groupable:true,width:50}),
+                    {
+                        header: 'Название модуля',
+                        dataIndex: 'moduleName',
+                        width: 400,
+                        renderer: Ext.util.Format.htmlEncode,
+                        align: 'center'
+                    },
+                    {
+                        header: 'ОКСО',
+                        dataIndex: 'DirectionOkso',
+                        width: 90,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Название направления',
+                        dataIndex: 'DirectionTitle',
+                        width: 310,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Название версии ОП',
+                        dataIndex: 'Name',
+                        width: 190,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'ФИО руководителя',
+                        dataIndex: 'HeadFullName',
+                        width: 230,
+                        renderer: Ext.util.Format.htmlEncode
+                    },
+                    {
+                        header: 'Год',
+                        dataIndex: 'Year',
+                        renderer: Ext.util.Format.htmlEncode,
+                        width: 70
+                    },
+                    {
+                        header: 'Уровень обучения',
+                        align: 'center',
+                        dataIndex: 'qualification',
+                        width: 210
+                    },
+                    {
+                        header: 'Подразделение',
+                        dataIndex: 'DivisionTitle',
+                        renderer: Ext.util.Format.htmlEncode,
+                        width: 150
+                    },
+                    {
+                        header: 'Кафедра',
+                        dataIndex: 'ChairTitle',
+                        renderer: Ext.util.Format.htmlEncode,
+                        width: 180
+                    },
+                    {
+                        header: 'Название профиля',
+                        dataIndex: 'Profile',
+                        renderer: Ext.util.Format.htmlEncode,
+                        width: 190
+                    },
+                    {
+                        xtype: 'templatecolumn',
+                        tpl: tpl,
+                        sortable: false,
+                        width: 800
+                    }
+                ],
+                features: [{
+                    ftype: 'grouping',
+                    collapsible: true,
+                    startCollapsed: true,
+                    hideGroupedHeader: true,
+                }]
+            });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+
+        });
+    </script>
+}

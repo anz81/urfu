@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - ИТС</title>
+
+    @Scripts.Render("~/Scripts/_TreePanel.js")
+
+
+    @Styles.Render("~/Content/bootstrap.css")
+    @Styles.Render("~/Content/ExtSite.css")
+    @Styles.Render("~/Content/bootstrapsnippets.css")
+
+    @Scripts.Render("~/bundles/modernizr")
+
+    @Scripts.Render("~/Scripts/jquery-2.1.4.js")
+    @Scripts.Render("~/bundles/bootstrap")
+
+    @Styles.Render("~/Ext/classic/theme-neptune-touch/resources/theme-neptune-touch-all-debug.css")
+
+    @Scripts.Render("~/Ext/ext-all-debug.js")
+    @Scripts.Render("~/Ext/classic/theme-neptune-touch/theme-neptune-touch-debug.js")
+
+    @Scripts.Render("~/Ext/classic/locale/locale-ru-debug.js")
+
+    <script type="text/javascript">
+        
+        window.appSettings = {
+            "title": @Html.Raw(Json.Encode(@ViewBag.Title))
+        };
+
+    </script>
+
+    @Scripts.Render("~/Scripts/Ext/app.js")
+</head>
+<body>
+    @Html.Partial("_Navbar")
+    @RenderBody()
+    @RenderSection("scripts", required: false)
+</body>
+</html>

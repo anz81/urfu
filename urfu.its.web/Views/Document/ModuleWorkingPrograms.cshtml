@@ -1,0 +1,786 @@
+﻿@using Urfu.Its.Common
+@using Urfu.Its.Web.DataContext
+@using Urfu.Its.Web.Models
+@{
+    ViewBag.Title = "Список версий РП";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+<style>
+
+    .its-medium {
+        width: 24px;
+        height: 24px;
+        margin-left: 5px;
+    }
+</style>
+@section scripts
+{
+<script type="text/javascript">
+    var showDisciplines;
+    var showChangeLists = function(docId, title) {
+        var window = createChangeListsWindow(docId, 'Листы изменений модуля ' + title);
+        window.show();
+    };
+
+    Ext.onReady(function() {
+        Ext.tip.QuickTipManager.init();
+
+        var documentTypes =
+            @Html.Raw(Json.Encode(EnumHelper<VersionedDocumentType>.GetValues(VersionedDocumentType.ModuleWorkingProgram).Select(m => new {Value = m, Text = EnumHelper<VersionedDocumentType>.GetDisplayValue(m)}).ToList()));
+        var getTypeName = function (value) {
+            for (var i = 0; i < documentTypes.length; i++) {
+                if (documentTypes[i].Value === value) {
+                    return documentTypes[i].Text;
+
+                }
+            }
+
+            return value;
+        };
+        var documentTypeStore = Ext.create('Ext.data.Store',
+            {
+                fields: ['Value', 'Text'],
+                data: documentTypes
+            });
+        var store = Ext.create("Ext.data.BufferedStore",
+            {
+                fields: [
+                    "VersionedDocumentId", "moduleId", "title", "shortTitle", "coordinator", "specialities", "SedOP",
+                    "status", { name: "statusChangeTime", type: 'date' }
+                ],
+                autoLoad: true,
+                pageSize: 300,
+                remoteSort: true,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: window.location.href,
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    }
+                }
+            });
+        var disciplinesStore = Ext.create("Ext.data.Store",
+            {
+                fields: [
+                    "VersionedDocumentId", "disciplineId", "title", "ModuleWorkingProgramId", "version","status",
+                    { name: "statusChangeTime", type: 'date' }
+                ],
+                //autoLoad: true,
+                remoteSort: true,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '@Url.Action("DisciplinesWorkingPrograms")',
+                    reader: { type: 'json' }
+                }
+            });
+
+        var prevSettings = {};
+        try {
+            var prevSettingString = JSON.parse(localStorage.getItem("ModuleWorkingProgramsFilters") || "[]");
+
+            for (var i = 0; i < prevSettingString.length; i++) {
+                prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+            }
+        } catch (err) {
+        }
+        var filtersWnd = null;
+
+        //Название модуля, Координатор
+        var setFilters = function() {
+            var settings = [
+                { property: 'title', value: filtersWnd.getComponent("title").getValue() },
+                { property: 'coordinator', value: filtersWnd.getComponent("coordinator").getValue() },
+                { property: 'type', value: filtersWnd.getComponent("typeCombo").getValue() },
+
+            ];
+            store.setFilters(settings);
+            localStorage.setItem("ModuleWorkingProgramsFilters", JSON.stringify(settings));
+        };
+
+        filtersWnd = Ext.create('Ext.window.Window',
+            {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: false,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "Название модуля", itemId: "title", value: prevSettings["title"] },
+                    { fieldLabel: "Координатор", itemId: "coordinator", value: prevSettings["coordinator"] },
+                    {
+                        fieldLabel: "Тип документа",
+                        itemId: "typeCombo",
+                        value: prevSettings["type"],
+                        xtype: "combobox",
+                        store: documentTypeStore,
+                        valueField: 'Value',
+                        displayField: 'Text',
+                        queryMode: 'local'
+
+                    }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function() {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function() { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+        setFilters();
+        var disciplinesGridPanel = Ext.create('Ext.window.Window',
+            {
+                title: 'Дисциплины',
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: false,
+                bodyPadding: 6,
+                height: 600,
+                layout: 'fit',
+                width: 1200,
+                items: [
+                    {
+                        xtype: 'grid',
+                        id: 'disciplinesGrid',
+                        loadMask: true,
+                        columnLines: true,
+                        //height: 800,
+                        width: 1000,
+                        store: disciplinesStore,
+                        columns: [
+                            { xtype: 'rownumberer', width: 50 },
+                            {
+                                header: 'Версия',
+                                align: 'center',
+                                dataIndex: 'version',
+                                width: 100,
+                                renderer: Ext.util.Format.htmlEncode
+                            },
+                            {
+                                header: 'Название дисциплины',
+                                dataIndex: 'title',
+                                width: 400,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            //{
+                            //    header: 'Дата изменения статуса',
+                            //    align: 'center',
+                            //    dataIndex: 'statusChangeTime',
+                            //    width: 200,
+                            //    renderer: Ext.util.Format.dateRenderer('d.m.Y H:i'),
+
+                            //},
+                            {
+                                header: 'Статус',
+                                align: 'center',
+                                dataIndex: 'status',
+                                width: 200,
+                                renderer: Ext.util.Format.htmlEncode
+                            },
+                            {
+                                header: 'Дата изменения статуса',
+                                align: 'center',
+                                dataIndex: 'statusChangeTime',
+                                width: 200,
+                                renderer: Ext.util.Format.dateRenderer('d.m.Y H:i'),
+
+                            },
+                            {
+                                xtype: 'templatecolumn',
+                                sortable: false,
+                                tpl: '<a href="/Document/{VersionedDocumentId}">РПД</a>',
+                                width: 100
+                            },
+                            {
+                                xtype: 'actioncolumn',
+                                region: 'center',
+                                width: 200,
+                                defaults: {
+                                    metadata: {
+                                        attr: 'style="padding-left:10px;width:auto;"'
+                                    }
+                                },
+                                items: [
+                                    {
+                                        icon: '@Url.Content("~/Content/Images/doc1.png?22")', // Use a URL in the icon config
+                                        iconCls: 'icon-padding',
+                                        text: 'Скачать docx',
+                                        tooltip: 'Скачать docx',
+                                        handler: function(grid, rowIndex, colIndex) {
+                                            var rec = grid.getStore().getAt(rowIndex);
+                                            window.location =
+                                                + rec.get('VersionedDocumentId') + '/Print?format=docx';
+
+                                        }
+                                    },
+                                    @*{
+                                        icon: '@Url.Content("~/Content/Images/pdf1.png?1")', // Use a URL in the icon config
+                                        iconCls: 'icon-padding',
+                                        text: 'Скачать pdf',
+                                        tooltip: 'Скачать pdf',
+                                        handler: function(grid, rowIndex, colIndex) {
+                                            var rec = grid.getStore().getAt(rowIndex);
+                                            window.location =
+                                                + rec.get('VersionedDocumentId') + '/Print?format=docx';
+
+
+                                        }
+                                    },*@
+                                    @if (User.IsInRole(ItsRoles.Admin))
+                                    {<text>
+                                    {
+                                icon: '@Url.Content("~/Content/Images/remove.png")', // Use a URL in the icon config
+                                iconCls: 'icon-padding',
+                                text: 'Удалить',
+                                tooltip: 'Удалить',
+                                handler: function(grid, rowIndex, colIndex) {
+                                    var rec = grid.getStore().getAt(rowIndex);
+                                    //var grid = this.up('grid');
+                                    var maskEl = grid.getEl();
+                                    //var store = grid.getStore();
+                                    removeRequest(false);
+
+                                    function removeRequest(confirmed) {
+                                        if (confirmed)
+                                            maskEl.mask('Выполнение операции...');
+
+                                        Ext.Ajax.request({
+                                            url: '/DisciplineWorkingProgram/RemoveWorkingProgram',
+                                            params: {
+                                                id: rec.get('VersionedDocumentId'),
+                                                confirmed: confirmed
+                                            },
+                                            success: function (response) {
+                                                if(confirmed)
+                                                    maskEl.unmask();
+
+                                                if (!confirmed) {
+                                                    if (confirm("Вы действительно хотите удалить версию РП?")) {
+                                                        removeRequest(true);
+                                                    }
+                                                } else {
+                                                    disciplinesStore.load();
+                                                }
+                                            },
+                                            failure: function (d) {
+                                                if (confirmed)
+                                                    maskEl.unmask();
+
+                                                console.error(d.responseText);
+                                                alert(d.responseText);
+                                            }
+                                        });
+                                    }
+                                }
+
+                                    }
+                                                                        </text> }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            });
+
+        var sendToSed = function (wpId, r) {
+            var mainMaskEl = Ext.getCmp('MainGrid').getEl();
+            mainMaskEl.mask('Выполнение операции...');
+                    Ext.Ajax.request({
+                            //method: 'GET',
+                            url: '@Url.Action("SendToSed","Document")',
+                            params: {
+                                //groupId: r.get('GroupId'),
+                                wpId: wpId,
+                            },
+                            success: function (a) {
+                                mainMaskEl.unmask();
+                                var result = JSON.parse(a.responseText);
+                                if(result.success)
+                                {
+                                    
+                                    Ext.Msg.alert('Ok', 'РПМ отправлена в УПОП.');
+                                    //todo взять из ответа
+                                    r.set('Status', result.statusName);
+                                    r.set('SedOp', result.sedOp);
+                                    //r.set('statusChangeTime', result.statusChangeTime);
+                                    Ext.getCmp('MainGrid').getView().refresh();
+                                }
+                                else
+                                    Ext.Msg.alert('Ошибка', result.message);
+                            },
+                            failure: function (a) {
+                                mainMaskEl.unmask();
+                                var result = JSON.parse(a.responseText);
+                                Ext.Msg.alert('Ошибка', 'РПМ не отправлена.');
+                            }
+                    });
+                };
+
+        var getStatus = function (wpId, r) {
+            var mainMaskEl = Ext.getCmp('MainGrid').getEl();
+            mainMaskEl.mask('Выполнение операции...');
+                    Ext.Ajax.request({
+                            //method: 'POST',
+                            url: '@Url.Action("GetSedStatus", "Document")',
+                            params: {
+                                wpId: wpId,
+                            },
+                            success: function (a) {
+                                //store.reload();
+                                mainMaskEl.unmask();
+                                var result = JSON.parse(a.responseText);
+                                if(result.success)
+                                {
+                                    Ext.Msg.alert('Ok', 'Статус в СЭД: ' + result.statusName);
+
+                                    r.set('Status', result.statusName);
+                                    r.set('SedOp', result.sedOp);
+                                  // r.set('statusChangeTime', result.statusChangeTime);
+
+                                    Ext.getCmp('MainGrid').getView().refresh();
+                                }
+                                else
+                                    Ext.Msg.alert('Ошибка', result.message);
+                            },
+                            failure: function (a) {
+                                mainMaskEl.unmask();
+                                var result = JSON.parse(a.responseText);
+                                Ext.Msg.alert('Ошибка', 'Ошибка при получении статуса');
+                            }
+                    });
+                };
+
+        var gridPanel = Ext.create('Ext.grid.Panel', {
+            region: 'center',
+            store: store,
+            tbar: [
+                {
+                    xtype: 'button',
+                    text: 'Фильтры...',
+                    handler: function() { filtersWnd.show(); }
+                },
+                {
+                    xtype: 'button',
+                    text: "Отменить фильтры",
+                    handler: function() {
+                        store.clearFilter();
+                        localStorage.setItem("ModuleWorkingProgramsFilters", JSON.stringify([]));
+                    }
+                }
+            ],
+            loadMask: true,
+            columnLines: true,
+            id: 'MainGrid',
+            viewConfig: {
+                markDirty: false
+            },
+            columns: [
+                { xtype: 'rownumberer', width: 50 },
+                {
+                    header: 'Версия',
+                    align: 'center',
+                    dataIndex: 'version',
+                    width: 100,
+                    renderer: Ext.util.Format.htmlEncode
+                },
+                {
+                    header: 'Направления',
+                    align: 'left',
+                    dataIndex: 'specialities',
+                    sortable: false,
+                    width: 150,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Название модуля',
+                    dataIndex: 'title',
+                    width: 400,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Координатор',
+                    align: 'left',
+                    dataIndex: 'coordinator',
+                    width: 400,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Статус',
+                    align: 'center',
+                    dataIndex: 'Status',
+                    width: 200,
+                    renderer: Ext.util.Format.htmlEncode
+                },
+                {
+                    header: 'Тип документа',
+                    align: 'center',
+                    dataIndex: 'type',
+                    width: 200,
+                    renderer: getTypeName,
+                },
+                {
+                    header: 'Дата изменения статуса',
+                    align: 'center',
+                    dataIndex: 'statusChangeTime',
+                    width: 200,
+                    renderer: Ext.util.Format.dateRenderer('d.m.Y H:i')
+                },
+                {
+                    xtype: 'templatecolumn',
+                    sortable: false,
+                    tpl: new Ext.XTemplate("<a href='/Document/{VersionedDocumentId}'>{[this.getTypeName(values.type)]}</a>" +
+                        "<tpl if='this.hasDWP(values.type)'> <a href='javascript:showDisciplines({VersionedDocumentId},\"{title}\");'>РПД</a>  </tpl>" +
+                        " <a href='javascript:showChangeLists({VersionedDocumentId},\"{title}\");'>ЛИ</a>",
+                        {
+                            getTypeName: function (type) {
+                                return getTypeName(type);
+                            },
+                            hasDWP: function(type) {
+                                return type != @VersionedDocumentType.GiaWorkingProgram.ToString("D") && type != @VersionedDocumentType.PracticesWorkingProgram.ToString("D");
+                            }
+                        }),
+                    width: 150
+                },
+                {
+                    sortable: false,
+                    hideable: false,
+                    menuDisabled: true,
+                    width: 230,
+                    renderer: function (v, m, r) {
+                        var id = Ext.id();
+                        var sedOp = r.get("SedOp");
+                        var text = sedOp ? 'Отправить в УПОП' : 'Получить статус СЭД';
+                       
+                        Ext.defer(function () {
+                            Ext.widget('button', {
+                                renderTo: id,
+                                text: text,
+                                width: 210,
+                                handler: function () {
+                                    var wpId = r.get("VersionedDocumentId");
+                                    if (sedOp)
+                                        sendToSed(wpId, r);
+                                    else
+                                        getStatus(wpId, r);
+                                }
+                            });
+                        }, 150);
+                        
+                        return Ext.String.format('<div id="{0}"></div>', id);
+                    }
+                },
+                {
+                    xtype: 'actioncolumn',
+
+                    region: 'center',
+                    width: 200,
+                    defaults: {
+                        metadata: {
+                            attr: 'style="padding-left:10px;width:auto;"'
+                        }
+                    },
+                    items: [
+                        @*{
+                            icon: '@Url.Content("~/Content/Images/DWP.png")', // Use a URL in the icon config
+                            iconCls: 'icon-padding',
+                            text: 'Дисциплины',
+                            tooltip: 'Дисциплины',
+                            handler: function(grid, rowIndex, colIndex) {
+
+                                //teachersPanel.mask('Загрузка');
+
+
+                            }
+                        },*@
+                        {
+                            icon: '@Url.Content("~/Content/Images/doc1.png?22")', // Use a URL in the icon config
+                            iconCls: 'icon-padding',
+                            text: 'Скачать docx',
+                            tooltip: 'Скачать docx',
+                            handler: function(grid, rowIndex, colIndex) {
+                                var rec = grid.getStore().getAt(rowIndex);
+                                window.location =
+                                    + rec.get('VersionedDocumentId') + '/Print?format=docx';
+
+
+                            }
+                        }@*,
+                        {
+                            icon: '@Url.Content("~/Content/Images/pdf1.png?1")', // Use a URL in the icon config
+                            iconCls: 'icon-padding',
+                            text: 'Скачать pdf',
+                            tooltip: 'Скачать pdf',
+                            handler: function(grid, rowIndex, colIndex) {
+                                var rec = grid.getStore().getAt(rowIndex);
+                                window.location =
+                                    + rec.get('VersionedDocumentId') + '/Print?format=docx';
+
+
+                            }
+                        }*@,
+                        @if (User.IsInRole(ItsRoles.Admin))
+                        {<text>
+                        {
+                            icon: '@Url.Content("~/Content/Images/remove.png")', // Use a URL in the icon config
+                            iconCls: 'icon-padding',
+                            text: 'Удалить',
+                            tooltip: 'Удалить',
+                            handler: function(grid, rowIndex, colIndex) {
+                                var rec = grid.getStore().getAt(rowIndex);
+                                var maskEl = this.up('grid').getEl();
+                                var store = this.up('grid').getStore();
+                                removeRequest(false);
+
+                                function removeRequest(confirmed) {
+                                    if (confirmed)
+                                        maskEl.mask('Выполнение операции...');
+
+                                    Ext.Ajax.request({
+                                        url: '/WorkingPrograms/RemoveModuleWorkingProgram',
+                                        params: {
+                                            id: rec.get('VersionedDocumentId'),
+                                            confirmed: confirmed
+                                        },
+                                        success: function (response) {
+                                            if(confirmed)
+                                                maskEl.unmask();
+
+                                            if (!confirmed) {
+                                                if (confirm("Вы действительно хотите удалить версию РП?")) {
+                                                    removeRequest(true);
+                                                }
+                                            } else {
+                                                store.load();
+                                            }
+                                        },
+                                        failure: function (d) {
+                                            if (confirmed)
+                                                maskEl.unmask();
+
+                                            console.error(d.responseText);
+                                            alert(d.responseText);
+                                        }
+                                    });
+                                }
+                            }
+                    }</text>}
+                    ]
+                }
+            ]
+        });
+
+        showDisciplines = function(docId, title) {
+            //disciplinesGridPanel.getComponent('Id').setValue(rec.get('Id'));
+            disciplinesStore.proxy.setUrl(
+                '@Url.Action("DisciplinesWorkingPrograms")?moduleWPId=' + docId);
+            disciplinesStore.load();
+            disciplinesGridPanel.setTitle('Дисцилины модуля ' + title);
+            disciplinesGridPanel.show();
+        }
+
+        var items = [
+            gridPanel
+        ];
+
+        Urfu.createViewport('border', items);
+    });
+
+    function createChangeListsWindow(docId, title) {
+        return Ext.create('Ext.window.Window', {
+            title: title,
+            closeAction: 'destroy',
+            resizable: false,
+            autoHeight: false,
+            bodyPadding: 6,
+            height: 600,
+            layout: 'fit',
+            width: 1000,
+            tbar: [{
+                xtype: 'button',
+                text: 'Сформировать лист изменений',
+                handler: function () {
+                    var store = this.up('window').down('grid').getStore();
+                    var window = new Ext.window.Window({
+                        title: 'Выберите конечную версию',
+                        viewModel: {
+                            data: {
+                                DocumentId: null
+                            }
+                        },
+                        closeAction: 'destroy',
+                        bodyPadding: 10,
+                        layout: 'fit',
+                        width: 250,
+                        items: {
+                            xtype: 'combobox',
+                            queryMode: 'local',
+                            displayField: 'Name',
+                            valueField: 'DocumentId',
+                            bind: {
+                                value: '{DocumentId}'
+                            },
+                            store: {
+                                autoLoad: true,
+                                proxy: {
+                                    type: 'ajax',
+                                    url: '@Url.Action("GetChangeListTargetVersions", "WorkingPrograms")?id=' + docId,
+                                    reader: { type: 'json' }
+                                }
+                            }
+                        },
+                        buttons: [{
+                            text: 'Сформировать',
+                            bind: {
+                                disabled: '{!DocumentId}'
+                            },
+                            handler: function () {
+                                var window = this.up('window');
+                                var vm = this.lookupViewModel();
+                                var targetId = vm.get('DocumentId');
+                                var maskEl = this.up('window').getEl();
+                                maskEl.mask('Выполнение операции...');
+
+                                Ext.Ajax.request({
+                                    url: '/WorkingPrograms/CreateChangeList',
+                                    params: {
+                                        sourceId: docId,
+                                        targetId: targetId
+                                    },
+                                    success: function (response) {
+                                        maskEl.unmask();
+                                        store.load();
+                                        window.close();
+                                    },
+                                    failure: function (d) {
+                                        maskEl.unmask();
+
+                                        console.error(d.responseText);
+                                        alert(d.responseText);
+                                    }
+                                });
+                            }
+                        }, {
+                            text: 'Отмена',
+                            handler: function() {
+                                this.up('window').close();
+                            }
+                        }]
+                    });
+                    window.show();
+                }
+            }],
+            items: [{
+                xtype: 'grid',
+                id: 'changeListsGrid',
+                loadMask: true,
+                columnLines: true,
+                //height: 800,
+                sortableColumns: false,
+                store: {
+                    autoLoad: true,
+                    proxy: {
+                        type: 'ajax',
+                        url: '@Url.Action("GetChangeLists", "WorkingPrograms")?id=' + docId,
+                        reader: { type: 'json' }
+                    }
+                },
+                columns: [{
+                    xtype: 'rownumberer', width: 50
+                }, {
+                    header: 'Исходная версия',
+                    dataIndex: 'SourceDisplayName',
+                    width: 400,
+                    renderer: Ext.util.Format.htmlEncode
+                }, {
+                    header: 'Конечная версия',
+                    dataIndex: 'TargetDisplayName',
+                    width: 400,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                }, {
+                    xtype: 'actioncolumn',
+                    region: 'center',
+                    width: 80,
+                    defaults: {
+                        metadata: {
+                            attr: 'style="padding-left:10px;width:auto;"'
+                        }
+                    },
+                    items: [{
+                        icon: '@Url.Content("~/Content/Images/doc1.png")', // Use a URL in the icon config
+                        iconCls: 'icon-padding',
+                        text: 'Скачать docx',
+                        tooltip: 'Скачать docx',
+                        handler: function(grid, rowIndex, colIndex) {
+                            var rec = grid.getStore().getAt(rowIndex);
+                            window.location =
+                                + rec.get('VersionedDocumentId') + '/Print?format=docx';
+                        }
+                    },
+                        @if (User.IsInRole(ItsRoles.Admin))
+                        {<text>
+                    {
+                        icon: '@Url.Content("~/Content/Images/remove.png")', // Use a URL in the icon config
+                        iconCls: 'icon-padding',
+                        text: 'Удалить',
+                        tooltip: 'Удалить',
+                        handler: function(grid, rowIndex, colIndex) {
+                            var store = grid.getStore();
+                            var rec = store.getAt(rowIndex);
+                            var maskEl = grid.getEl();
+
+                            removeRequest(false);
+
+                            function removeRequest(confirmed) {
+                                if (confirmed)
+                                    maskEl.mask('Выполнение операции...');
+
+                                Ext.Ajax.request({
+                                    url: '/WorkingPrograms/RemoveChangeList',
+                                    params: {
+                                        id: rec.get('VersionedDocumentId'),
+                                        confirmed: confirmed
+                                    },
+                                    success: function (response) {
+                                        if(confirmed)
+                                            maskEl.unmask();
+
+                                        if (!confirmed) {
+                                            if (confirm("Вы действительно хотите удалить Лист изменений?")) {
+                                                removeRequest(true);
+                                            }
+                                        } else {
+                                            store.load();
+                                        }
+                                    },
+                                    failure: function (d) {
+                                        if (confirmed)
+                                            maskEl.unmask();
+
+                                        console.error(d.responseText);
+                                        alert(d.responseText);
+                                    }
+                                });
+                            }
+                        }
+                    }</text>}]
+                }]
+            }]
+        });
+    }
+</script>
+}

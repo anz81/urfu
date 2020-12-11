@@ -1,0 +1,116 @@
+﻿
+@model Urfu.Its.Frames.Controllers.PracticeMainList
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Список практик</title>
+    @Styles.Render("~/Content/css")
+    <style>
+        input, select, textarea {
+            max-width: initial;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    @Styles.Render("~/Content/css")
+    @*<base target="parent">*@
+</head>
+<body>
+
+    @{var first = "in"; }
+
+    <div class="container-fluid">
+        <h5>@Model.StudentFIO</h5>
+
+        <div class="row">
+            <div class="col-sm-8">
+                <h4>Список практик</h4>
+                <a href="@Url.Content("~/Content/Инструкция по практикам для студентов.pdf")" style="display: inline-block;"><span class="pdfIcon"></span> Инструкция </a>
+            </div>
+        </div>
+
+        <div class="panel-group" id="accordion">
+            @foreach (var practiceGroup in Model.Practices)
+            {
+                foreach (var group in practiceGroup.Groups.OrderByDescending(g => g.Year))
+                {
+                    if (group.HavePractice)
+                    {
+                        <div class="panel panel-default container-fluid">
+                            <div class="panel-heading row">
+                                <div class="col-sm-2"><h5 class="panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#gr_@group.ID"> @group.YearInfo</a></h5></div>
+                                <div class="col-sm-4"><h5 class="panel-title">Группа @group.Name</h5></div>
+                                @*<h5 class="col-xs-2">Группа @row.GroupName</h5>*@
+                                @*<h5 class="col-xs-2">@row.YearInfo</h5>*@
+                            </div>
+
+                            <div class="panel-collapse collapse @first" id="gr_@group.ID">
+                                @{first = "";}
+                                <div class="panel-body">
+
+                                    @foreach (var kvp in group.Practices)
+                                    {
+                                        if (kvp.Value.Count > 0)
+                                        {
+
+                                            <h5>@kvp.Key</h5>
+
+                                            <div class="panel panel-default container-fluid">
+                                                <div class="panel-body">
+                                                    <div class="row">
+                                                        @foreach (var p in kvp.Value)
+                                                        {
+                                                            if (p.PracticeID == 0)
+                                                            {
+                                                                @*Похоже имя для фрейма не выставили, надеемся на Default поведенение
+                                                            @Html.ActionLink(p.Name, "Create", new
+                                                            {
+                                                                studentID = Model.StudentId,
+                                                                groupID = group.ID,
+                                                                year = group.Year,
+                                                                semesterID = p.SemesterID,
+                                                                disciplineUID = p.DisciplineUID
+                                                            }
+                                                            , new { target = "Practice", @class = "col-xs-8" });*@
+                                                                @Html.ActionLink(p.Name, "Create", new
+                                                           {
+                                                               studentID = practiceGroup.StudentId,
+                                                               groupID = group.ID,
+                                                               year = group.Year,
+                                                               semesterID = p.SemesterID,
+                                                               disciplineUID = p.DisciplineUID
+                                                           }
+                                                                            , new { @class = "col-sm-8" });
+                                                            }
+                                                            else
+                                                            {
+                                                                @Html.ActionLink(p.Name, "Practice", new { ID = p.PracticeID }, new { @class = "col-sm-8" });
+                                                            }
+
+                                                            <div class="col-sm-2">@p.Semester</div>
+                                                            <div class="col-sm-2">@p.Period</div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                                        }
+                                    }
+                                    }
+        </div>
+    </div>
+
+</body>
+</html>
+
+

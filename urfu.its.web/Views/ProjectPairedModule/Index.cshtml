@@ -1,0 +1,366 @@
+﻿
+@{
+    ViewBag.Title = "Парные модули";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@{
+    <div class="form-horizontal">
+        <script type="text/javascript">
+
+        var localStorageName = "ProjectPairedModuleFilters";
+
+        Ext.onReady(function() {
+            Ext.tip.QuickTipManager.init();
+
+            Ext.define('Semester',
+            {
+                extend: 'Ext.data.Model',
+                fields:
+                [
+                    { type: 'string', name: 'Id' },
+                    { type: 'string', name: 'Name' }
+                ]
+                });
+            
+            var SemestersStore = Ext.create('Ext.data.Store',
+            {
+                model: 'Semester',
+                proxy:
+                {
+                    type: 'ajax',
+                    url: '/Minors/Semesters',
+                    reader: { type: 'json', rootProperty: 'data' }
+                }
+            });
+            var statesStore = Ext.create('Ext.data.Store',
+                {
+                    model: 'Semester',
+                    proxy:
+                        {
+                            type: 'ajax',
+                            url: '/Minors/States',
+                            reader: { type: 'json', rootProperty: 'data' }
+                        }
+                });
+            var moduleTypesStore = Ext.create('Ext.data.Store',
+                {
+                    model: 'Semester',
+                    data: [
+                        { Id: 'Проектное обучение', Name: 'Проектное обучение' },
+                        { Id: 'Парный модуль', Name: 'Парный модуль' }
+                    ]
+                });
+            var store = Ext.create("Ext.data.Store",
+            {
+                idProperty: 'id',
+                autoLoad: true,
+                remoteSort: false,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '/ProjectPairedModule/Index',
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                    }
+                }
+            });
+
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem(localStorageName) || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+            }
+
+            var filtersWnd = null;
+            //направление, название модуля, координатор, учебный год, семестр
+            var setFilters = function() {
+                var settings = [
+                    { property: 'specialities', value: filtersWnd.getComponent("specialities").getValue() },
+                    { property: 'title', value: filtersWnd.getComponent("title").getValue() },
+                    { property: 'coordinator', value: filtersWnd.getComponent("coordinator").getValue() },
+                    { property: 'year', value: filtersWnd.getComponent("year").getValue() },
+                    { property: 'semester', value: filtersWnd.getComponent("semester").getValue() },
+                    { property: 'state', value: filtersWnd.getComponent("state").getValue() },
+                    { property: 'eduplanNumber', value: filtersWnd.getComponent("eduplanNumber").getValue() },
+                    { property: 'versionNumber', value: filtersWnd.getComponent("versionNumber").getValue() },
+                    { property: 'type', value: filtersWnd.getComponent("type").getValue() }
+                ];
+
+                store.setFilters(settings);
+                localStorage.setItem(localStorageName, JSON.stringify(settings));
+            };
+
+            filtersWnd = Ext.create('Ext.window.Window',
+            {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: false,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "Направление", itemId: "specialities", value: prevSettings["specialities"] },
+                    { fieldLabel: "Название модуля", itemId: "title", value: prevSettings["title"] },
+                    {
+                        fieldLabel: "Тип модуля",
+                        itemId: "type",
+                        value: prevSettings["type"],
+                        xtype: "combobox",
+                        store: moduleTypesStore,
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'local',
+                        width: 400
+                    },
+                    { fieldLabel: "Координатор", itemId: "coordinator", value: prevSettings["coordinator"] },
+                    { fieldLabel: "Учебный год", itemId: "year", value: prevSettings["year"] },
+                    {
+                        fieldLabel: "Семестр",
+                        itemId: "semester",
+                        value: prevSettings["semester"],
+                        xtype: "combobox",
+                        store: SemestersStore,
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'remote',
+                        width: 250
+                    },
+                    {
+                        fieldLabel: "Состояние",
+                        itemId: "state",
+                        value: prevSettings["state"],
+                        xtype: "combobox",
+                        store: statesStore,
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'remote',
+                        width: 300
+                    },
+                    { fieldLabel: "Номер учебного плана", itemId: "eduplanNumber", value: prevSettings["eduplanNumber"] },
+                    { fieldLabel: "Версия учебного плана", itemId: "versionNumber", value: prevSettings["versionNumber"] }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function() {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function() { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+            setFilters();
+
+            var tplFile = '<a href="{file}">Файл</a>'
+
+            function setConnection(connect) {
+                var objects = gridPanel.getSelectionModel().getSelection();
+                var messageTitle = connect ? "Связать два модуля" : "Удалить связь модулей";
+
+                if (objects.length !== 2) {
+                    Ext.MessageBox.alert(messageTitle, 'Выберите два модуля, сейчас выбрано ' + objects.length);
+                    return;
+                }
+
+                var mod0 = objects[0].data;
+                var mod1 = objects[1].data;
+
+                if (mod0.type == mod1.type) {
+                    Ext.MessageBox.alert(messageTitle, 'Модули должны быть разных типов');
+                    return;
+                }
+
+                if (mod0.eduplanNumber != mod1.eduplanNumber || mod0.versionNumber != mod1.versionNumber) {
+                    Ext.MessageBox.alert(messageTitle, 'Модули должны быть на одном учебном плане');
+                    return;
+                }
+
+                Ext.Ajax.request({
+                    url: '@Url.Action("Connect")',
+                    params: {
+                        mod1: mod0.id,
+                        mod2: mod1.id,
+                        eduplan: mod0.eduplanNumber,
+                        version: mod0.versionNumber,
+                        connect: connect
+                    },
+                    success: function (response) {
+                        var data = Ext.decode(response.responseText);
+                        Ext.MessageBox.show({
+                            title: 'Информационное сообщение',
+                            msg: data.message,
+                            buttons: Ext.MessageBox.OK,
+                            fn: function (btn) {
+                                if (data.success) {
+                                    gridPanel.getSelectionModel().clearSelections();
+                                    store.reload();
+                                }
+                            }
+                        });
+                    },
+                    failure: function (response) {
+                        Ext.MessageBox.alert('Ошибка', "Неизвестная ошибка");
+                    }
+                });
+            };
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+            {
+                region: 'center',
+                store: store,
+                loadMask: true,
+                columnLines: true,
+                tbar: [
+                    {
+                    xtype: 'button',
+                        text: 'Фильтры...',
+                        handler: function() { filtersWnd.show(); }
+                },
+                    {
+                    xtype: 'button',
+                        text: "Отменить фильтры",
+                        handler: function() {
+                        store.clearFilter();
+                        localStorage.setItem(localStorageName, JSON.stringify([]));
+                    }
+                },
+                    '-',
+                    {
+                        xtype: 'button',
+                        text: "Связать",
+                        handler: function () {
+                            setConnection(true);
+                        }
+                    },
+                     '-',
+                    {
+                        xtype: 'button',
+                        text: "Удалить",
+                        handler: function () {
+                            setConnection(false);
+                        }
+                    }
+                ],
+                plugins: [
+                    {
+                    ptype: "rowexpander",
+                        rowBodyTpl: new Ext.XTemplate(
+                            '<p><b>Компетенции: </b>{competence}</p>',
+                            '<p><b>Зачётные единицы: </b>{testUnits}</p>',
+                            '<p><b>Приоритет: </b>{priority}</p>',
+                            '<p><b>Состояние: </b>{state}</p>',
+                            '<p><b>Дата утверждения: </b>{approvedDate}</p>',
+                            '<p><b>Комментарий: </b>{comment}</p>'
+                        )
+                    }
+                ],
+                columns: [
+                    { xtype: 'rownumberer', width: 50 },
+                    {
+                        header: 'Направления',
+                        align: 'left',
+                        dataIndex: 'specialities',
+                        width: 150,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Название модуля',
+                        dataIndex: 'title',
+                        width: 300,
+                        cellWrap: true,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Тип модуля',
+                        dataIndex: 'type',
+                        width: 150,
+                        cellWrap: true,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Номер плана и версия',
+                        dataIndex: 'planAndVersion',
+                        width: 100,
+                        cellWrap: true,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Группа',
+                        dataIndex: 'group',
+                        width: 90,
+                        cellWrap: true,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Координатор',
+                        align: 'left',
+                        dataIndex: 'coordinator',
+                        width: 200,
+                        cellWrap: true,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        xtype: 'templatecolumn',
+                        sortable: false,
+                        tpl: tplFile,
+                        width: 70
+                    },
+                    {
+                        sortable: false,
+                        width: 200,
+                        renderer: function (value, metaData, record, rowIndex, colIndex, store, view) {
+
+                            var tpl = Ext.String.format('<a href="@Url.Action("Edit", "ProjectPairedModule")?id={0}">Изменить</a>\
+                                | <a href="@Url.Action("Disciplines", "ProjectPairedModule")?moduleId={1}">Дисциплины</a>', record.data.id, record.data.id);
+
+                            if (record.data.type == "Парный модуль")
+                                return tpl;
+                            else return "";
+                        }
+                    }
+                ],
+                selModel:
+                    {
+                        selType: 'checkboxmodel',
+                        headerWidth: 30
+                    }
+            });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+            gridPanel.getStore().on('load', function (store, records, options) {
+                var focus = '@ViewBag.Focus';
+                if (focus && focus.length > 0) {
+
+                    var focusRow = store.findExact('id', focus);
+                    if (focusRow > 0) {
+                        var rowData = store.getAt(focusRow);
+                        gridPanel.getView().focusRow(rowData);
+                        gridPanel.getSelectionModel().select(rowData);
+                    }
+                }
+                return false;
+            });
+        });
+        </script>
+    </div>
+
+}
+     

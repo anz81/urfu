@@ -1,0 +1,114 @@
+﻿@{
+    ViewBag.Title = "Персоны";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            var personsStore = Ext.create("Ext.data.BufferedStore",
+                {
+                    fields: ["id", "Name", "Surname", "PatronymicName", "Phone"],
+                    autoLoad: true,
+                    pageSize: 300,
+                    remoteSort: true,
+                    remoteFilter: true,
+                    proxy: {
+                        type: 'ajax',
+                        url: '/Persons/Index',
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        }
+                    }
+                });
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: personsStore,
+                    loadMask: true,
+                    tbar: [
+                        {
+                            xtype: 'label',
+                            text: 'Фамилия'
+                        },
+                        {
+                            id: 'txtSurname',
+                            xtype: 'textfield',
+                        },
+                        {
+                            xtype: 'label',
+                            text: 'Имя'
+                        },
+                        {
+                            id: 'txtName',
+                            xtype: 'textfield',
+                        },
+                        {
+                            xtype: 'label',
+                            text: 'Отчество'
+                        },
+                        {
+                            id: 'txtPatronymicName',
+                            xtype: 'textfield'
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Применить',
+                            handler: function () {
+                                personsStore.filter([
+                                    { property: 'Surname', value: Ext.getCmp('txtSurname').getValue() },
+                                    { property: 'Name', value: Ext.getCmp('txtName').getValue() },
+                                    { property: 'PatronymicName', value: Ext.getCmp('txtPatronymicName').getValue() }
+                                    ]);
+                            }
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Отменить',
+                            handler: function () { personsStore.clearFilter(); }
+                        }
+                    ],
+                    columns: [
+                        { xtype:'rownumberer', width: 50 },
+                        {
+                            header: 'Фамилия',
+                            dataIndex: 'Surname',
+                            width: 200,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Имя',
+                            dataIndex: 'Name',
+                            width: 150,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Отчество',
+                            align: 'center',
+                            dataIndex: 'PatronymicName',
+                            width: 150,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Телефон',
+                            align: 'center',
+                            dataIndex: 'Phone',
+                            width: 250,
+                            sortable: false,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                    ]
+                });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+    </script>
+}

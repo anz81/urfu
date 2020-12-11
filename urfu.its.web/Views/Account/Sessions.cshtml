@@ -1,0 +1,25 @@
+﻿
+@model IEnumerable<UserSessionInfo>
+
+@{
+    ViewBag.Title = "Активные пользователи";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<table class="table">
+    <tr>
+    <th>Пользователь</th>
+    <th>Последнее действие</th>
+    </tr>
+    @foreach (var user in Model)
+    {
+        <tr>
+            <td>@user.UserName</td>
+            <td>@user.LastSeen</td>
+        </tr>
+
+    }
+</table>
+
+

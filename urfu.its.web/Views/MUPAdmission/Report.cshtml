@@ -1,0 +1,314 @@
+﻿@model Urfu.Its.Web.Controllers.MinorReportVM
+
+@{
+    ViewBag.Title = "Отчет по подгруппам Модеуса по зачисленным студентам";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function() {
+            Ext.Ajax.setTimeout(1200000);
+            Ext.tip.QuickTipManager.init();
+
+
+            function parseJson(json) {
+                var data = JSON.parse(json.replace(/&quot;/g, '"'));
+                return data;
+            }
+
+            var dataYears = parseJson('@ViewBag.Years');
+
+            var yearsStore = Ext.create("Ext.data.Store",
+                {
+                    data: dataYears
+
+                });
+
+            var dataSemesters = parseJson('@ViewBag.Semesters');
+            var SemestersStore = Ext.create("Ext.data.Store",
+                {
+                    data: dataSemesters
+                });
+
+            var store = Ext.create("Ext.data.Store",
+                {
+                    fields: [
+                        "CompetitionGroupName", "MUP", "GroupName", "Surname", "Name", "PatronymicName",
+                        "StudentStatus","SubgroupName","Description","Teacher"
+                    ],
+                    groupField: 'CompetitionGroupName',
+                    autoLoad: false,
+                    //pageSize: 300,
+                    remoteSort: true,
+                    remoteFilter: true,
+
+                    proxy: {
+                        type: 'ajax',
+                        url: window.location.pathname ,
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        },
+                        timeout: 1200000
+                    }
+                });
+
+            var defaultYear = @(DateTime.Now.Month < 7? DateTime.Now.Year -1 : DateTime.Now.Year);
+            var prevSettings = { Year: defaultYear, semesterId:@(DateTime.Now.Month < 7?2:1)};
+
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("MUPReportFilters") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            }
+            catch (err) {
+                console.log(err);
+            }
+
+            var semesterCmbx = Ext.create('Ext.form.ComboBox',
+                {
+                    xtype: 'combobox',
+                    fieldLabel: 'Семестр',
+                    store: SemestersStore,
+                    value: prevSettings["semesterId"] || "@(DateTime.Now.Month < 7?2:1)",
+                    valueField: 'Id',
+                    displayField: 'Name',
+                    queryMode: 'local',
+                    editable: false,
+                    disableKeyFilter: false,
+                    width: 300
+                });
+
+            var yearCmbx = Ext.create('Ext.form.ComboBox',
+                {
+                    xtype: 'combobox',
+                    fieldLabel: 'Год',
+                    store: yearsStore,
+                    value: prevSettings["Year"] || defaultYear,
+                    valueField: 'Id',
+                    displayField: 'Name',
+                    queryMode: 'remote',
+                    editable: false,
+                    disableKeyFilter: false,
+                    width: 200
+                });
+
+            var filtersWnd = null;
+
+            function loadStore() {
+                store.proxy.setUrl(window.location.pathname +
+                    '?filter=' +
+                    encodeURIComponent(localStorage.getItem("MUPReportFilters")));
+                store.load();
+            }
+
+            var setFilters = function() {
+                var settings = [
+                    {property: 'MUP', value: filtersWnd.getComponent("MUPNameField").getValue()},
+                    { property: 'CompetitionGroupName', value: filtersWnd.getComponent("CompetitionGroupNameField").getValue() },
+                    { property: 'GroupName', value: filtersWnd.getComponent("GroupNameField").getValue() },
+                    { property: 'Surname', value: filtersWnd.getComponent("SurnameField").getValue() },
+                    { property: 'Name', value: filtersWnd.getComponent("NameField").getValue() },
+                    { property: 'PatronymicName', value: filtersWnd.getComponent("PatronymicNameField").getValue() },
+                    {property:'SubgroupName',value:filtersWnd.getComponent("SubgroupNameField").getValue() },
+                    { property: 'semesterId', value: semesterCmbx.getValue() || 0, verb: 'Equals' },
+                    { property: 'Year', value: yearCmbx.getRawValue() || defaultYear, verb: 'Equals' },
+                    { property: 'Description', value: filtersWnd.getComponent("DescriptionField").getValue() }
+                ];
+
+                localStorage.setItem("MUPReportFilters", JSON.stringify(settings));
+                loadStore();
+            };
+
+            var grouping = Ext.create('Ext.grid.feature.Grouping',
+                {
+                    ftype: 'grouping',
+                    collapsible: true,
+                    startCollapsed: true,
+                    hideGroupedHeader: true,
+                    groupHeaderTpl: '{name} / Год: {[values.rows[0].data.Year]} / Семестр: {[values.rows[0].data.Semester]} ',
+                    enableGroupingMenu:false
+                });
+
+            filtersWnd = Ext.create('Ext.window.Window',
+                {
+                    title: "Фильтры",
+                    closeAction: 'hide',
+                    resizable: false,
+                    autoHeight: true,
+                    bodyPadding: 6,
+                    defaults: {
+                        xtype: 'textfield',
+                        width: 500
+                    },
+                    items: [
+                        { fieldLabel: "МУП", itemId: "MUPNameField", value: prevSettings["MUPName"] },
+                        { fieldLabel: "Конкурсная группа", itemId: "CompetitionGroupNameField", value: prevSettings["CompetitionGroupName"] },
+                        { fieldLabel: "Название группы", itemId: "GroupNameField", value: prevSettings["GroupName"] },
+                        { fieldLabel: "Фамилия", itemId: "SurnameField", value: prevSettings["Surname"] },
+                        { fieldLabel: "Имя", itemId: "NameField", value: prevSettings["Name"] },
+                        { fieldLabel: "Отчество", itemId: "PatronymicNameField", value: prevSettings["PatronymicName"] },
+                        { fieldLabel: "Подгруппа", itemId: "SubgroupNameField", value: prevSettings["SubgroupName"] },
+                        { fieldLabel: "Комментарий", itemId: "DescriptionField", value: prevSettings["Description"] },
+                        yearCmbx,
+                        semesterCmbx
+                    ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function() {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function() { filtersWnd.hide(); }
+                    }
+                ]
+                });
+
+            setFilters();
+
+            var gridPanel = null;
+
+            var downloadReport = Ext.create('Ext.Button',
+                {
+                    xtype: 'button',
+                    text: 'Отчет по МУПам',
+                    handler: function() {
+                        var fileUrl = '@Url.Action("DownloadReport")' +
+                            "?filter=" +
+                            encodeURIComponent(localStorage.getItem("MUPReportFilters") || "[]");
+                        window.location.href = fileUrl;
+                    }
+                });
+
+            gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    store: store,
+                    region: 'center',
+                    columnLines: true,
+                    tbar: [
+                        {
+                            xtype: 'button',
+                            text: 'Фильтры...',
+                            handler: function() { filtersWnd.show(); }
+                        },
+                        {
+                            xtype: 'button',
+                            text: "Отменить фильтры",
+                            handler: function() {
+                                localStorage.setItem("MUPReportFilters", JSON.stringify([
+                                    { property: 'semesterId', value: semesterCmbx.getValue(), verb: 'Equals' },
+                                    { property: 'Year', value: yearCmbx.getRawValue(), verb: 'Equals' },
+                                ]));
+                                store.proxy.setUrl(window.location.pathname + '?filter='+encodeURIComponent(localStorage.getItem("MUPReportFilters")));
+                                store.load();
+                            }
+                        }, '-',
+                        {
+                            xtype: 'button',
+                            text: "Развернуть\\Свернуть группировку",
+                            handler: function() {
+                                window.groupsCollapsed = !window.groupsCollapsed;
+                                if (window.groupsCollapsed)
+                                    grouping.expandAll();
+                                else
+                                    grouping.collapseAll();
+                            }
+                            //text: 'Сворачивание',
+                            //menu: [
+                            //    {
+                            //        text: 'Collapse all',
+                            //        handler: 'collapseAll'
+                            //    },
+                            //    {
+                            //        text: 'Expand all',
+                            //        handler: 'expandAll'
+                            //    }
+
+                            //    ]
+                        },
+                        '-',
+                        downloadReport
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        {
+                            header: 'МУП',
+                            dataIndex: 'MUP',
+                            width: 400,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Название группы',
+                            dataIndex: 'GroupName',
+                            width: 110,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Фамилия',
+                            dataIndex: 'Surname',
+                            width: 155,
+                            renderer: function(value, metaData, record) {
+                                return '<a href="/PersonalInfo/Student?studentId=' + record.data.Id + '">' + value + '</a>';
+                            }
+                        },
+                        {
+                            header: 'Имя',
+                            dataIndex: 'Name',
+                            width: 170,
+                            renderer: Urfu.renders.htmlEncode
+                        },
+                        {
+                            header: 'Отчество',
+                            dataIndex: 'PatronymicName',
+                            width: 150,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Статус студента',
+                            dataIndex: 'StudentStatus',
+                            align: 'center',
+                            width: 125
+                        },
+                        {
+                            header: 'Подгруппа',
+                            dataIndex: 'SubgroupName',
+                            align: 'center',
+                            width: 450
+                        },
+                        {
+                            header: 'Комментарий',
+                            dataIndex: 'Description',
+                            align: 'center',
+                            width: 125
+                        },
+                        {
+                            header: 'Преподаватель',
+                            dataIndex: 'Teacher',
+                            align: 'center',
+                            width: 125
+                        }
+                    ],
+                    features: [grouping]
+                });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+
+    </script>
+
+}
+
+
+

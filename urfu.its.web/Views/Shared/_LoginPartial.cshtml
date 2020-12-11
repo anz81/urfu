@@ -1,0 +1,30 @@
+﻿@using Microsoft.AspNet.Identity
+@if (Request.IsAuthenticated)
+{
+    using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+    {
+    @Html.AntiForgeryToken()
+
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.Admin))
+            {
+                @Html.ActionLink("Пользователь " + User.Identity.GetUserName(), "Manage", "Account", routeValues: null, htmlAttributes: new {title = "Manage",@class="contrast-text"})
+            }
+            else
+            {
+                <text>
+                    <a>Пользователь @User.Identity.GetUserName()</a>
+                </text>
+            }
+        </li>
+        <li><a href="javascript:document.getElementById('logoutForm').submit()" class="contrast-text">Выйти</a></li>
+    </ul>
+    }
+}
+else
+{
+    <ul class="nav navbar-nav navbar-right">
+        <li>@Html.ActionLink("Войти", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "contrast-text" })</li>
+    </ul>
+}

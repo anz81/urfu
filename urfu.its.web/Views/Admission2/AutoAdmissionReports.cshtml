@@ -1,0 +1,27 @@
+﻿@model IEnumerable<Urfu.Its.Web.DataContext.MinorAutoAdmissionReport>
+@{
+    ViewBag.Title = "AutoAdmissionReports";
+}
+
+<h2>Отчеты</h2>
+
+<table class="table-bordered table-condensed">
+    <thead>
+    <tr>
+        <td>Id</td>
+        <td>Дата</td>
+        <td>Тип</td>
+        <td></td>
+    </tr>
+    </thead>
+    @foreach (var r in Model)
+    {
+        <tr>
+            <td>@r.Id</td>
+            <td>@r.Date</td>
+            <td>@r.ModuleType</td>
+            <td>@Html.ActionLink("Скачать", "AutoAdmissionReport", new {r.Id})</td>
+        </tr>
+    }
+</table>
+

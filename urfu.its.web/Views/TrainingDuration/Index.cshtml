@@ -1,0 +1,884 @@
+﻿@{
+    ViewBag.Title = "Справочник Сроки обучения";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+<style>
+    .no-padding .x-grid-cell-inner {
+        padding: 0
+    }
+
+    .x-form-item-default.x-item-disabled {
+        filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+        opacity: 1;
+    }
+
+    .x-item-disabled,
+    .x-item-disabled * {
+        cursor: default;
+        pointer-events: none;
+        color: rgb(90,90,97)
+    }
+</style>
+
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            Ext.tip.QuickTipManager.init();
+            var filterName = "TrainingDurationsFilters";
+
+            var numbersTest = /^([0-9]+)([.,]?)([0-9]*)$/;
+            Ext.apply(Ext.form.field.VTypes, {
+                numbers: function (val, field) {
+                    return numbersTest.test(val);
+                },
+                numbersText: 'Срок обучения должен быть числом'
+            });
+
+            function isEmptyString(str) {
+                return str == null || str.trim() == '';
+            }
+
+            function parseJson(json) {
+                var data = JSON.parse(json.replace(/&quot;/g, '"'));
+                return data;
+            }
+
+            var dataDivisions = parseJson('@ViewBag.Divisions');
+            var dataFamilirizationTypes = parseJson('@ViewBag.FamilirizationTypes');
+
+            var divisionStore = Ext.create("Ext.data.Store",
+                {
+                    data: dataDivisions
+                });
+            var directionStore = Ext.create("Ext.data.Store", {});
+            var standardStore = Ext.create("Ext.data.Store", {});
+
+            var store = Ext.create("Ext.data.BufferedStore",
+                {
+                    autoLoad: true,
+                    remoteSort: true,
+                    remoteFilter: true,
+                    pageSize: 300,
+                    proxy: {
+                        type: 'ajax',
+                        url: window.location.pathname,
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        }
+                    }
+                });
+
+            var prevSettings = {};
+
+            var filterDivisionValue;
+            var filterDirectionValue;
+            var filterStandardValue;
+
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem(filterName) || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+                store.setFilters(prevSettingString);
+                store.load();
+                if (!isEmptyString(prevSettings["divisionUuid"])) {
+                    var currentDivisionData = divisionStore.data.items.filter(d => d.data.Id == prevSettings["divisionUuid"])[0].data;
+                    directionStore.setData(currentDivisionData.Directions);
+                    filterDivisionValue = prevSettings["divisionUuid"];
+                }
+                if (prevSettings["directionUid"].length != 0) {
+                    var currentDirectionData = directionStore.data.items.filter(d => prevSettings == d.data.Ids || d.data.Ids.includes(prevSettings["directionUid"][0]))[0].data;
+                    filterStandardValue = prevSettings["directionUid"];
+                    filterDirectionValue = currentDirectionData.Ids;
+                    standardStore.setData(currentDirectionData.standards);
+                }
+            } catch (err) {
+
+            }
+
+            var filtersWnd = null;
+
+            var setFilters = function () {
+                var filterDirectionUid = [];
+                if (isEmptyString(filtersWnd.getComponent("standard").getValue())) {
+                    filterDirectionUid = filtersWnd.getComponent("directionUid").getValue();
+                }
+                else {
+                    filterDirectionUid.push(filtersWnd.getComponent("standard").getValue());
+                }
+                var settings = [
+                    { property: 'divisionUuid', value: filtersWnd.getComponent("divisionUuid").getValue() },
+                    { property: 'directionUid', value: filterDirectionUid }
+                ];
+
+                localStorage.setItem(filterName, JSON.stringify(settings));
+                store.setFilters(settings);
+                store.load();
+
+            };
+
+            filtersWnd = Ext.create('Ext.window.Window',
+                {
+                    title: "Фильтры",
+                    closeAction: 'hide',
+                    resizable: false,
+                    autoHeight: true,
+                    x: 100,
+                    y: 100,
+                    bodyPadding: 6,
+                    defaults: {
+                        xtype: 'textfield',
+                        width: 650,
+                        labelWidth: 120
+                    },
+                    items: [
+                        {
+                            fieldLabel: "Институт/ Департамент",
+                            itemId: "divisionUuid",
+                            value: filterDivisionValue,
+                            xtype: "combobox",
+                            store: divisionStore,
+                            valueField: 'Id',
+                            displayField: 'Name',
+                            queryMode: 'local',
+                            anyMatch: true,
+                            width: 550,
+                            listeners: {
+                                change: function (t, newValue, oldValue, eOpts) {
+                                    filtersWnd.items.items.find(p => p.itemId == "directionUid").setValue('');
+                                    filtersWnd.items.items.find(p => p.itemId == "standard").setValue('');
+
+                                    var currentDivisionData = divisionStore.data.items.filter(d => d.data.Id == newValue)[0].data;
+                                    directionStore.setData(currentDivisionData.Directions);
+
+                                }
+                            }
+                        },
+                        {
+                            fieldLabel: "Направление",
+                            itemId: "directionUid",
+                            value: filterDirectionValue,
+                            xtype: "combobox",
+                            store: directionStore,
+                            valueField: 'Ids',
+                            displayField: 'OksoAndTitle',
+                            queryMode: 'local',
+                            anyMatch: true,
+                            width: 550,
+                            listeners: {
+                                change: function (t, newValue, oldValue, eOpts) {
+                                    if (newValue != null && newValue.length != 0) {
+                                        filtersWnd.items.items.find(p => p.itemId == "standard").setValue('');
+
+                                        var currentDirectionData = directionStore.data.items.filter(d => d.data.Ids == newValue || d.data.Ids.includes(newValue))[0].data;
+                                        standardStore.setData(currentDirectionData.standards);
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            xtype: 'combobox',
+                            fieldLabel: 'Стандарт ВПО',
+                            itemId: "standard",
+                            store: standardStore,
+                            value: filterStandardValue,
+                            queryMode: 'local',
+                            displayField: 'standard',
+                            valueField: 'directionUid',
+                            anyMatch: true,
+                            width: 300
+                        },
+                    ],
+                    buttons: [
+                        {
+                            text: "OK",
+                            handler: function () {
+                                setFilters();
+                                filtersWnd.hide();
+                            }
+                        },
+                        {
+                            text: "Отмена",
+                            handler: function () { filtersWnd.hide(); }
+                        }
+                    ]
+                });
+
+            function createAddWindow(id, record) {
+                return Ext.create('Ext.window.Window',
+                    {
+                        title: "Срок обучения",
+                        closeAction: 'hide',
+                        overflowY: 'auto',
+                        resizable: true,
+                        x: 100,
+                        y: 100,
+                        autoHeight: true,
+                        width: 650,
+                        modal: true,
+                        bodyPadding: 6,
+                        rowHeight: 100,
+                        defaults: {
+                            labelWidth: 130
+                        },
+                        viewModel: {
+                            data: Ext.apply({}, record ? record.data : {}),
+                            stores: {
+                                divisions: {
+                                    data: dataDivisions
+                                },
+                                directions: {},
+                                standards: {},
+                                qualifications: {},
+                                familirizationTypes: {
+                                    data: dataFamilirizationTypes
+                                }
+                            }
+                        },
+                        items: {
+                            xtype: 'form',
+                            defaults: {
+                                labelWidth: 130
+                            },
+                            items: [
+                                {
+                                    xtype: 'combobox',
+                                    fieldLabel: 'Институт/ Департамент',
+                                    name: 'DivisionUuid',
+                                    bind: {
+                                        store: '{divisions}',
+                                        value: '{divisionUuid}'
+                                    },
+                                    allowBlank: false,
+                                    editable: true,
+                                    queryMode: 'local',
+                                    displayField: 'Name',
+                                    valueField: 'Id',
+                                    anyMatch: true,
+                                    width: 600,
+                                    listeners: {
+                                        change: function () {
+                                            var form = this.up('window').down('form');
+
+                                            var divisionsStore = this.lookupViewModel().getStore('divisions');
+                                            var directionsStore = this.lookupViewModel().getStore('directions');
+                                            var standardsStore = this.lookupViewModel().getStore('standards');
+                                            var qualificationsStore = this.lookupViewModel().getStore('qualifications');
+
+                                            form.items.items.find(p => p.name == "DirectionUid").setValue('');
+                                            form.items.items.find(p => p.name == "Standard").setValue('');
+                                            form.items.items.find(p => p.name == "Qualification").setValue('');
+
+                                            var division = form.items.items.find(p => p.name == "DivisionUuid").getValue();
+                                            var currentDivisionData = divisionsStore.data.items.filter(d => d.data.Id == division)[0].data;
+                                            directionsStore.setData(currentDivisionData.Directions);
+                                            standardsStore.setData({});
+                                            qualificationsStore.setData({});
+                                        }
+                                    }
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    fieldLabel: 'Направление подготовки',
+                                    name: 'DirectionUid',
+                                    bind: {
+                                        store: '{directions}',
+                                        value: '{directionUid}'
+                                    },
+                                    allowBlank: false,
+                                    editable: true,
+                                    queryMode: 'local',
+                                    displayField: 'OksoAndTitle',
+                                    valueField: 'OksoAndTitle',
+                                    anyMatch: true,
+                                    width: 600,
+                                    listeners: {
+                                        change: function (t, newValue, oldValue, eOpts) {
+                                            var form = this.up('window').down('form');
+                                            var direction = form.items.items.find(p => p.name == "DirectionUid").getValue();
+                                            if (!isEmptyString(direction)) {
+
+                                                var directionsStore = this.lookupViewModel().getStore('directions');
+                                                var standardsStore = this.lookupViewModel().getStore('standards');
+                                                var qualificationsStore = this.lookupViewModel().getStore('qualifications');
+
+                                                form.items.items.find(p => p.name == "Standard").setValue('');
+                                                form.items.items.find(p => p.name == "Qualification").setValue('');
+
+                                                var currentDirectionData = directionsStore.data.items.filter(d => d.data.OksoAndTitle == direction)[0].data;
+                                                //var currentDirectionData = directionsStore.data.items.filter(d => d.data.Ids == direction || d.data.Ids.includes(direction))[0].data;
+
+                                                qualificationsStore.setData(currentDirectionData.qualifications);
+                                                standardsStore.setData(currentDirectionData.standards);
+
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    fieldLabel: 'Стандарт ВПО',
+                                    name: 'Standard',
+                                    bind: {
+                                        store: '{standards}',
+                                        value: '{Standard}'
+                                    },
+                                    allowBlank: false,
+                                    editable: true,
+                                    queryMode: 'local',
+                                    displayField: 'standard',
+                                    valueField: 'directionUid',
+                                    anyMatch: true,
+                                    width: 360
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    fieldLabel: 'Уровень обучения',
+                                    name: 'Qualification',
+                                    bind: {
+                                        store: '{qualifications}',
+                                        value: '{qualification}'
+                                    },
+                                    allowBlank: false,
+                                    editable: true,
+                                    queryMode: 'local',
+                                    displayField: 'qualification',
+                                    valueField: 'qualification',
+                                    anyMatch: true,
+                                    width: 360
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    fieldLabel: 'Форма обучения',
+                                    name: 'FamilirizationType',
+                                    bind: {
+                                        store: '{familirizationTypes}',
+                                        value: '{familirizationType}'
+                                    },
+                                    allowBlank: false,
+                                    editable: true,
+                                    queryMode: 'local',
+                                    displayField: 'Name',
+                                    valueField: 'Name',
+                                    anyMatch: true,
+                                    width: 360
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    name: 'Duration',
+                                    fieldLabel: 'Срок обучения',
+                                    bind: '{duration}',
+                                    allowBlank: false,
+                                    editable: true,
+                                    vtype: 'numbers',
+                                    width: 360
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    name: 'DurationSPO',
+                                    fieldLabel: 'Срок обучения на базе СПО соответствующего профиля',
+                                    bind: '{durationSPO}',
+                                    allowBlank: true,
+                                    editable: true,
+                                    vtype: 'numbers',
+                                    width: 360
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    name: 'DurationSPOUnsuitableProfile',
+                                    fieldLabel: 'Срок обучения на базе СПО не соответствующего профиля',
+                                    bind: '{durationSPOUnsuitableProfile}',
+                                    allowBlank: true,
+                                    editable: true,
+                                    vtype: 'numbers',
+                                    width: 360
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    name: 'DurationVPO',
+                                    fieldLabel: 'Срок обучения на базе ВПО соответствующего профиля',
+                                    bind: '{durationVPO}',
+                                    allowBlank: true,
+                                    editable: true,
+                                    vtype: 'numbers',
+                                    width: 360
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    name: 'DurationVPOUnsuitableProfile',
+                                    fieldLabel: 'Срок обучения на базе ВПО не соответствующего профиля',
+                                    bind: '{durationVPOUnsuitableProfile}',
+                                    allowBlank: true,
+                                    editable: true,
+                                    vtype: 'numbers',
+                                    width: 360
+                                }
+                            ],
+                            buttons: [
+                            {
+                                text: "Сохранить",
+                                hidden: '@ViewBag.CanEdit' == 'False',
+                                handler: function () {
+                                    var window = this.up('window');
+                                    var form = window.down('form');
+
+                                    var isValid = true;
+                                    form.items.items.forEach(function (element, index, array) {
+                                        if (!element.isValid()) isValid = false;
+                                    });
+                                    if (!isValid) {
+                                        return;
+                                    }
+                                    var duration = form.items.items.find(p => p.name == "Duration").getValue();
+                                    duration = duration.replace('.', ',');
+
+                                    var durationSPO = form.items.items.find(p => p.name == "DurationSPO").getValue();
+                                    durationSPO = durationSPO.replace('.', ',');
+
+                                    var durationSPOUnsuitableProfile = form.items.items.find(p => p.name == "DurationSPOUnsuitableProfile").getValue();
+                                    durationSPOUnsuitableProfile = durationSPOUnsuitableProfile.replace('.', ',');
+
+                                    var durationVPO = form.items.items.find(p => p.name == "DurationVPO").getValue();
+                                    durationVPO = durationVPO.replace('.', ',');
+
+                                    var durationVPOUnsuitableProfile = form.items.items.find(p => p.name == "DurationVPOUnsuitableProfile").getValue();
+                                    durationVPOUnsuitableProfile = durationVPOUnsuitableProfile.replace('.', ',');
+
+                                    Ext.Ajax.request({
+                                        url: '@Url.Action("CreateDuration")',
+                                        params: {
+                                            division: form.items.items.find(p => p.name == "DivisionUuid").getValue(),
+                                            qualification: form.items.items.find(p => p.name == "Qualification").getValue(),
+                                            direction: form.items.items.find(p => p.name == "Standard").getValue(),
+                                            familirizationType: form.items.items.find(p => p.name == "FamilirizationType").getValue(),
+                                            duration: duration,
+                                            dSPO: durationSPO,
+                                            dSPOUP: durationSPOUnsuitableProfile,
+                                            dVPO: durationVPO,
+                                            dVPOUP: durationVPOUnsuitableProfile
+                                        },
+                                        success: function (response) {
+                                            if (response.responseText != "") {
+                                                var data = Ext.decode(response.responseText);
+                                                if (data.success) {
+                                                    Ext.MessageBox.show({
+                                                        title: 'Уведомление',
+                                                        msg: data.message,
+                                                        buttons: Ext.MessageBox.OK
+                                                    });
+                                                    window.close();
+                                                    store.reload();
+                                                }
+                                                else {
+                                                    Ext.MessageBox.show({
+                                                        title: 'Ошибка',
+                                                        msg: data.message,
+                                                        buttons: Ext.MessageBox.OK
+                                                    });
+                                                }
+                                            }
+                                        },
+                                        failure: function (response) {
+                                            Ext.MessageBox.show({
+                                                title: 'Информационное сообщение',
+                                                msg: 'Ошибка',
+                                                buttons: Ext.MessageBox.OK
+                                            });
+                                        }
+                                    });
+                                }
+                            },
+                            {
+                                text: "Отмена",
+                                hidden: '@ViewBag.CanEdit' == 'False',
+                                handler: function () {
+                                    var window = this.up('window');
+                                    window.close();
+                                }
+                            }
+                        ]
+                        }
+                    })
+            };
+
+
+            function createEditWindow(id, record) {
+                var data = record ? record.data : {};
+                var directionCodeAndValue = data.directionCode + ' - ' + data.directionTitle;
+                return Ext.create('Ext.window.Window',
+                    {
+                        title: "Срок обучения",
+                        closeAction: 'hide',
+                        overflowY: 'auto',
+                        resizable: true,
+                        x: 100,
+                        y: 100,
+                        autoHeight: true,
+                        width: 650,
+                        modal: true,
+                        bodyPadding: 6,
+                        rowHeight: 100,
+                        defaults: {
+                            labelWidth: 130
+                        },
+                        viewModel: {
+                            data: Ext.apply({}, record ? record.data : {})
+                        },
+                        items: {
+                            xtype: 'form',
+                            defaults: {
+                                labelWidth: 130
+                            },
+                            items: [
+                                {
+                                    xtype: 'textfield',
+                                    fieldLabel: 'Институт/ Департамент',
+                                    bind: {
+                                        value: '{divisionTitle}'
+                                    },
+                                    editable: false,
+                                    disabled: true,
+                                    width: 600,
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    fieldLabel: 'Направление подготовки',
+                                    value: directionCodeAndValue,
+                                    editable: false,
+                                    disabled: true,
+                                    width: 600,
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    fieldLabel: 'Стандарт ВПО',
+                                    bind: {
+                                        value: '{standard}'
+                                    },
+                                    editable: false,
+                                    disabled: true,
+                                    width: 360,
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    fieldLabel: 'Уровень обучения',
+                                    bind: {
+                                        value: '{qualification}'
+                                    },
+                                    editable: false,
+                                    disabled: true,
+                                    width: 360,
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    fieldLabel: 'Форма обучения',
+                                    bind: {
+                                        value: '{familirizationType}'
+                                    },
+                                    editable: false,
+                                    disabled: true,
+                                    width: 360,
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    name: 'Duration',
+                                    fieldLabel: 'Срок обучения',
+                                    bind: '{duration}',
+                                    allowBlank: false,
+                                    editable: true,
+                                    vtype: 'numbers',
+                                    width: 360
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    name: 'DurationSPO',
+                                    fieldLabel: 'Срок обучения на базе СПО соответствующего профиля',
+                                    bind: '{durationSPO}',
+                                    allowBlank: true,
+                                    editable: true,
+                                    vtype: 'numbers',
+                                    width: 360
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    name: 'DurationSPOUnsuitableProfile',
+                                    fieldLabel: 'Срок обучения на базе СПО не соответствующего профиля',
+                                    bind: '{durationSPOUnsuitableProfile}',
+                                    allowBlank: true,
+                                    editable: true,
+                                    vtype: 'numbers',
+                                    width: 360
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    name: 'DurationVPO',
+                                    fieldLabel: 'Срок обучения на базе ВПО соответствующего профиля',
+                                    bind: '{durationVPO}',
+                                    allowBlank: true,
+                                    editable: true,
+                                    vtype: 'numbers',
+                                    width: 360
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    name: 'DurationVPOUnsuitableProfile',
+                                    fieldLabel: 'Срок обучения на базе ВПО не соответствующего профиля',
+                                    bind: '{durationVPOUnsuitableProfile}',
+                                    allowBlank: true,
+                                    editable: true,
+                                    vtype: 'numbers',
+                                    width: 360
+                                },
+                            ],
+                            buttons: [
+                                {
+                                    text: "Сохранить",
+                                    hidden: '@ViewBag.CanEdit' == 'False',
+                                    handler: function () {
+                                        var window = this.up('window');
+                                        var form = window.down('form');
+
+                                        var isValid = true;
+                                        form.items.items.forEach(function (element, index, array) {
+                                            if (!element.isValid()) isValid = false;
+                                        });
+                                        if (!isValid) {
+                                            return;
+                                        }
+                                        var duration = form.items.items.find(p => p.name == "Duration").getValue();
+                                        duration = duration.replace('.', ',');
+
+                                        var durationSPO = form.items.items.find(p => p.name == "DurationSPO").getValue();
+                                        durationSPO = durationSPO.replace('.', ',');
+
+                                        var durationSPOUnsuitableProfile = form.items.items.find(p => p.name == "DurationSPOUnsuitableProfile").getValue();
+                                        durationSPOUnsuitableProfile = durationSPOUnsuitableProfile.replace('.', ',');
+
+                                        var durationVPO = form.items.items.find(p => p.name == "DurationVPO").getValue();
+                                        durationVPO = durationVPO.replace('.', ',');
+
+                                        var durationVPOUnsuitableProfile = form.items.items.find(p => p.name == "DurationVPOUnsuitableProfile").getValue();
+                                        durationVPOUnsuitableProfile = durationVPOUnsuitableProfile.replace('.', ',');
+
+                                        Ext.Ajax.request({
+                                            url: '@Url.Action("UpdateDuration")',
+                                            params: {
+                                                id: id,
+                                                duration: duration,
+                                                dSPO: durationSPO,
+                                                dSPOUP: durationSPOUnsuitableProfile,
+                                                dVPO: durationVPO,
+                                                dVPOUP: durationVPOUnsuitableProfile
+                                            },
+                                            success: function (response) {
+                                                if (response.responseText != "") {
+                                                    var data = Ext.decode(response.responseText);
+                                                    if (data.success) {
+                                                        Ext.MessageBox.show({
+                                                            title: 'Уведомление',
+                                                            msg: data.message,
+                                                            buttons: Ext.MessageBox.OK
+                                                        });
+                                                        window.close();
+                                                        store.reload();
+                                                    }
+                                                    else {
+                                                        Ext.MessageBox.show({
+                                                            title: 'Ошибка',
+                                                            msg: data.message,
+                                                            buttons: Ext.MessageBox.OK
+                                                        });
+                                                    }
+                                                }
+                                            },
+                                            failure: function (response) {
+                                                Ext.MessageBox.show({
+                                                    title: 'Информационное сообщение',
+                                                    msg: 'Ошибка',
+                                                    buttons: Ext.MessageBox.OK
+                                                });
+                                            }
+                                        });
+                                    }
+                                },
+                                {
+                                    text: "Отмена",
+                                    hidden: '@ViewBag.CanEdit' == 'False',
+                                    handler: function () {
+                                        var window = this.up('window');
+                                        window.close();
+                                    }
+                                }
+                            ]
+                        }
+                    })
+            }
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: store,
+                    loadMask: true,
+                    columnLines: true,
+                    tbar: [
+                        {
+                            xtype: 'button',
+                            text: 'Фильтры...',
+                            handler: function() { filtersWnd.show(); }
+                        },
+                        {
+                            xtype: 'button',
+                            text: "Отменить фильтры",
+                            handler: function() {
+                                store.clearFilter();
+                                store.load();
+                                localStorage.setItem(filterName, JSON.stringify([]));
+                            }
+                        }, '-',
+                        {
+                            xtype: 'button',
+                            text: 'Добавить',
+                            hidden: '@ViewBag.CanEdit' == 'False',
+                            handler: function () { createAddWindow('-1', {}).show(); }
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        {
+                            header: 'Институт/Департамент',
+                            dataIndex: 'divisionTitle',
+                            width: 300,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Уровень подготовки',
+                            dataIndex: 'qualification',
+                            width: 200,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Код направления',
+                            dataIndex: 'directionCode',
+                            width: 150,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Направление подготовки',
+                            dataIndex: 'directionTitle',
+                            width: 200,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Стандарт ВПО',
+                            dataIndex: 'standard',
+                            width: 150,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Форма обучения',
+                            dataIndex: 'familirizationType',
+                            width: 150,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Срок обучения',
+                            dataIndex: 'duration',
+                            width: 150,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Срок обучения на базе СПО соответствующего профиля',
+                            dataIndex: 'durationSPO',
+                            width: 200,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Срок обучения на базе СПО не соответствующего профиля',
+                            dataIndex: 'durationSPOUnsuitableProfile',
+                            width: 200,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Срок обучения на базе ВПО соответствующего профиля',
+                            dataIndex: 'durationVPO',
+                            width: 200,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Срок обучения на базе ВПО не соответствующего профиля',
+                            dataIndex: 'durationVPOUnsuitableProfile',
+                            width: 200,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+
+                        {
+                            xtype: 'actioncolumn',
+                            resizable: false,
+                            sortable: false,
+                            hidden: '@ViewBag.CanEdit' == 'False',
+                            width: 70,
+                            items: [
+                                {
+                                    icon: '@Url.Content("/Content/Images/edit.png")',
+                                    iconCls: 'icon-padding',
+                                    tooltip: 'Редактировать',
+                                    handler: function (grid, rowIndex, colIndex, item, e, record) {
+                                        var rec = grid.getStore().getAt(rowIndex);
+                                        createEditWindow(rec.get('id'), rec).show();
+                                    }
+                                }, {
+                                    icon: '@Url.Content("/Content/Images/remove.png")',
+                                    iconCls: 'icon-padding',
+                                    tooltip: 'Удалить',
+
+                                    handler: function (grid, rowIndex, colIndex, item, e, record) {
+
+                                        Ext.MessageBox.show({
+                                            title: 'Уведомление',
+                                            msg: "Удалить запись?",
+                                            buttons: Ext.MessageBox.YESNO,
+                                            fn: function (btn) {
+                                                if (btn === 'yes') {
+                                                    Ext.Ajax.request({
+                                                        method: 'GET',
+                                                        url: '@Url.Action("RemoveDuration")',
+                                                        success: function(response) {
+                                                            Ext.MessageBox.show({
+                                                                title: 'Информационное сообщение',
+                                                                msg: 'Запись удалена успешно',
+                                                                buttons: Ext.MessageBox.OK
+                                                            });
+                                                            store.reload();
+                                                        },
+                                                        failure: function(d) {
+                                                            Ext.MessageBox.show({
+                                                                title: 'Ошибка',
+                                                                msg: 'Неизвестная ошибка',
+                                                                buttons: Ext.MessageBox.OK
+                                                            });
+                                                        },
+                                                        params: { id: record.get('id') }
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+
+        });
+    </script>
+}

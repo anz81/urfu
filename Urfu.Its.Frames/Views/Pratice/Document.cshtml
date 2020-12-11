@@ -1,0 +1,156 @@
+﻿@model Urfu.Its.Frames.Controllers.DocumentListVM
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Document</title>
+
+    @Styles.Render("~/Content/css")
+
+    <style>
+        input, select, textarea {
+            max-width: initial;
+        }
+
+        .tooltip {
+            opacity: 1 !important;
+        }
+
+        .tooltip-inner {
+            background: #f2f2f2;
+            color: #000000;
+            box-shadow: 0 2px 7px 0 rgba(0,0,0,0.64);
+        }
+
+        .tooltip.top .tooltip-arrow {
+            border-top-color: #f2f2f2;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    @*<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.validate.min.js"></script>*@
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>    
+    <div class="container-fluid">
+        <h4>@Model.DisciplineTitle</h4>
+        <div class="row">
+            <h5 class="col-sm-4">@Model.YearInfo</h5>
+            <h5 class="col-sm-4">@Model.Semester</h5>
+            <h5 class="col-sm-4">@Model.PeriodInfo()</h5>
+        </div>
+
+        <div class="container row">
+            @Html.ActionLink("Выбор предприятия, руководителя, темы", "Practice", null, new { ID = Model.PracticeID }, new { @class = "btn btn-info", role = "button" })
+            @Html.ActionLink("Шаблоны документов", "Document", null, new { ID = Model.PracticeID }, new { @class = "btn btn-success", role = "button" })
+            @Html.ActionLink("Сканы документов", "Scan", null, new { ID = Model.PracticeID }, new { @class = "btn btn-info", role = "button" })
+        </div>
+
+        <p>
+        </p>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-sm-12">
+                        До начала практики
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                @foreach (var d in Model.BeforeDocuments)
+                {
+                    <p>
+                        <div class="row">
+                            <div class="col-sm-10">
+                                <span class="glyphicon glyphicon-download-alt"></span>
+                                @Html.ActionLink(" " + d.Name, "GetTemplate", new { practiceId = Model.PracticeID, type = d.DocumentType })
+                                @if (!string.IsNullOrWhiteSpace(d.Title))
+                                {
+                                    <img src="~/explanation.png" data-toggle="tooltip" title="@d.Title" />
+                                }
+
+                            </div>
+                        </div>
+                    </p>
+                }
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-sm-12">
+                        Для дистанционной формы прохождения практики
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                @foreach (var d in Model.DistantDocuments)
+                {
+                    <p>
+                        <div class="row">
+                            <div class="col-sm-10">
+                                <span class="glyphicon glyphicon-download-alt"></span>
+                                @Html.ActionLink(" " + d.Name, "GetTemplate", new { practiceId = Model.PracticeID, type = d.DocumentType })
+                                @if (!string.IsNullOrWhiteSpace(d.Title))
+                                {
+                                    <img src="~/explanation.png" data-toggle="tooltip" title="@d.Title" />
+                                }
+
+                            </div>
+                        </div>
+                    </p>
+                }
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-sm-12">
+                        Отчет по практике
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                @foreach (var d in Model.AfterDocuments)
+                {
+                    <p>
+                        <div class="row">
+                            <div class="col-sm-10">
+                                <span class="glyphicon glyphicon-download-alt"></span>
+                                @Html.ActionLink(" " + d.Name, "GetTemplate", new { practiceId = Model.PracticeID, type = d.DocumentType })
+                                @if (!string.IsNullOrWhiteSpace(d.Title))
+                                {
+                                    <img src="~/explanation.png" data-toggle="tooltip" title="@d.Title" />
+                                }
+                            </div>
+                        </div>
+                    </p>
+                }
+            </div>
+        </div>
+    </div>
+
+</body>
+
+
+</html>
+
+<script>
+    // после загрузки страницы
+    $(function () {
+        // инициализировать все элементы на страницы, имеющих атрибут data-toggle="tooltip", как компоненты tooltip
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+</script>
+
+

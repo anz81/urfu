@@ -1,0 +1,188 @@
+﻿@{
+    ViewBag.Title = "Группы";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+@section scripts
+{
+    <script type="text/javascript">
+
+        Ext.onReady(function () {
+            Ext.tip.QuickTipManager.init();
+
+            var store = Ext.create("Ext.data.BufferedStore",
+            {
+                fields: ["Id", "Name", "ProfileName", "Year", "ChairId", "FormativeDivisionId", "FormativeDivisionParentId", "ManagingDivisionId", "ManagingDivisionParentId"],
+                autoLoad: true,
+                pageSize: 300,
+                remoteSort: true,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '/Groups/Index',
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    }
+                }
+            });
+
+
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("GroupsFilters") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+
+            }
+
+            var filtersWnd = null;
+            var setFilters = function () {
+                var settings = [
+                    { property: 'Name', value: filtersWnd.getComponent("Name").getValue() },
+                    { property: 'ProfileName', value: filtersWnd.getComponent("ProfileName").getValue() },
+                    { property: 'Year', value: filtersWnd.getComponent("Year").getValue() },
+                ];
+                store.setFilters(settings);
+                localStorage.setItem("GroupsFilters", JSON.stringify(settings));
+            };
+
+            filtersWnd = Ext.create('Ext.window.Window', {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "Название группы", itemId: "Name", value: prevSettings["Name"] },
+                    { fieldLabel: "Название профиля", itemId: "ProfileName", value: prevSettings["ProfileName"] },
+                    { fieldLabel: "Год", itemId: "Year", value: prevSettings["Year"] }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function () {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+            setFilters();
+
+            function getTpl(propertyName) {
+                return '<a href="@ViewBag.UniUrl/fx/uni/ru.naumen.uni.published_jsp?uuid={' + propertyName + '}">Открыть в UNI</a>';
+            }
+
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+            {
+                region: 'center',
+                store: store,
+                tbar: [
+                    {
+                        xtype: 'button',
+                        text: 'Фильтры...',
+                        handler: function () { filtersWnd.show(); }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Отменить фильтры",
+                        handler: function () {
+                            localStorage.setItem("GroupsFilters", []);
+                            store.clearFilter();
+                        }
+                    }
+                ],
+                loadMask: true,
+                columns: [
+                    { xtype: 'rownumberer', width: 50 },
+                    {
+                        header: 'Название группы',
+                        align: 'left',
+                        dataIndex: 'Name',
+                        sortable: false,
+                        width: 200,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Название профиля',
+                        dataIndex: 'ProfileName',
+                        width: 500,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Год',
+                        dataIndex: 'Year',
+                        width: 150,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        xtype: 'templatecolumn',
+                        sortable: false,
+                        tpl: getTpl("ChairId"),
+                        header: 'Кафедра',
+                        width: 200
+                    },
+                    {
+                        xtype: 'templatecolumn',
+                        sortable: false,
+                        tpl: getTpl("FormativeDivisionId"),
+                        header: 'Формирующее подразделение',
+                        width: 200
+                    },
+                    {
+                        xtype: 'templatecolumn',
+                        sortable: false,
+                        tpl: getTpl("FormativeDivisionParentId"),
+                        header: 'Родитель формирующего подразделения',
+                        width: 200
+                    },
+                    {
+                        xtype: 'templatecolumn',
+                        sortable: false,
+                        tpl: getTpl("ManagingDivisionId"),
+                        header: 'Управляющее подразделение',
+                        width: 200
+                    },
+                    {
+                        xtype: 'templatecolumn',
+                        sortable: false,
+                        tpl: getTpl("ManagingDivisionParentId"),
+                        header: 'Родитель управляющего подразделения',
+                        width: 200
+                    },
+                    //{
+                    //    xtype: 'templatecolumn',
+                    //    sortable: false,
+                    //    tpl: tpl,
+                    //    width: 420
+                    //}
+
+                ]
+            });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+    </script>
+}
+
+
+
+

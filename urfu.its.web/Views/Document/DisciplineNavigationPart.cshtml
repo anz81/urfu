@@ -1,0 +1,29 @@
+﻿@using Urfu.Its.Common
+@model Urfu.Its.VersionedDocs.ViewModels.DisciplineWorkingProgramViewModel
+
+@{
+    ViewBag.Title = Model.DisplayName;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<a href="@Url.Action("Index", new { id = Model.ModuleWorkingProgramId })">РПМ</a>
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+<a class="btn btn-default" href="@Url.Action("Print", new { id = Model.DocumentId, format = "docx" })" download>Печатная форма</a>
+
+@if (Model.IsSchemaActual)
+{
+    <ul class="list-group" style="margin-top: 30px">
+        @foreach (var s in Model.Sections)
+        {
+            <li class="list-group-item"><a href="@Url.Action("Section", new RouteValueDictionary(Request.QueryStringToRouteValueDictionary()) {{"id", Model.DocumentId}, {"section", s.SystemName}})">@s.DisplayName</a></li>
+        }
+    </ul>
+}
+else
+{
+    <div class="alert alert-warning" style="margin-top: 30px">Схема документа устарела. Доступна только его <a class="alert-link" href="@Url.Action("Print", new { id = Model.DocumentId })" download>печатная форма</a>.</div>
+}

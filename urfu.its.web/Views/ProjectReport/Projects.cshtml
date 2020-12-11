@@ -1,0 +1,271 @@
+﻿@{
+    ViewBag.Title = "Отчет по проектам";
+
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+<script type="text/javascript">
+    
+    Ext.onReady(function () {
+
+        Ext.tip.QuickTipManager.init();
+
+        var filterName = "ProjectReportProjectsFilters"
+
+        var dataYears = Urfu.parseJson('@ViewBag.Years');
+        var yearsStore = Ext.create("Ext.data.Store",
+            {
+                data: dataYears
+            });
+        var dataSemesters = Urfu.parseJson('@ViewBag.Semesters');
+        var semestersStore = Ext.create("Ext.data.Store",
+            {
+                data: dataSemesters
+            });
+
+        var store = Ext.create("Ext.data.Store",
+        {
+            autoLoad: false,
+            remoteSort: false,
+            remoteFilter: true,
+            proxy: {
+                type: 'ajax',
+                url: '@Url.Action("Projects")',
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data'
+                }
+            }
+        });
+
+        var prevSettings = {};
+        try {
+            var prevSettingString = JSON.parse(localStorage.getItem(filterName) || "[]");
+
+            for (var i = 0; i < prevSettingString.length; i++) {
+                prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+            }
+
+            if (prevSettings["Years"] == null || prevSettings["Years"] == "[]") {
+                prevSettings["Years"] = [];
+                prevSettings["Years"].push(parseInt('@ViewBag.CurrentYear', 10));
+            }
+
+            if (prevSettings["Semesters"] == null || prevSettings["Semesters"] == "[]") {
+                prevSettings["Semesters"] = [];
+                prevSettings["Semesters"].push(parseInt('@ViewBag.CurrentSemester', 10));
+            }
+
+        } catch (err) {
+
+        }
+        
+        var setFilters = function (year, semester, direction, title) {
+            var settings = [
+                { property: 'Years', value: year },
+                { property: 'Semesters', value: semester },
+                { property: 'Direction', value: direction == undefined ? filtersWnd.getComponent("Direction").getValue() : direction },
+                { property: 'Title', value: title == undefined ? filtersWnd.getComponent("Project").getValue() : title }
+            ];
+            store.setFilters(settings);
+            localStorage.setItem(filterName, JSON.stringify(settings));
+        };
+
+        filtersWnd = Ext.create('Ext.window.Window', {
+            title: "Фильтры",
+            closeAction: 'hide',
+            resizable: false,
+            autoHeight: true,
+            bodyPadding: 6,
+            defaults: {
+                xtype: 'textfield',
+                width: 500
+            },
+            items: [
+                { fieldLabel: "Направление", itemId: "Direction", value: prevSettings["Direction"] },
+                { fieldLabel: "Проект", itemId: "Project", value: prevSettings["Title"] }
+            ],
+            buttons: [
+                {
+                    text: "OK",
+                    handler: function () {
+                        setFilters(Ext.getCmp(yearCmbxId).getValue(), Ext.getCmp(semesterCmbxId).getValue());
+                        filtersWnd.hide();
+                    }
+                },
+                {
+                    text: "Отмена",
+                    handler: function () { filtersWnd.hide(); }
+                }
+            ]
+        });
+        setFilters(prevSettings["Years"], prevSettings["Semesters"]);
+
+        function downloadReport() {
+            var fileUrl = '@Url.Action("DownloadProjectsReport", "ProjectReport")'
+                .concat('?filter=' + encodeURIComponent(localStorage.getItem(filterName) || "[]"));
+            window.location.href = fileUrl;
+            return false;
+        }
+
+        function changeYearSemester(year, semester) {
+            if (year.length > 0 && semester.length > 0) {
+                setFilters(year, semester);
+            }
+        }
+
+        var semesterCmbxId = 'ProjectReportSemesterId';
+        var yearCmbxId = 'ProjectReportYearId';
+        
+        var gridPanel = Ext.create('Ext.grid.Panel',
+        {
+            region: 'center',
+            store: store,
+            loadMask: true,
+            columnLines: true,
+            dockedItems: [
+                {
+                    xtype: 'toolbar',
+                    dock: 'top',
+                    items: [
+                        {
+                            xtype: 'tagfield',
+                            fieldLabel: 'Учебный год',
+                            id: yearCmbxId,
+                            value: prevSettings["Years"],
+                            store: yearsStore,
+                            valueField: 'Year',
+                            displayField: 'Year',
+                            queryMode: 'local',
+                            forceSelection: false,
+                            allowBlank: false,
+                            listeners: {
+                                change: function (t, newValue, oldValue) {
+                                    var semester = Ext.getCmp(semesterCmbxId).getValue();
+                                    changeYearSemester(newValue, semester);
+                                }
+                            }
+                        },
+                        {
+                            xtype: 'tagfield',
+                            fieldLabel: 'Семестр',
+                            id: semesterCmbxId,
+                            margin: '0 5 0 5',
+                            labelWidth: 65,
+                            value: prevSettings["Semesters"],
+                            store: semestersStore,
+                            valueField: 'Id',
+                            displayField: 'Name',
+                            queryMode: 'local',
+                            forceSelection: false,
+                            allowBlank: false,
+                            listeners: {
+                                change: function (t, newValue, oldValue) {
+                                    var year = Ext.getCmp(yearCmbxId).getValue();
+                                    changeYearSemester(year, newValue);
+                                }
+                            }
+                        }
+                    ]
+                },
+
+                {
+                    xtype: 'toolbar',
+                    dock: 'top',
+                    items: [
+                        {
+                            xtype: 'button',
+                            text: 'Фильтры',
+                            handler: function () { filtersWnd.show(); }
+                        },
+                        {
+                            xtype: 'button',
+                            text: "Отменить фильтры",
+                            handler: function () {
+                                setFilters(Ext.getCmp(yearCmbxId).getValue(), Ext.getCmp(semesterCmbxId).getValue(), "", "");
+                            }
+                        }, '-',
+                        {
+                            xtype: 'button',
+                            text: "Отчет в Excel",
+                            handler: downloadReport
+                        }
+
+                    ]
+                },
+            ],
+            columns: [
+                { xtype: 'rownumberer', width: 50 },
+                {
+                    header: 'Уровень',
+                    dataIndex: 'Level',
+                    width: 110,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Наименование',
+                    dataIndex: 'Title',
+                    width: 300,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'РОПы',
+                    dataIndex: 'Rops',
+                    width: 200,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Кураторы',
+                    dataIndex: 'Curators',
+                    width: 200,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Предприятие',
+                    dataIndex: 'Company',
+                    width: 300,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Лимит',
+                    dataIndex: 'Limit',
+                    width: 100,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Кол-во заявлений',
+                    dataIndex: 'Selection',
+                    width: 120,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Зачислено всего',
+                    dataIndex: 'Admission',
+                    width: 120,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Свободно мест',
+                    dataIndex: 'Vacancy',
+                    width: 120,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Проектная группа',
+                    dataIndex: 'CompetitionGroup',
+                    width: 300,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                }
+            ]
+
+        });
+       
+        var items = [
+            gridPanel
+        ];
+
+        Urfu.createViewport('border', items);
+
+    });
+</script>
+

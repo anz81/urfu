@@ -1,0 +1,261 @@
+﻿
+@model Urfu.Its.Web.Models.MinorDivisionViewModel
+<style>
+        /*
+     контейнер просто содержит узлы.
+     узел сам будет отвечать за свой отступ
+    */
+
+        .Container {
+            padding: 0;
+            margin: 0;
+        }
+
+            .Container li {
+                list-style-type: none; /* убрать кружочки/точечки */
+            }
+
+        /*
+        узел отодвинут от левой стенки контейнера на 18px
+        благодаря этим отступам вложенные узлы формируют иерархию
+    */
+
+        .Node {
+            margin-left: 18px;
+            zoom: 1; /* спецсвойство против багов IE6,7. Ставит hasLayout */
+        }
+
+        /*
+         Корневой узел от родительского контейнера не отодвинут.
+       Ему же не надо демонстрировать отступом, чей он сын.
+       Это правило идет после .Node, поэтому имеет более высокий приоритет
+       Так что class="Node IsRoot" дает margin-left:0
+    */
+
+        .IsRoot {
+            margin-left: 0;
+        }
+
+        /*
+        иконка скрытого/раскрытого поддерева или листа
+        сами иконки идут дальше, здесь общие свойства
+     */
+        .Expand {
+            width: 18px;
+            height: 18px;
+            /* принцип двухколоночной верстки. */
+            /* float:left и width дива Expand + margin-left дива Content */
+            float: left;
+        }
+
+        /* содержание (заголовок) узла */
+        .Content {
+            /* чтобы не налезать на Expand */
+            margin-left: 18px;
+            /* высота заголовка - как минимум равна Expand
+            Т.е правая колонка всегда выше или равна левой.
+            Иначе нижний float будет пытаться разместиться на получившейся ступеньке
+        */
+            min-height: 18px;
+        }
+
+        /* все правила после * html выполняет только IE6 */
+        * html .Content {
+            height: 18px; /* аналог min-height для IE6 */
+        }
+
+        /* открытое поддерево */
+        .ExpandOpen .Expand {
+            background-image: url(/Content/Images/minus.gif);
+        }
+
+        /* закрытое поддерево */
+        .ExpandClosed .Expand {
+            background-image: url(/Content/Images/plus.gif);
+        }
+
+        /* лист */
+        .ExpandLeaf .Expand {
+            background-image: url(/Content/Images/leaf.gif);
+        }
+
+        .Node {
+            margin-left: 18px;
+            zoom: 1;
+            /* линия слева образуется повторяющимся фоновым рисунком */
+            background-image: url(/forum/img/i.gif);
+            background-position: top left;
+            background-repeat: repeat-y;
+        }
+
+        /* это правило - ниже .Node, поэтому имеет больший приоритет */
+        .IsLast {
+            /* добавить соединительную черточку наверх */
+            background-image: url(/forum/img/i_half.gif);
+            background-repeat: no-repeat;
+        }
+
+        .ExpandOpen .Container {
+            display: block;
+        }
+
+        .ExpandClosed .Container {
+            display: none;
+        }
+
+        .ExpandOpen .Expand, .ExpandClosed .Expand {
+            cursor: pointer; /* иконки скрытия-раскрытия */
+        }
+
+        .ExpandLeaf .Expand {
+            cursor: auto; /* листовой узел */
+        }
+</style>
+
+<h2>Кафедры</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    @Html.Hidden("PeriodId",Model.Period.Id)
+
+    <div onclick="tree_toggle(arguments[0])">
+        <ul class="Container">
+            @for (var c1 = 0; c1 < Model.Roots.Count; c1++)
+            {
+                if (Model.Roots[c1].Childs == null)
+                {
+                    @Html.HiddenFor(m => Model.Roots[c1].DivisionID)
+                    <li class="Node ExpandLeaf">
+                        <div class="Expand"></div>
+                        <div class="Content">@Html.EditorFor(m => m.Roots[c1].Selected)   @Html.DisplayFor(m => m.Roots[c1].Division.typeTitle) @Html.DisplayFor(m => m.Roots[c1].Division.title)</div>
+                    </li>
+                }
+                else
+                {
+                    <li class="Node IsRoot ExpandClosed">
+                        <div class="Expand"></div>
+                        <div class="Content">@Html.DisplayFor(m => m.Roots[c1].Division.typeTitle) @Html.DisplayFor(m => m.Roots[c1].Division.title) </div>
+                        <ul class="Container">
+                            @for (var c2 = 0; c2 < Model.Roots[c1].Childs.Count; c2++)
+                            {
+                                if (Model.Roots[c1].Childs[c2].Childs == null)
+                                {
+                                    @Html.HiddenFor(m => Model.Roots[c1].Childs[c2].DivisionID)
+                                    <li class="Node ExpandLeaf">
+                                        <div class="Expand"></div>
+                                        <div class="Content">@Html.EditorFor(m => m.Roots[c1].Childs[c2].Selected)   @Html.DisplayFor(m => m.Roots[c1].Childs[c2].Division.typeTitle) @Html.DisplayFor(m => m.Roots[c1].Childs[c2].Division.title)</div>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li class="Node ExpandClosed">
+                                        <div class="Expand"></div>
+                                        <div class="Content">@Html.DisplayFor(m => m.Roots[c1].Childs[c2].Division.typeTitle) @Html.DisplayFor(m => m.Roots[c1].Childs[c2].Division.title)</div>
+
+                                        <ul class="Container">
+                                            @for (var c3 = 0; c3 < Model.Roots[c1].Childs[c2].Childs.Count; c3++)
+                                {
+                                    if (Model.Roots[c1].Childs[c2].Childs[c3].Childs == null)
+                                    {
+                                                    @Html.HiddenFor(m => Model.Roots[c1].Childs[c2].Childs[c3].DivisionID)
+                                                    <li class="Node ExpandLeaf ">
+                                                        <div class="Expand"></div>
+                                                        <div class="Content">@Html.EditorFor(m => m.Roots[c1].Childs[c2].Childs[c3].Selected)  @Html.DisplayFor(m => m.Roots[c1].Childs[c2].Childs[c3].Division.typeTitle) @Html.DisplayFor(m => m.Roots[c1].Childs[c2].Childs[c3].Division.title)</div>
+                                                    </li>
+                                                }
+                                                else
+                                                {
+                                                    <li class="Node ExpandClosed">
+                                                        <div class="Expand"></div>
+                                                        <div class="Content">
+                                                            <div class="Content">@Html.DisplayFor(m => m.Roots[c1].Childs[c2].Childs[c3].Division.typeTitle) @Html.DisplayFor(m => m.Roots[c1].Childs[c2].Childs[c3].Division.title)</div>
+                                                        </div>
+
+                                                        <ul class="Container">
+                                                            @for (var c4 = 0; c4 < Model.Roots[c1].Childs[c2].Childs[c3].Childs.Count; c4++)
+                                                            {
+                                                                @Html.HiddenFor(m => Model.Roots[c1].Childs[c2].Childs[c3].Childs[c4].DivisionID)
+                                                                <li class="Node ExpandLeaf">
+                                                                    <div class="Expand"></div>
+                                                                    <div class="Content">@Html.EditorFor(m => m.Roots[c1].Childs[c2].Childs[c3].Childs[c4].Selected)  @Html.DisplayFor(m => m.Roots[c1].Childs[c2].Childs[c3].Childs[c4].Division.typeTitle) @Html.DisplayFor(m => m.Roots[c1].Childs[c2].Childs[c3].Childs[c4].Division.title)</div>
+                                                                </li>
+                                                            }
+                                                        </ul>
+                                                    </li>
+                                                }
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+
+    <div class="form-horizontal">
+
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @*@foreach (var r in Model.Childs)
+            {
+            <div class="form-group">
+
+                <div class="col-md-10">
+                    <div class="checkbox">
+                        @Html.EditorFor(model => model.Selected)
+                        @Html.ValidationMessageFor(model => model.Selected, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <div class="checkbox">
+                        @Html.DisplayFor(m => r.Division.shortTitle)
+                    </div>
+                </div>
+            </div>
+            }*@
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Сохранить" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+<div>
+    @Html.ActionLink("Вернуться к списку", "Tmers", new { id = Model.DisciplineId })
+</div>
+<script>
+
+function tree_toggle(event) {
+	event = event || window.event
+	var clickedElem = event.target || event.srcElement
+
+	if (!hasClass(clickedElem, 'Expand')) {
+		return // клик не там
+	}
+
+	// Node, на который кликнули
+	var node = clickedElem.parentNode
+	if (hasClass(node, 'ExpandLeaf')) {
+		return // клик на листе
+	}
+
+	// определить новый класс для узла
+	var newClass = hasClass(node, 'ExpandOpen') ? 'ExpandClosed' : 'ExpandOpen'
+	// заменить текущий класс на newClass
+	// регексп находит отдельно стоящий open|close и меняет на newClass
+	var re =  /(^|\s)(ExpandOpen|ExpandClosed)(\s|$)/
+	node.className = node.className.replace(re, '$1'+newClass+'$3')
+}
+
+
+function hasClass(elem, className) {
+	return new RegExp("(^|\\s)"+className+"(\\s|$)").test(elem.className)
+}
+
+</script>

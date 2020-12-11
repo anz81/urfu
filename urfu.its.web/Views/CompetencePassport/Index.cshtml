@@ -1,0 +1,759 @@
+﻿@using Urfu.Its.Web.Models
+@{
+    ViewBag.Title = "Список версий паспортов компетенций";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+
+    var canManageWorkingPrograms = User.IsInRole(ItsRoles.WorkingProgramManager);
+    var canViewWorkingPrograms = User.IsInRole(ItsRoles.WorkingProgramView);
+}
+<style>
+
+    .its-medium {
+        width: 24px;
+        height: 24px;
+        margin-left: 5px;
+    }
+</style>
+@section scripts
+{
+    <script src="@Url.Content("~/Scripts/VersionedDocs/versionedDocs.js")"></script>
+
+    <script type="text/javascript">
+    var localStorageName = "CompetencePassportVersionsListFilter";
+    Ext.onReady(function() {
+        Ext.tip.QuickTipManager.init();
+
+        function required(value) {
+            return (value != undefined && value.length > 0) ? true : "Поле не может быть пустым";
+        }
+
+        var dataDivisions = Urfu.parseJson('@ViewBag.Divisions');
+        var divisionStore = Ext.create("Ext.data.Store",
+            {
+                data: dataDivisions
+            });
+        var directionStore = Ext.create("Ext.data.Store", {});
+        var dataDirections = dataDivisions.map(d => d.Directions).reduce(function (a, b) { return a.concat(b); })
+            .sort((a, b) => (a.DirectionName > b.DirectionName) ? 1 : ((b.DirectionName > a.DirectionName) ? -1 : 0));
+
+        var profileStore = Ext.create("Ext.data.Store", {});
+        var ohopStore = Ext.create("Ext.data.Store", {});
+
+        var directionFiltersStore = Ext.create("Ext.data.Store", {});
+        var profileFiltersStore = Ext.create("Ext.data.Store", {});
+
+        var dataStatuses = Urfu.parseJson('@ViewBag.Statuses');
+        var statusStore = Ext.create("Ext.data.Store",
+            {
+                data: dataStatuses
+            });
+
+        var store = Ext.create("Ext.data.Store",
+            {
+                autoLoad: false,
+                remoteSort: false,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: window.location.href,
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    }
+                }
+            });
+
+        var prevSettings = {};
+        try {
+            var prevSettingString = JSON.parse(localStorage.getItem(localStorageName) || "[]");
+
+            for (var i = 0; i < prevSettingString.length; i++) {
+                prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+            }
+        } catch (err) {
+        }
+        var filtersWnd = null;
+
+        function loadStore() {
+            store.proxy.setUrl(window.location.pathname +
+                '?filter=' +
+                encodeURIComponent(localStorage.getItem(localStorageName)));
+            store.load();
+        }
+
+        var setFilters = function(ohopId) {
+            var settings = [
+                { property: 'divisionId', value: filtersWnd.getComponent("division").getValue() },
+                { property: 'directionId', value: filtersWnd.getComponent("direction").getValue() },
+                { property: 'profileId', value: filtersWnd.getComponent("profile").getValue() },
+                { property: 'statusId', value: filtersWnd.getComponent("status").getValue() },
+                { property: 'ohopId', value: ohopId }
+            ];
+            localStorage.setItem(localStorageName, JSON.stringify(settings));
+            loadStore();
+        };
+
+        var changeDivisionEvent = function (wnd, directions, profiles, newValue, isFilter) {
+            wnd.items.items.find(p => p.itemId == "direction").setValue('');
+            directions.setData([]);
+
+            wnd.items.items.find(p => p.itemId == "profile").setValue('');
+            profiles.setData([]);
+
+            if (newValue != '' && newValue != null) {
+                try {
+                    var currentDivisionData = divisionStore.data.items.filter(d => d.data.DivisionId == newValue)[0].data;
+                    directions.setData(currentDivisionData.Directions);
+                }
+                catch{ }
+            }
+            else {
+                if (isFilter) {
+                    directions.setData(dataDirections);
+                }
+            }
+        }
+
+        var changeDirectionEvent = function (wnd, directions, profiles, newValue) {
+            wnd.items.items.find(p => p.itemId == "profile").setValue('');
+            profiles.setData([]);
+
+            if (newValue != '' && newValue != null) {
+                try {
+                    var currentDirectionData = directions.data.items.filter(d => d.data.DirectionId == newValue)[0].data;
+                    profiles.setData(currentDirectionData.Profiles);
+                }
+                catch{ }
+            }
+        }
+
+        filtersWnd = Ext.create('Ext.window.Window',
+            {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: false,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500,
+                    labelWidth: 130
+                },
+                items: [
+                    {
+                        fieldLabel: "Институт",
+                        itemId: "division",
+                        value: prevSettings['divisionId'],
+                        xtype: "combobox",
+                        store: divisionStore,
+                        valueField: 'DivisionId',
+                        displayField: 'DivisionName',
+                        queryMode: 'local',
+                        anyMatch: true,
+                        width: 500,
+                        listeners: {
+                            change: function (t, newValue, oldValue, eOpts) {
+                                changeDivisionEvent(filtersWnd, directionFiltersStore, profileFiltersStore, newValue, true);
+                            }
+                        }
+                    },
+                    {
+                        fieldLabel: "Направление",
+                        itemId: "direction",
+                        value: prevSettings['directionId'],
+                        xtype: "combobox",
+                        store: directionFiltersStore,
+                        valueField: 'DirectionId',
+                        displayField: 'DirectionName',
+                        queryMode: 'local',
+                        anyMatch: true,
+                        width: 500,
+                        listeners: {
+                            change: function (t, newValue, oldValue, eOpts) {
+                                changeDirectionEvent(filtersWnd, directionFiltersStore, profileFiltersStore, newValue);
+                            }
+                        }
+                    },
+                    {
+                        fieldLabel: "Образовательная программа",
+                        itemId: "profile",
+                        value: prevSettings['profileId'],
+                        xtype: "combobox",
+                        store: profileFiltersStore,
+                        valueField: 'ProfileId',
+                        displayField: 'ProfileName',
+                        queryMode: 'local',
+                        anyMatch: true,
+                        width: 500
+                    },
+                    {
+                        fieldLabel: "Статус",
+                        itemId: "status",
+                        value: prevSettings['statusId'],
+                        xtype: "combobox",
+                        store: statusStore,
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'local',
+                        anyMatch: true,
+                        width: 300
+                    }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function () {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+        changeDivisionEvent(filtersWnd, directionFiltersStore, profileFiltersStore, prevSettings['divisionId'], true);
+        changeDirectionEvent(filtersWnd, directionFiltersStore, profileFiltersStore, prevSettings['directionId']);
+        filtersWnd.getComponent("direction").setValue(prevSettings['directionId']);
+        filtersWnd.getComponent("profile").setValue(prevSettings['profileId']);
+
+        setFilters(prevSettings['ohopId']);
+
+        var createWnd = Ext.create('Ext.window.Window',
+        {
+            title: "Добавление паспорта компетенций",
+            closeAction: 'hide',
+            resizable: false,
+            autoHeight: false,
+            bodyPadding: 6,
+            defaults: {
+                xtype: 'textfield',
+                width: 500,
+                labelWidth: 130
+            },
+            items: [
+                {
+                    fieldLabel: "Институт",
+                    itemId: "division",
+                    xtype: "combobox",
+                    store: divisionStore,
+                    valueField: 'DivisionId',
+                    displayField: 'DivisionName',
+                    queryMode: 'local',
+                    anyMatch: true,
+                    allowBlank: true,
+                    width: 500,
+                    listeners: {
+                        change: function (t, newValue, oldValue, eOpts) {
+                            changeDivisionEvent(createWnd, directionStore, profileStore, newValue, false);
+                        }
+                    }
+                },
+                {
+                    fieldLabel: "Направление",
+                    itemId: "direction",
+                    xtype: "combobox",
+                    store: directionStore,
+                    valueField: 'DirectionId',
+                    displayField: 'DirectionName',
+                    queryMode: 'local',
+                    anyMatch: true,
+                    allowBlank: false,
+                    width: 500,
+                    listeners: {
+                        change: function (t, newValue, oldValue, eOpts) {
+                            changeDirectionEvent(createWnd, directionStore, profileStore, newValue);
+                        }
+                    }
+                },
+                {
+                    fieldLabel: "Образовательная программа",
+                    itemId: "profile",
+                    xtype: "combobox",
+                    store: profileStore,
+                    valueField: 'ProfileId',
+                    displayField: 'ProfileName',
+                    queryMode: 'local',
+                    anyMatch: true,
+                    allowBlank: false,
+                    width: 500,
+                    listeners: {
+                        change: function (t, newValue, oldValue, eOpts) {
+                            createWnd.items.items.find(p => p.itemId == "ohop").setValue('');
+                            ohopStore.setData([]);
+
+                            if (newValue != '' && newValue != null) {
+                                try {
+                                    var currentProfileData = profileStore.data.items.filter(d => d.data.ProfileId == newValue)[0].data;
+                                    ohopStore.setData(currentProfileData.Ohops);
+                                }
+                                catch{ }
+                            }
+                        }
+                    }
+                },
+                {
+                    fieldLabel: "Учебный год и версия ОХОП",
+                    itemId: "ohop",
+                    xtype: "combobox",
+                    store: ohopStore,
+                    valueField: 'OhopId',
+                    displayField: 'VersionYear',
+                    queryMode: 'local',
+                    anyMatch: true,
+                    allowBlank: false,
+                    width: 500
+                },
+                {
+                    xtype: 'numberfield',
+                    fieldLabel: 'Год паспорта компетенций',
+                    itemId: 'year',
+                    hideTrigger: true,
+                    cls: 'field-margin',
+                    minValue: 2014,
+                    maxValue: 2099,
+                    validator: required,
+                    width: 200
+                }
+            ],
+            buttons: [
+                {
+                    text: "OK",
+                    handler: function () {
+                        var isValid = true;
+                        createWnd.items.items.forEach(function (element, index, array) {
+                            if (!element.isValid()) isValid = false;
+                        });
+                        if (!isValid) return false;
+                        var formPanel = Ext.create('VersionedDocs.Selector', {
+                            documentKind: @ViewBag.DocumentKind,
+                            linkedEntityId: createWnd.getComponent("ohop").getValue(),
+                            canView: @(canViewWorkingPrograms ? "true" : "false"),
+                            canEdit: @(canManageWorkingPrograms ? "true" : "false"),
+                            hiddenStandard: true,
+                            year: createWnd.getComponent("year").getValue()
+                        });
+                        formPanel.items.items[0].items.items[0].setEditable('true');
+                        createWnd.close();
+                        formPanel.show();
+                    }
+                },
+                {
+                    text: "Отмена",
+                    handler: function () { createWnd.close(); }
+                }
+            ]
+        });
+
+        var updateStatusWnd = function (record) {
+            return Ext.create('Ext.window.Window',
+                {
+                    title: "Редактирование статуса Паспорта компетенций",
+                    closeAction: 'hide',
+                    overflowY: 'auto',
+                    resizable: true,
+                    maxHeight: 500,
+                    autoHeight: true,
+                    maxWidth: 400,
+                    modal: true,
+                    bodyPadding: 6,
+                    layout: { type: 'vbox', align: 'stretch' },
+                    items: [
+                        {
+                            xtype: 'hidden',
+                            hidden: true,
+                            value: record.data.versionedDocumentId,
+                            itemId: "versionedDocumentId"
+                        },
+                        {
+                            xtype: 'label',
+                            text: `${record.data.profile} ${record.data.profileTitle}`,
+                            style: 'font-weight: normal;'
+                        },
+                        {
+                            xtype: 'label',
+                            text: `Версия ${record.data.version}`,
+                            style: 'font-weight: normal;'
+                            //style: 'font-weight: bold;'
+                        },
+                        {
+                            fieldLabel: "Статус",
+                            itemId: "StatusId",
+                            //margin: '10 0 0 0',
+                            value: record.data.statusId,
+                            xtype: "combobox",
+                            store: statusStore,
+                            valueField: 'Id',
+                            displayField: 'Name',
+                            queryMode: 'local',
+                            anyMatch: true,
+                            width: 300,
+                            labelWidth: 50
+                        },
+                        {
+                            xtype: 'label',
+                            text: `Комментарий`,
+                            style: 'font-weight: normal;'
+                            //style: 'font-weight: bold;'
+                        },
+                        {
+                            xtype: 'textarea',
+                            fieldLabel: '',
+                            itemId: 'Comment',
+                            value: record.data.comment,
+                            width: 400,
+                            height: 100
+                        }
+                    ],
+                    buttons: [
+                        {
+                            text: "Сохранить",
+                            handler: function (btn) {
+
+                                var statusId = btn.up().up().items.items.find(c => c.itemId == "StatusId").getValue();
+                                var id = btn.up().up().items.items.find(c => c.itemId == "versionedDocumentId").getValue();
+                                var comment = btn.up().up().items.items.find(c => c.itemId == "Comment").getValue();
+
+                                Ext.getBody().mask('Сохранение статуса...');
+                                Ext.Ajax.request({
+                                    url: '/CompetencePassport/UpdateVersionStatus',
+                                    params: {
+                                        id: id,
+                                        status: statusId,
+                                        comment: comment
+                                    },
+                                    timeout: 120000,
+                                    success: function (response) {
+                                        var data = Ext.decode(response.responseText);
+                                        if (!data.success) {
+                                            Ext.MessageBox.show({
+                                                title: 'Информационное сообщение',
+                                                msg: data.message,
+                                                buttons: Ext.MessageBox.OK,
+                                                fn: function (btn) {
+                                                }
+                                            });
+                                        }
+                                        else
+                                            store.reload();
+                                        Ext.getBody().unmask();
+                                    },
+                                    failure: function (d) {
+                                        Ext.MessageBox.alert('Ошибка', "Неизвестная ошибка");
+                                        Ext.getBody().unmask();
+                                    }
+                                });
+
+                                btn.up('window').close();
+                            }
+                        }
+                    ]
+                });
+        }
+
+        var id = 'versionsCompetencePassportGrid';
+
+        var gridPanel = Ext.create('Ext.grid.Panel', {
+            region: 'center',
+            store: store,
+            id: id,
+            tbar: [
+                {
+                    xtype: 'button',
+                    text: 'Фильтры...',
+                    handler: function() { filtersWnd.show(); }
+                },
+                {
+                    xtype: 'button',
+                    text: "Отменить фильтры",
+                    handler: function() {
+                        localStorage.setItem(localStorageName, "[]");
+                        loadStore();
+                    }
+                }, '-',
+                {
+                    xtype: 'button',
+                    text: 'Добавить',
+                    hidden: '@ViewBag.CanEdit' == 'False',
+                    handler: function () {
+                        createWnd.show();
+                    }
+                }
+            ],
+            loadMask: true,
+            columnLines: true,
+            viewConfig: {
+                markDirty: false
+            },
+            columns: [
+                { xtype: 'rownumberer', width: 50 },
+                {
+                    header: 'Версия',
+                    align: 'center',
+                    dataIndex: 'version',
+                    width: 100,
+                    renderer: Ext.util.Format.htmlEncode
+                },
+                {
+                    header: 'Направление',
+                    dataIndex: 'directionOkso',
+                    width: 200,
+                    renderer: function (value, metaData, record, rowIndex, colIndex, store, view) {
+                        value = `${record.data.directionOkso} - ${record.data.directionTitle}`;
+                        metaData.tdAttr = 'data-qtip="' + Ext.String.htmlEncode(value) + '"';
+                        return value;
+                    }
+                },
+                {
+                    header: 'Стандарт',
+                    dataIndex: 'standard',
+                    renderer: Ext.util.Format.htmlEncode,
+                    width: 130
+                },
+                {
+                    header: 'Образовательная программа',
+                    dataIndex: 'profile',
+                    width: 200,
+                    renderer: function (value, metaData, record, rowIndex, colIndex, store, view) {
+                        value = `${record.data.profile} - ${record.data.profileTitle}`;
+                        metaData.tdAttr = 'data-qtip="' + Ext.String.htmlEncode(value) + '"';
+                        return value;
+                    }
+                },
+                {
+                    header: 'Уровень обучения',
+                    align: 'center',
+                    dataIndex: 'qualification',
+                    width: 150
+                },
+                {
+                    header: 'Подразделение',
+                    dataIndex: 'chairTitle',
+                    cellWrap: true,
+                    renderer: Ext.util.Format.htmlEncode,
+                    width: 180
+                },
+                {
+                    header: 'Год',
+                    dataIndex: 'year',
+                    renderer: Ext.util.Format.htmlEncode,
+                    width: 80
+                },
+                {
+                    header: 'Статус',
+                    align: 'center',
+                    dataIndex: 'status',
+                    width: 150,
+                    renderer: Ext.util.Format.htmlEncode
+                },
+                {
+                    header: 'Дата изменения статуса',
+                    align: 'center',
+                    dataIndex: 'statusChangeTime',
+                    width: 150
+                },
+                {
+                    xtype: 'actioncolumn',
+                    region: 'center',
+                    width: 80,
+                    items: [
+                        {
+                            icon: '@Url.Content("~/Content/Images/comment2.png")',
+                            iconCls: 'icon-toppadding',
+                            tooltip: 'Комменатрий',
+                            handler: function (grid, rowIndex, colIndex) {
+                                var rec = grid.getStore().getAt(rowIndex);
+                                Ext.Msg.show({
+                                    title: 'Комментарий',
+                                    message: rec.data.comment,
+                                    width: 500,
+                                    height: 300
+                                })
+                                grid.getSelectionModel().select(rec);
+                            }
+                        },
+                        {
+                            icon: '@Url.Content("~/Content/Images/send.png?30")',
+                            iconCls: 'icon-padding-mediumicon',
+                            tooltip: 'Отправить на согласование',
+                            handler: function (grid, rowIndex, colIndex) {
+                                var rec = grid.getStore().getAt(rowIndex);
+                                if (rec.data.statusId === 10 || rec.data.statusId === 11) {
+                                    Ext.MessageBox.show({
+                                        title: 'Информационное сообщение',
+                                        msg: "Документ уже находится в обработке или подписан",
+                                        buttons: Ext.MessageBox.OK
+                                    });
+
+                                    return;
+                                }
+
+                                Ext.getBody().mask('Отправка...');
+                                Ext.Ajax.request({
+                                    url: '/CompetencePassport/SendVersion',
+                                    params: {
+                                        id: rec.get('versionedDocumentId')
+                                    },
+                                    timeout: 120000,
+                                    success: function (response) {
+                                        var d = Ext.JSON.decode(response.responseText);
+
+                                        if (!d.success) {
+                                            Ext.MessageBox.show({
+                                                title: 'Ошибка',
+                                                msg: d.message,
+                                                buttons: Ext.MessageBox.OK
+                                            });
+                                        } else {
+                                            try {
+                                                grid.getStore().getAt(rowIndex).data.status = d.status;
+                                                grid.getStore().getAt(rowIndex).data.statusId = d.statusId;
+                                                grid.getStore().getAt(rowIndex).data.statusChangeTime = d.statusDate;
+
+                                                Ext.getCmp(id).getView().scrollRowIntoView(rowIndex)
+
+                                                Ext.getCmp(id).getView().focusRow(grid.getStore().getAt(rowIndex));
+                                                Ext.getCmp(id).getSelectionModel().select(grid.getStore().getAt(rowIndex));
+
+                                                Ext.getCmp(id).getView().refresh();
+
+
+                                                Ext.MessageBox.show({
+                                                    title: 'Уведомление',
+                                                    msg: 'Документ отправлен на согласование',
+                                                    buttons: Ext.MessageBox.OK
+                                                });
+                                            }
+                                            catch{
+
+                                            }
+                                        }
+
+                                        Ext.getBody().unmask();
+                                    },
+                                    failure: function (d) {
+                                        Ext.MessageBox.show({
+                                            title: 'Ошибка',
+                                            msg: 'Неизвестная ошибка',
+                                            buttons: Ext.MessageBox.OK
+                                        });
+                                        Ext.getBody().unmask();
+                                    }
+                                });
+                            }
+                        },
+                    ]
+                },
+                {
+                    xtype: 'templatecolumn',
+                    sortable: false,
+                    tpl: new Ext.XTemplate(`<a href='/Document/{versionedDocumentId}'>ПК</a>`),
+                    width: 60
+                },
+                {
+                    xtype: 'actioncolumn',
+
+                    region: 'center',
+                    width: 130,
+                    defaults: {
+                        metadata: {
+                            attr: 'style="padding-left:10px;width:auto;"'
+                        }
+                    },
+                    items: [
+                        {
+                            icon: '@Url.Content("~/Content/Images/edit.png")',
+                            iconCls: '@ViewBag.CanApprove' == 'True' ? 'icon-padding' : '{ visibility: hidden }',
+                            tooltip: 'Изменить статус',
+                            handler: function(grid, rowIndex, colIndex) {
+                                var rec = grid.getStore().getAt(rowIndex);
+                                var wnd = updateStatusWnd(rec);
+                                wnd.show();
+                            }
+                        },
+                        {
+                            icon: '@Url.Content("~/Content/Images/doc1.png?22")',
+                            iconCls: 'icon-padding',
+                            text: 'Скачать docx',
+                            tooltip: 'Скачать docx',
+                            handler: function(grid, rowIndex, colIndex) {
+                                var rec = grid.getStore().getAt(rowIndex);
+                                window.location = '/Document/' + rec.get('versionedDocumentId') + '/Print?format=docx';
+                            }
+                        },
+                        {
+                            icon: '@Url.Content("~/Content/Images/remove2.png")',
+                            iconCls: '@ViewBag.CanEdit' == 'True' ? 'icon-padding-squareicon' : '{ visibility: hidden }',
+                            text: 'Удалить',
+                            tooltip: 'Удалить',
+                            handler: function(grid, rowIndex, colIndex) {
+
+                                var rec = grid.getStore().getAt(rowIndex);
+                                var maskEl = grid.getEl();
+                                function request(confirmed) {
+                                    maskEl.mask('Выполнение операции...');
+
+                                    Ext.Ajax.request({
+                                        url: '/CompetencePassport/Remove',
+                                        params: {
+                                            id: rec.get('versionedDocumentId')
+                                        },
+                                        success: function (response) {
+                                            store.reload();
+                                            maskEl.unmask();
+                                        },
+                                        failure: function (d) {
+                                            maskEl.unmask();
+
+                                            console.error(d.responseText);
+                                            alert(d.responseText);
+                                        }
+                                    });
+                                }
+
+                                Ext.MessageBox.show({
+                                    title: 'Информационное сообщение',
+                                    msg: "Вы действительно хотите удалить версию паспорта компетенций?",
+                                    buttons: Ext.MessageBox.YESNO,
+                                    fn: function (btn) {
+                                        if (btn === 'yes') {
+                                            request();
+                                        }
+                                    }
+                                });
+                            }
+                        },
+                        {
+                            icon: '@Url.Content("~/Content/Images/arrow.png")',
+                            iconCls: 'icon-padding-mediumicon',
+                            tooltip: 'Версия ОХОП',
+                            handler: function(grid, rowIndex, colIndex) {
+                                var rec = grid.getStore().getAt(rowIndex);
+                                var settings = [
+                                    { property: 'divisionId', value: '' },
+                                    { property: 'directionId', value: '' },
+                                    { property: 'profileId', value: '' },
+                                    { property: 'statusId', value: '' },
+                                    { property: 'id', value: rec.get('versionOhopId') }
+                                ];
+                                localStorage.setItem("BasicCharacteristicOPVersionsListFilter", JSON.stringify(settings));
+                                var link = "@Url.Action("Versions","BasicCharacteristicOP")";
+                                window.open(link, '_blank');
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        var items = [
+            gridPanel
+        ];
+
+        Urfu.createViewport('border', items);
+    });
+    </script>
+}

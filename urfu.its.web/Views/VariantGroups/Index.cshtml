@@ -1,0 +1,48 @@
+﻿@model IEnumerable<Urfu.Its.Web.DataContext.VariantGroup>
+
+<h2>@ViewBag.Title</h2>
+
+
+<p>
+    @Html.ActionLink("Редактирование варианта", "BasicContentEdit", "Variant", new { variantId = ViewBag.variantId }, null)
+</p>
+@*<p>
+    @Html.ActionLink("Новая группа", "Create", new { variantId = ViewBag.variantId })
+</p>*@
+<table class="table table-striped table-hover table-bordered table-condensed">
+    <tr>
+        <th>@{ int rowNum = 1;}</th>
+        <th>
+            @Html.DisplayNameFor(model => model.Variant.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.GroupType)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.TestUnits)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@Html.Raw(rowNum++)</td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Variant.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.GroupType)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TestUnits)
+            </td>
+            <td>
+                @Html.ActionLink("Изменить", "Edit", new { id = item.Id }) |
+                @Html.ActionLink("Просмотреть", "Details", new { id = item.Id }) |
+                @Html.ActionLink("Удалить", "Delete", new { id = item.Id })
+            </td>
+        </tr>
+    }
+
+</table>

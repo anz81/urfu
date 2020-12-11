@@ -1,0 +1,57 @@
+﻿@model IEnumerable<Urfu.Its.Web.DataContext.VariantContent>
+
+<h2>@ViewBag.Title</h2>
+
+
+<p>
+    @Html.ActionLink((string)ViewBag.BackButtonText, "BasicContentEdit", "Variant", new { variantId = ViewBag.variantId }, null)
+</p>
+
+<p>
+    @*@Html.ActionLink("Добавить модуль", "Create", new { variantId = ViewBag.variantId })*@
+</p>
+<table class="table table-striped table-hover table-bordered table-condensed">
+    <tr>
+        <th>@{ int rowNum = 1;}</th>
+        <th>
+            @Html.DisplayNameFor(model => model.Group.GroupType)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Module.number)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Module.title)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Selectable)
+        </th>
+        <th>Пререквизиты</th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@Html.Raw(rowNum++)</td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Group.GroupType)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Module.number)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Module.title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Selectable)
+            </td>
+            <td>
+                @Html.Raw(string.Join(", <br>" + Environment.NewLine, item.Requirments.Select(r => r.Module.number + " "+ r.Module.shortTitle)))
+            </td>
+            <td>
+                @Html.ActionLink("Редактировать", "Edit", new { id = item.Id })
+            </td>
+        </tr>
+    }
+
+</table>

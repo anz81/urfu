@@ -1,0 +1,699 @@
+﻿@{
+    ViewBag.Title = "Приказы Минтруда России";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+<style>
+      .x-action-col-icon {
+        height: 16px;
+        width: 16px;
+        margin-left: 5px !important;
+    }
+      .first {          
+          font-size: 1.1em;
+      }
+</style>
+
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function() {
+            Ext.tip.QuickTipManager.init();
+
+            var filterName = "ProfOrderFilters";
+
+            function parseJson(json) {
+                var data = JSON.parse(json.replace(/&quot;/g, '"'));
+                return data;
+            }
+
+            var StatusesStore = Ext.create("Ext.data.Store",
+                {
+                    fields: ['StatusName'],
+                    data: parseJson('@ViewBag.OrderStatuses')
+                });
+
+            Ext.define('ProfOrder',
+                {
+                    extend: 'Ext.data.Model',
+                    fields: [
+                        { name: 'ProfOrderId', type: 'int' },
+                        { name: 'ProfStandardCode', type: 'string' },
+                        { name: 'NumberOfMintrud', type: 'string' },
+                        {
+                            name: 'DateOfMintrud',
+                            type: 'date',
+                            dateFormat: 'MS',
+                            serialize: function(value, record) {
+                                var date = new Date(parseInt(value.substr(6)));
+                                return Ext.Date.format(date, Ext.Date.patterns.ISO8601Short);
+                            }
+                        },
+                        { name: 'RegNumberOfMinust', type: 'string' },
+                        {
+                            name: 'RegNumberDateOfMinust',
+                            type: 'date',
+                            dateFormat: 'MS',
+                            serialize: function(value, record) {
+                                var date = new Date(parseInt(value.substr(6)));
+                                return Ext.Date.format(date, Ext.Date.patterns.ISO8601Short);
+                            }
+                        },
+                        { name: 'Status', type: 'string' },
+                    ]
+
+                });
+
+            var ProfOrderStore = Ext.create("Ext.data.Store",
+                {
+                    autoLoad: true,
+                    model: 'ProfOrder',
+                    remoteSort: true,
+                    remoteFilter: true,
+                    proxy: {
+                        type: 'ajax',
+                        url: window.location.pathname,
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total',
+                        }
+                    }
+
+                });
+
+            var prevSettings = {};
+
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem(filterName) || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+                ProfOrderStore.setFilters(prevSettingString);
+            } catch (err) {
+                console.log(err);
+            }
+
+            var filtersWnd = null;
+
+            var setFilters = function() {
+                var settings = [
+                    { property: 'ProfStandardCode', value: filtersWnd.getComponent("ProfStandardCodeField").getValue() },
+                    { property: 'NumberOfMintrud', value: filtersWnd.getComponent("NumberOfMintrudField").getValue() },
+                    { property: 'Status', value: filtersWnd.getComponent("StatusField").getValue() },
+                ];
+                ProfOrderStore.setFilters(settings);
+                localStorage.setItem(filterName, JSON.stringify(settings));
+            };
+
+
+            filtersWnd = Ext.create('Ext.window.Window',
+                {
+                    title: "Фильтры",
+                    closeAction: 'hide',
+                    closeToolText: 'Закрыть окно',
+                    resizable: false,
+                    autoHeight: true,
+                    bodyPadding: 6,
+                    defaults: {
+                        xtype: 'textfield',
+                        width: 400
+                    },
+                    items: [
+                        { fieldLabel: "Код профессионального стандарта", labelWidth: 150, itemId: "ProfStandardCodeField", value: prevSettings["ProfStandardCode"] },
+                        { fieldLabel: "Номер приказа Минтруда России", labelWidth: 150, itemId: "NumberOfMintrudField", value: prevSettings["NumberOfMintrud"] },
+                        {
+                            xtype: 'combobox',
+                            fieldLabel: "Статус приказа",
+                            labelWidth: 150,
+                            itemId: "StatusField",
+                            store: StatusesStore,
+                            value: prevSettings["Status"],
+                            queryMode: 'local',
+                            displayField: 'StatusName',
+                            valueField: 'StatusName',
+                            anyMatch: true,
+                            width: 400
+                        }
+                    ],
+                    buttons: [
+                        {
+                            text: "OK",
+                            handler: function() {
+                                setFilters();
+                                filtersWnd.hide();
+                            }
+                        },
+                        {
+                            text: "Отмена",
+                            handler: function() { filtersWnd.hide(); }
+                        }
+                    ]
+                });
+
+
+            function createRecordWindow(store, record) {
+                return Ext.create('Ext.window.Window',
+                    {
+                        title: record ? 'Редактирование записи' : 'Добавление записи',
+                        closeAction: 'hide',
+                        closeToolText: 'Закрыть окно',
+                        resizable: false,
+                        bodyPadding: 6,
+                        viewModel: {
+                            data: Ext.apply({}, record ? record.data : {}),
+                            stores: {
+                                profstandards: {
+                                    proxy: {
+                                        autoLoad: true,
+                                        type: 'ajax',
+                                        url: '@Url.Action("ProfStandards")',
+                                        reader: { type: 'json' }
+                                    }
+                                }
+                            }
+                        },
+                        items:
+                        {
+                            xtype: 'form',
+                            layout: { type: 'vbox', align: 'stretch' },
+                            defaults: {
+                                xtype: 'textfield',
+                                labelWidth: 170,
+                            },
+                            items: [
+                                {
+                                    xtype: 'hidden',
+                                    name: 'Id',
+                                    bind: '{ProfOrderId}',
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    fieldLabel: 'Код профессионального стандарта',
+                                    name: 'ProfStandardCode',
+                                    bind: {
+                                        store: '{profstandards}',
+                                        value: '{ProfStandardCode}'
+                                    },
+                                    editable: true,
+                                    allowBlank: false,
+                                    queryMode: 'remote',
+                                    displayField: 'Code',
+                                    forceSelection: true,
+                                    tpl: Ext.create('Ext.XTemplate',
+                                        '<tpl for=".">',
+                                        '<div class="x-boundlist-item" data-qtip="{Title}" style="border-bottom:1px">',
+                                        '<div>{Code}</div>' +
+                                        '</div>',
+                                        '</tpl>'
+                                    )
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    fieldLabel: 'Номер приказа Минтруда России',
+                                    bind: '{NumberOfMintrud}',
+                                    name: 'NumberOfMintrud',
+                                    allowBlank: false
+                                },
+                                {
+                                    xtype: 'datefield',
+                                    fieldLabel: 'Дата приказа Минтруда России',
+                                    bind: '{DateOfMintrud}',
+                                    startDay: 1,
+                                    format: 'd.m.Y',
+                                    allowBlank: false,
+                                    name: 'DateOfMintrud'
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    fieldLabel: 'Регистрационный номер Минюста ',
+                                    bind: '{RegNumberOfMinust}',
+                                    itemId: 'RegNumberOfMinust',
+                                    name: 'RegNumberOfMinust',
+                                    allowBlank: false
+                                },
+                                {
+                                    xtype: 'datefield',
+                                    fieldLabel: 'Дата регистрационного номера Минюста России',
+                                    bind: '{RegNumberDateOfMinust}',
+                                    startDay: 1,
+                                    allowBlank: false,
+                                    name: 'RegNumberDateOfMinust'
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    fieldLabel: "Статус приказа",
+                                    bind: '{Status}',
+                                    store: StatusesStore,
+                                    queryMode: 'local',
+                                    displayField: 'StatusName',
+                                    valueField: 'StatusName',
+                                    name: 'Status',
+                                    anyMatch: true,
+                                    allowBlank: false,
+                                    forceSelection: true
+                                }
+                            ]
+                        },
+                        buttons: [
+                            {
+                                text: "Сохранить",
+                                formBind: true,
+                                handler: function() {
+
+                                    var window = this.up('window');
+                                    var form = window.down('form');
+
+                                    if (!form.isValid()) {
+                                        Ext.Msg.alert('Ошибка', 'Заполнены не все поля');
+                                        return;
+                                    }
+                                    form.submit({
+                                        url: record ? '@Url.Action("Edit")' : '@Url.Action("Create")',
+                                        success: function(form, action) {
+                                            var r = action.result;
+                                            if (!r.success) {
+                                                Ext.MessageBox.alert('', r.message);
+                                            } else {
+                                                Ext.MessageBox.alert('', 'Информация сохранена.');
+                                                ProfOrderStore.reload();
+                                                window.close();
+                                            }
+                                        },
+                                        failure: function(form, action) {
+                                            Ext.MessageBox.alert('', 'Информация не сохранена. ' + action.result.message);
+                                        }
+                                    });
+                                }
+                            },
+                            {
+                                text: "Отмена",
+                                handler: function() { this.up('window').close(); }
+                            }
+                        ]
+
+                    });
+            };
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: ProfOrderStore,
+                    columnLines: true,
+                    tbar: [
+                        {
+                            xtype: 'button',
+                            text: 'Фильтры...',
+                            handler: function() { filtersWnd.show(); }
+                        },
+                        {
+                            xtype: 'button',
+                            text: "Отменить фильтры",
+                            handler: function() {
+                                ProfOrderStore.clearFilter();
+                                ProfOrderStore.load();
+                                localStorage.setItem(filterName, JSON.stringify([]));
+                            }
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Добавить приказ',
+                            hidden: '@ViewBag.CanEdit' == 'False',
+                            handler: function() { createRecordWindow(ProfOrderStore).show(); }
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', header: '№', width: 60 },
+                        { header: 'Код профессионального стандарта', dataIndex: 'ProfStandardCode', width: 250, align: 'center', renderer: Ext.util.Format.htmlEncode },
+                        { header: 'Номер приказа Минтруда России', dataIndex: 'NumberOfMintrud', width: 250, align: 'center', renderer: Ext.util.Format.htmlEncode },
+                        { header: 'Дата приказа Минтруда России', dataIndex: 'DateOfMintrud', width: 250, align: 'center', renderer: Ext.util.Format.dateRenderer('d.m.Y') },
+                        { header: 'Регистрационный номер Минюста России', dataIndex: 'RegNumberOfMinust', width: 250, align: 'center', renderer: Ext.util.Format.htmlEncode },
+                        { header: 'Дата регистрационного номера Минюста России', dataIndex: 'RegNumberDateOfMinust', width: 250, align: 'center', renderer: Ext.util.Format.dateRenderer('d.m.Y') },
+                        { header: 'Статус', dataIndex: 'Status', width: 250, align: 'center', renderer: Ext.util.Format.htmlEncode },
+                        {
+                            xtype: 'actioncolumn',
+                            resizable: false,
+                            sortable: false,
+                            width: 60,
+                            align: 'center',
+                            hidden: '@ViewBag.CanEdit' == 'False',
+                            items: [
+                                {
+                                    icon: '@Url.Content("/Content/Images/edit.png")',
+                                    tooltip: 'Редактировать',
+                                    handler: function(grid, rowIndex, colIndex, item, e, record) {
+                                        createRecordWindow(ProfOrderStore, record).show();
+                                    }
+                                },
+                                {
+                                    icon: '@Url.Content("/Content/Images/remove.png")',
+                                    tooltip: 'Удалить',
+
+                                    handler: function(grid, rowIndex, colIndex, item, e, record) {
+                                        Ext.MessageBox.show({
+                                            title: 'Удаление',
+                                            msg: 'Вы действительно хотите удалить запись?',
+                                            buttons: Ext.MessageBox.YESNO,
+                                            fn: function(button) {
+                                                if ('yes' == button) {
+                                                    Ext.Ajax.request({
+                                                        method: 'GET',
+                                                        url: '@Url.Action("Delete")',
+                                                        params: { id: record.get('ProfOrderId') },
+                                                        success: function(response) {
+                                                            var r = Ext.decode(response.responseText);
+                                                            if (!r.success)
+                                                                Ext.MessageBox.alert('', r.message);
+                                                            else {
+                                                                ProfOrderStore.reload();
+                                                                Ext.MessageBox.alert('', 'Запись удалена');
+                                                            }
+                                                        },
+                                                        failure: function(xhr) {
+                                                            Ext.MessageBox.show({
+                                                                msg: xhr.responseText
+                                                            })
+
+                                                        }
+                                                    });
+                                                }
+                                            },
+                                            icon: Ext.MessageBox.QUESTION
+                                        })
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'actioncolumn',
+                            resizable: false,
+                            sortable: false,
+                            width: 70,
+                            align: 'center',
+                            items: [
+                                {
+                                    icon: '/Content/Images/document-add2.png',
+                                    tooltip: 'Приказы Минтруда России изменения',
+                                    handler: function(grid, rowIndex, colIndex) {
+                                        var rec = grid.getStore().getAt(rowIndex);
+                                        proforderChangesStore.getProxy().extraParams = {
+                                                proforderId: rec.get('ProfOrderId')
+                                            },
+                                            proforderChangesStore.load();
+                                        var proforderChangesVM = proforderChangesWindow.getViewModel();
+                                        proforderChangesVM.setData(rec.data);
+                                        proforderChangesVM.set('DateOfMintrud', Ext.util.Format.date(rec.get('DateOfMintrud'), 'd.m.Y'));
+                                        proforderChangesVM.set('RegNumberDateOfMinust', Ext.util.Format.date(rec.get('RegNumberDateOfMinust'), 'd.m.Y'));
+                                        proforderChangesWindow.show();
+
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+
+                });
+
+            Ext.define('ProfOrderСhange',
+                {
+                    extend: 'Ext.data.Model',
+                    fields: [
+                        {
+                            name: 'ProfOrderChangeID',
+                            type: 'int'
+                        },
+                        {
+                            name: 'ProfOrderId',
+                            type: 'int'
+                        },
+                        { name: 'DateOfMintrud', type: 'date', dateFormat: 'd.m.Y' },
+                        'NumberOfMintrud', 'RegNumberOfMinust',
+                        { name: 'RegNumberDateOfMinust', type: 'date', dateFormat: 'd.m.Y' },
+                        'Status'
+                    ],
+
+                    validations: [
+                        {
+                            type: 'length',
+                            field: 'NumberOfMintrud',
+                            min: 1
+                        }, {
+                            type: 'length',
+                            field: 'RegNumberOfMinust',
+                            min: 1
+                        }, {
+                            type: 'length',
+                            field: 'Status',
+                            min: 1
+                        },
+                        {
+                            type: 'length',
+                            field: 'DateOfMintrud',
+                            min: 1
+                        },
+                        {
+                            type: 'length',
+                            field: 'RegNumberDateOfMinust',
+                            min: 1
+                        }
+                    ],
+
+                    setMainproforder: function(proforderId) {
+                        this.set('ProfOrderId', proforderId);
+                    }
+
+                });
+
+
+            var proforderChangesStore = Ext.create("Ext.data.Store",
+                {
+                    autoLoad: false,
+                    model: 'ProfOrderСhange',
+                    proxy: {
+                        type: 'ajax',
+                        url: '@Url.Action("GetProfOrderChanges")',
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data'
+                        }
+                    }
+                });
+
+            var proforderChangesWindow = Ext.create('Ext.window.Window',
+                {
+                    title: 'Изменения приказа Минтруда России',
+                    closeToolText: 'Закрыть окно',
+                    closeAction: 'hide',
+                    height: 500,
+                    width: 1430,
+                    layout: 'fit',
+                    viewModel: {
+                        data: {}
+                    },
+                    items: [
+                        {
+                            xtype: 'gridpanel',
+                            store: proforderChangesStore,
+                            viewConfig: {
+                                markDirty: false
+                            },
+                            columnLines: true,
+                            plugins: {
+                                ptype: 'rowediting',
+                                clicksToEdit: 1,
+                                autoCancel: false,
+                                errorsText: 'Ошибка',
+                                dirtyText: 'Вам необходимо подтвердить или отменить изменения',
+                                listeners: {
+                                    cancelEdit: function(rowEditing, context) {
+                                        if (context.record.phantom) {
+                                            proforderChangesStore.remove(context.record);
+                                        }
+                                    }
+                                },
+                                saveBtnText: "Сохранить",
+                                cancelBtnText: "Отмена"
+                            },
+                            columns: {
+                                items:[
+                                    { xtype: 'rownumberer',width: 40,  flex: 0},
+                                {
+                                    header: 'Номер внесения изменений в профессиональный стандарт',
+                                    dataIndex: 'NumberOfMintrud',
+                                    align: 'center',
+                                    cellWrap: true,
+                                    sortable: true,
+                                    field: {
+                                        xtype: 'textfield'
+                                    }
+                                },
+                                {
+                                    header: 'Дата внесения изменений в профессиональный стандарт',
+                                    dataIndex: 'DateOfMintrud',
+                                    align: 'center',
+                                    cellWrap: true,
+                                    sortable: true,
+                                    renderer: Ext.util.Format.dateRenderer('d.m.Y'),
+                                    field: {
+                                        xtype: 'datefield',
+                                        startDay: 1,
+                                        invalidText: "{0} не является правильной датой - дата должна быть указана в формате дд.мм.гг ",
+                                        formatText: "Дата должна быть указана в формате дд.мм.гг"
+                                    }
+                                },
+                                {
+                                    header: 'Регистрационный номер Минюста России',
+                                    dataIndex: 'RegNumberOfMinust',
+                                    align: 'center',
+                                    cellWrap: true,
+                                    sortable: true,
+                                    field: {
+                                        xtype: 'textfield'
+                                    }
+                                },
+                                {
+                                    header: 'Дата регистрационного номера Минюста России',
+                                    dataIndex: 'RegNumberDateOfMinust',
+                                    align: 'center',
+                                    cellWrap: true,
+                                    sortable: true,
+                                    renderer: Ext.util.Format.dateRenderer('d.m.Y'),
+                                    field: {
+                                        xtype: 'datefield',
+                                        startDay: 1,
+                                        invalidText: "{0} не является правильной датой - дата должна быть указана в формате дд.мм.гг ",
+                                        formatText: "Дата должна быть указана в формате дд.мм.гг"
+                                    }
+                                },
+                                {
+                                    header: 'Статус',
+                                    dataIndex: 'Status',
+                                    align: 'center',
+                                    flex:1/2,
+                                    editor: {
+                                        xtype: 'combobox',
+                                        editable: false,
+                                        store: StatusesStore,
+                                        displayField: 'StatusName',
+                                        valueField: 'StatusName'
+                                    }
+                                },
+                                {
+                                    xtype: 'actioncolumn',
+                                    menuDisabled: true,
+                                    width: 50,
+                                    flex: 0,
+                                    hidden: '@ViewBag.CanEdit' == 'False',
+                                    items: [
+                                        {
+                                            icon: '@Url.Content("/Content/Images/remove.png")',
+                                            iconCls: 'icon-padding',
+                                            tooltip: 'Удалить',
+                                            handler: function(grid, rowIndex, colIndex, item, e, record) {
+                                                Ext.MessageBox.show({
+                                                    title: 'Уведомление',
+                                                    msg: "Удалить запись?",
+                                                    buttons: Ext.MessageBox.YESNO,
+                                                    fn: function(btn) {
+                                                        if (btn === 'yes') {
+                                                            if (record.phantom) {
+                                                                proforderChangesStore.removeAt(rowIndex);
+                                                                return;
+                                                            }
+                                                            Ext.Ajax.request({
+                                                                method: 'GET',
+                                                                url: '@Url.Action("RemoveProfOrderChange")',
+                                                                params: { ProfOrderChangeId: record.get('ProfOrderChangeID') },
+                                                                success: function() {
+                                                                    Ext.MessageBox.show({
+                                                                        title: 'Информационное сообщение',
+                                                                        msg: 'Запись удалена успешно',
+                                                                        buttons: Ext.MessageBox.OK
+                                                                    });
+                                                                    proforderChangesStore.removeAt(rowIndex);
+                                                                },
+                                                                failure: function(response) {
+                                                                    console.log(response.status);
+                                                                }
+
+                                                            });
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    ]
+                                }
+                                ],
+                                defaults: {
+                                    flex: 1
+                                }
+                            },
+                        dockedItems: [
+                        {
+                            xtype: 'toolbar',
+                            dock: 'top',
+                            layout: {
+                                align: 'left',
+                                type: 'vbox'
+                            },
+                            items: [
+                                { xtype: 'tbtext', bind: { html: '<b>Код профессионального стандарта : </b><span class="first">{ProfStandardCode}' }, margin: '10 0 0 5' },
+                                { xtype: 'tbtext', bind: { html: '<b>Номер приказа Минтруда России : </b>{NumberOfMintrud}' }, margin: '10 0 0 5' },
+                                { xtype: 'tbtext', bind: { html: '<b>Дата приказа Минтруда России : </b>{DateOfMintrud}' }, margin: '10 0 0 5' },
+                                { xtype: 'tbtext', bind: { html: '<b>Регистрационный номер Минюста России : </b>{RegNumberOfMinust}' }, margin: '10 0 0 5' },
+                                { xtype: 'tbtext', bind: { html: '<b>Дата регистрационного номера Минюста России : </b>{RegNumberDateOfMinust}' }, margin: '10 0 0 5' },
+                                { xtype: 'tbtext', bind: { html: '<b>Статус : </b>{Status}' }, margin: '10 0 10 5' },
+                                {
+                                    xtype: 'button',
+                                    text: 'Добавить изменение',
+                                    hidden: '@ViewBag.CanEdit' == 'False',
+                                    handler: function() {
+                                        rowEditing = proforderChangesWindow.query('gridpanel')[0].findPlugin('rowediting');
+                                        var rec = new ProfOrderСhange();
+                                        rec.setMainproforder(proforderChangesWindow.viewModel.get('ProfOrderId'));
+                                        proforderChangesStore.insert(0, rec);
+                                        rowEditing.startEdit(rec, 0);
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    listeners: {
+                        beforeedit: function(editor, e) {
+                            if ('@ViewBag.CanEdit' == 'False') return false;
+                            editor.getEditor().items.items[editor.getEditor().items.length - 1].disable()
+                        },
+                        edit: function(editor, e) {
+                            if (!e.record.isValid()) {
+                                Ext.Msg.alert('Ошибка ', 'Заполнены не все поля. Приказ не сохранен!');
+                                return;
+                            }
+                            Ext.Ajax.request({
+                                method: 'POST',
+                                url: '@Url.Action("UpdateProforderChange")',
+                                jsonData: e.record.data,
+                                success: function(response) {
+                                    proforderChangesStore.reload();
+                                },
+                                failure: function() {
+                                    e.record.reject();
+                                }
+                            });
+                        }
+                    }
+
+                }
+            ]
+        });
+
+
+        var items = [
+            gridPanel
+        ];
+
+        Urfu.createViewport('border', items);
+    });
+    </script>
+}

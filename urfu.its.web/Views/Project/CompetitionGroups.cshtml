@@ -1,0 +1,842 @@
+﻿
+@{
+    ViewBag.Title = "Проектные группы";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+<script type="text/javascript">
+
+    Ext.onReady(function () {
+
+        var filterName = "ProjectCompetitionGroupsFilters"
+        var checkedNodes = {};
+        Ext.tip.QuickTipManager.init();
+        function gettoken() {
+            var token = '@Html.AntiForgeryToken()';
+            token = $(token).val();
+            return token;
+        }
+
+        Ext.define('Semester',
+           {
+               extend: 'Ext.data.Model',
+               fields:
+               [
+                   "Id", "Name"
+               ]
+           });
+
+
+        var SemestersStore = Ext.create('Ext.data.Store',
+        {
+            model: 'Semester',
+            proxy:
+            {
+                type: 'ajax',
+                url: '/Minors/Semesters',
+                reader: { type: 'json', root: 'data' }
+            },
+
+        });
+        SemestersStore.load();
+
+
+        var store = Ext.create("Ext.data.Store",
+        {
+            idProperty: 'Id',
+            autoLoad: true,
+            //pageSize: 300,
+            remoteSort: false,
+            remoteFilter: true,
+            proxy: {
+                type: 'ajax',
+                url: '@Url.Action("CompetitionGroups")',
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data'
+                }
+            }
+        });
+
+
+        var prevSettings = {};
+        try {
+            var prevSettingString = JSON.parse(localStorage.getItem(filterName) || "[]");
+
+            for (var i = 0; i < prevSettingString.length; i++) {
+                prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+            }
+        } catch (err) {
+
+        }
+
+        var filtersWnd = null;
+        var setFilters = function () {
+            var settings = [
+                { property: 'Name', value: filtersWnd.getComponent("NameField").getValue() },
+                { property: 'StudentCourse', value: filtersWnd.getComponent("StudentCourseField").getValue() },
+                { property: 'Year', value: filtersWnd.getComponent("YearField").getValue() },
+                { property: 'Semester', value: filtersWnd.getComponent("SemesterField").getValue() }
+            ];
+            store.setFilters(settings);
+            localStorage.setItem(filterName, JSON.stringify(settings));
+        };
+
+        filtersWnd = Ext.create('Ext.window.Window', {
+            title: "Фильтры",
+            closeAction: 'hide',
+            resizable: false,
+            autoHeight: true,
+            bodyPadding: 6,
+            defaults: {
+                xtype: 'textfield',
+                width: 500
+            },
+            items: [
+                { fieldLabel: "Название", itemId: "NameField", value: prevSettings["Name"] },
+                { fieldLabel: "Курс", itemId: "StudentCourseField", value: prevSettings["StudentCourse"] },
+                { fieldLabel: "Год", itemId: "YearField", value: prevSettings["Year"] },
+                { fieldLabel: "Семестр", itemId: "SemesterField", xtype: "combobox", store: ["Весенний", "Осенний", "Прочий"], value: prevSettings["Semester"] }
+            ],
+            buttons: [
+                {
+                    text: "OK",
+                    handler: function () {
+                        setFilters();
+                        filtersWnd.hide();
+                    }
+                },
+                {
+                    text: "Отмена",
+                    handler: function () { filtersWnd.hide(); }
+                }
+            ]
+        });
+        setFilters();
+
+        var numbersTest = /[0-6]/;
+
+        Ext.apply(Ext.form.field.VTypes, {
+            numbers: function (val, field) {
+                return numbersTest.test(val);
+            },
+            numbersText: 'Курс должен быть с 1 по 6. Если курс не важен, введите 0'
+        });
+
+        function required(value) {
+            return (value != undefined && value.length > 0) ? true : "Поле не может быть пустым";
+        }
+        formPanel = Ext.create('Ext.window.Window',
+            {
+                title: "Редактирование проектных групп",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: false,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 800,
+                },
+                items: [
+
+                 {
+                     xtype: 'hidden',
+                     itemId: 'Id',
+                 },
+                 {
+                     xtype: 'textarea',
+                     fieldLabel: 'Наименование',
+                     itemId: 'Name',
+                     height: 40,
+                     maxLength: 160,
+                     minLength: 1,
+                     cls: 'field-margin',
+                     validator: required
+
+                 },
+                 {
+                     xtype: 'textarea',
+                     fieldLabel: 'Сокращ. название',
+                     itemId: 'ShortName',
+                     height: 40,
+                     maxLength: 160,
+                     minLength: 1,
+                     cls: 'field-margin',
+                     validator: required
+
+                 }, {
+                     xtype: 'textarea',
+                     fieldLabel: 'Сокращ. название',
+                     itemId: 'ShortName',
+                     height: 40,
+                     maxLength: 160,
+                     minLength: 1,
+                     cls: 'field-margin',
+                     validator: required
+                   
+                 }, {
+                     xtype: 'textfield',
+                     fieldLabel: 'Курс',
+                     itemId: 'StudentCourse',
+                     cls: 'field-margin',
+                     hideTrigger: true,
+                     minLength: 1,
+                     maxLength: 1,
+                     vtype: 'numbers',
+                     validator: required
+
+                 }, {
+                     xtype: 'numberfield',
+                     fieldLabel: 'Учебный год',
+                     itemId: 'Year',
+                     hideTrigger: true,
+                     cls: 'field-margin',
+                     minValue: 2014,
+                     validator: required
+
+                 }, {
+                     fieldLabel: "Семестр",
+                     itemId: "SemesterId",
+                     xtype: "combobox",
+                     store: SemestersStore,
+                     valueField: 'Id',
+                     displayField: 'Name',
+                     queryMode: 'remote',
+                     cls: 'field-margin',
+
+                     editable: false,
+                     validator: required
+                 }
+                ],
+                buttons: [
+                    {
+                        id: 'btnOk',
+                        text: "OK",
+                        handler: function () {
+                            var isValid = true;
+                            formPanel.items.items.forEach(function (element, index, array) {
+                                if (!element.isValid()) isValid = false;
+                            });
+                            if (!isValid) return false;
+                            Ext.getBody().mask('Сохранение...');
+                            Ext.Ajax.request({
+                                url: '@Url.Action("CreateOrUpdateCompetitionGroup")',
+                                params: {
+                                    Id: formPanel.getComponent("Id").getValue() ? formPanel.getComponent("Id").getValue() : 0,
+                                    Name: formPanel.getComponent("Name").getValue(),
+                                    ShortName: formPanel.getComponent("ShortName").getValue(),
+                                    StudentCourse: formPanel.getComponent("StudentCourse").getValue(),
+                                    Year: formPanel.getComponent("Year").getValue(),
+                                    SemesterId: formPanel.getComponent("SemesterId").getValue(),
+                                    __RequestVerificationToken: gettoken()
+                                },
+                                success: function (response) {
+                                    Ext.getBody().unmask();
+                                    store.reload();
+
+                                },
+                                failure: function (response) {
+                                    Ext.getBody().unmask();
+                                }
+                            });
+                            formPanel.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { formPanel.hide(); }
+                    }
+                ]
+            });
+        var clearFormFields = function () {
+            setValuesToForm({});
+        };
+        function setValuesToForm(params) {
+            formPanel.items.items.forEach(function (element, index, array) {
+                if (params[element.itemId] != undefined)
+                    element.setValue(params[element.itemId]);
+                else {
+                    element.setValue('');
+                    element.clearInvalid();
+                    var studentCourse = formPanel.getComponent('StudentCourse');
+                    studentCourse.setReadOnly(false);
+                    studentCourse.minValue = 1;
+                    studentCourse.maxValue = 6;
+                }
+            });
+        }
+         Ext.define('BadGroup', {
+            extend: 'Ext.data.Model',
+            fields: [
+                { name: 'competitionGroupName', type: 'string' },
+                { name: 'group', type: 'string' },
+                { name: 'groupId', type: 'string' },
+            ]
+        });
+
+        badGroupsStore = Ext.create("Ext.data.Store",
+        {
+            model: 'BadGroup',
+            proxy: {
+                type: "memory",
+                reader: {
+                    type: "json"
+                }
+            }
+            });
+          function downloadBadGroups() {
+            
+              var xhr = new XMLHttpRequest();
+              //set the request type to post and the destination url to '/convert'
+              xhr.open('POST', '@Url.Action("DownloadBadGroups")');
+              //set the reponse type to blob since that's what we're expecting back
+              xhr.responseType = 'blob';
+              xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+
+              xhr.send(JSON.stringify({ badGroups: Ext.pluck(badGroupsStore.data.items, 'data') }));
+
+              xhr.onload = function (e) {
+                  if (this.status == 200) {
+                      // Create a new Blob object using the response data of the onload object
+                      var blob = new Blob([this.response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                      //Create a link element, hide it, direct it towards the blob, and then 'click' it programatically
+                      var a = document.createElement("a");
+                      a.style = "display: none";
+                      document.body.appendChild(a);
+                      //Create a DOMString representing the blob and point the link element towards it
+                      var url = window.URL.createObjectURL(blob);
+                      a.href = url;
+                      a.download = 'Несоответствие состава проектных групп.xlsx';
+                      //programatically click the link to trigger the download
+                      a.click();
+                      //release the reference to the file by revoking the Object URL
+                      window.URL.revokeObjectURL(url);
+                  } else {
+                      //deal with your error state here
+                  }
+              };
+
+        }
+        badGroups = Ext.create('Ext.window.Window',
+        {
+            title: "Данные группы включены в другие проектные группы",
+            closeAction: 'hide',
+            resizable: false,
+            autoHeight: false,
+            bodyPadding: 6,
+            height: 500,
+            defaults: {
+                width: 800,
+            },
+            items: [
+
+                {
+                    xtype: 'grid',
+                    id: 'teachersGrid',
+                    store: badGroupsStore,
+                    height: 400,
+                    tbar: [
+                        {
+                            xtype: 'button',
+                            text: "Открыть в Excel",
+                            handler: function () {
+                                downloadBadGroups();
+                            }
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 60 },
+                        {
+                            header: 'Группа',
+                            dataIndex: 'group',
+                            width: 300,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip,
+
+
+                        },
+                        {
+                            header: 'Проектные группа',
+                            dataIndex: 'competitionGroupName',
+                            width: 300,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip,
+                        },
+
+
+                    ],
+                    viewConfig :
+                    {
+                        enableTextSelection: true
+
+                    },
+
+                },
+
+            ],
+            buttons: [
+                {
+                    text: "ОК",
+                    handler: function() { badGroups.hide(); }
+                }
+            ]
+
+        });
+        treePanelCollapsed = true;
+        treePanel = {};
+        treeStore = Ext.create("Ext.data.TreeStore",
+        {
+            //idProperty: 'id',
+            autoLoad: true,
+            remoteFilter: true,
+            root: {
+                text: 'Root',
+                id: 'rootId',
+                expanded: false
+            },
+            //pageSize: 300,
+            fields: ['text', {
+                name: 'checked',
+                defaultValue: false
+            }],
+            proxy: {
+                type: 'ajax',
+                url: '@Url.Action("CompetitionGroupContentsTree")',
+                reader: {
+                    type: 'json',
+                    root: 'children'
+                }
+            },
+            listeners: {
+                'load': function () {
+
+                    if (treePanel.isMasked()) treePanel.unmask();
+                    colExpTree();
+                }
+            }
+        });
+        function colExpTree() {
+            var treeView = treePanel.getComponent('treeView');
+            if (treeView == undefined) return;
+            if (treePanelCollapsed) treeView.collapseAll(treeView);
+            else treeView.expandAll(treeView);
+        }
+        treePanel = Ext.create('Ext.window.Window',
+            {
+                title: "Редактирование проектных групп",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: false,
+                bodyPadding: 6,
+                height: 500,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 800,
+
+                },
+                tbar: [
+                    {
+                        xtype: 'textfield',
+                        fieldLabel: 'Группа',
+                        itemId: 'GroupName',
+
+                    },
+                    {
+                        xtype: 'button',
+                        icon: '../Content/Images/search.png',
+                        handler: function () {
+                            var settings = [
+                                { property: 'Name', value: Ext.ComponentQuery.query('#GroupName')[0].getValue() },
+                            ];
+                            treePanel.mask();
+                            treeStore.setFilters(settings);
+                            treePanelCollapsed = false;
+                            colExpTree();
+                        }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Развернуть\\Свернуть группировку",
+                        handler: function () {
+                            treePanelCollapsed = !treePanelCollapsed;
+                            colExpTree();
+                        }
+                    }
+                ],
+                items: [
+                      {
+                          xtype: 'hidden',
+                          itemId: 'Id',
+                    },
+                    {
+                        xtype: 'hidden',
+                        itemId: 'CanEdit',
+                    },
+                    {
+                        xtype: 'treepanel',
+                        rootVisible: false,
+                        id: 'treeView',
+                        store: treeStore,
+                        height: 350,
+                        listeners: {
+                            checkchange: function (node, checked) {
+                                checkchange_base(node, checked)
+                                if (!checked) {
+                                    //Ext.Msg.alert('Внимание!', 'При удалении академической группы из состава конкурсной группы все зачисления студентов будут удалены!', Ext.emptyFn);
+                                    Ext.MessageBox.show({
+                                        title: 'Внимание!', 
+                                        msg: 'При удалении академической группы из состава проектной группы все зачисления студентов будут удалены!',
+                                        buttons: Ext.MessageBox.OKCANCEL,
+                                        fn: function(button) {
+                                            if ('cancel' == button) {
+                                                node.set('checked',true);
+                                            }
+                                        },
+                                        icon: Ext.MessageBox.WARNING,    // иконка мб {ERROR,INFO,QUESTION,WARNING}
+                                        closable: true
+                                    });
+
+                                }
+                            }
+                        },
+                         updateTreeView: function(tree, fn) {
+                            var view = tree.getView();
+                            view.getStore().loadRecords(fn(tree.getRootNode()));
+                            view.refresh();
+                        },
+                        collapseAll: function (tree) {
+                            this.updateTreeView(tree, function (root) {
+                                root.cascadeBy(function (node) {
+                                    if (!node.isRoot() || tree.rootVisible) {
+                                        node.data.expanded = false;
+                                    }
+                                });
+                                return tree.rootVisible ? [root] : root.childNodes;
+                            });
+                        },
+
+                        expandAll: function (tree) {
+                            this.updateTreeView(tree, function (root) {
+                                var nodes = [];
+                                root.cascadeBy(function (node) {
+                                    if (!node.isRoot() || tree.rootVisible) {
+                                        node.data.expanded = true;
+                                        nodes.push(node);
+                                    }
+                                });
+                                return nodes;
+                            })
+                        },
+                    }
+                ],
+                buttons: [
+                    {
+                        text: "Сохранить",
+                        handler: function () {
+                            var canEdit = treePanel.getComponent("CanEdit").getValue();
+                            if (canEdit == "false") {
+                                Ext.MessageBox.alert('Ошибка', "У вас нет прав вносить изменения");
+                                treePanel.hide();
+                                return;
+                            }
+
+                            treePanel.mask('Сохранение..');
+                            var groupsIds = [];
+                            treeStore.getRootNode().cascadeBy(function (node) {
+                                if (node.data.leaf && node.data.checked) {
+                                    groupsIds.push(node.data.nodeId);
+                                }
+                            });
+                            var deselectedGroups = [];
+                            treeStore.getRootNode().cascadeBy(function (node) {
+                                if (node.data.leaf && !node.data.checked) {
+                                    deselectedGroups.push(node.data.nodeId);
+                                }
+                            });
+
+
+                            Ext.Ajax.request({
+                                method: 'POST',
+                                url: '@Url.Action("UpdateCompetitionGroupContents")',
+                                params: {
+                                    competitionGroupId: treePanel.getComponent("Id").getValue(),
+                                    groupsIds: groupsIds,
+                                    deselectedGroups: deselectedGroups,
+                                    isFiltered: Ext.ComponentQuery.query('#GroupName')[0].getValue() != "",
+                                    __RequestVerificationToken: gettoken()
+                                },
+                                success: function (response) {
+                                    var data = JSON.parse(response.responseText);
+                                    treePanel.unmask();
+                                    treePanel.hide();
+                                    store.reload();
+                                    if (data.length > 0) {
+                                        badGroupsStore.loadData(data);
+                                        badGroups.show();
+                                    }
+                                },
+                                failure: function (response) {
+                                    treePanel.unmask();
+                                    treePanel.hide();
+                                }
+                            });
+
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { treePanel.hide(); }
+                    }],
+                listeners: {
+                    'shown': function () {
+
+                    }
+                }
+            });
+        var tpl = '<a href="/ProjectAdmission/Index?competitionGroupId={Id}">Зачисления</a> | ' +
+            '<a href="/ProjectAdmission/PrepareAuto?competitionGroupId={Id}">Автозачисления</a> | ' +
+              '<a href="/ProjectSubgroupMeta/Index?competitionGroupId={Id}">Подгруппы</a>';
+
+
+        var gridPanel = Ext.create('Ext.grid.Panel',
+        {
+            region: 'center',
+            store: store,
+            loadMask: true,
+            columnLines: true,
+            tbar: [
+                {
+                    xtype: 'button',
+                    text: 'Фильтры...',
+                    handler: function () { filtersWnd.show(); }
+                },
+                    {
+                        xtype: 'button',
+                        text: "Отменить фильтры",
+                        handler: function () {
+                            store.clearFilter();
+                            localStorage.setItem(filterName, "[]");
+                        }
+                    }, '-',
+                    {
+                        xtype: 'button',
+                        text: 'Добавить проектную группу',
+                        disabled: '@ViewBag.CanEdit' == 'False',
+                        handler: function () {
+                            formPanel.setTitle("Добавление проектной группы");
+                            var btn = Ext.getCmp('btnOk');
+                            btn.setText('Добавить проектную группу');
+                            clearFormFields();
+                            formPanel.show();
+                        }
+                    }
+            ],
+            columns: [
+                {
+                    header: 'Номер',
+                    dataIndex: 'Id',
+                    width: 90,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Наименование',
+                    dataIndex: 'Name',
+                    width: 600,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Сокращ. название',
+                    dataIndex: 'ShortName',
+                    width: 150,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Курс',
+                    dataIndex: 'StudentCourse',
+                    width: 70,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Год',
+                    dataIndex: 'Year',
+                    width: 100,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Семестр',
+                    dataIndex: 'Semester',
+                    width: 125,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                }, {
+                    header: 'Группы',
+                    dataIndex: 'SelectedGroupsCount',
+                    width: 125,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                }, {
+                    header: 'Зачислено',
+                    dataIndex: 'AdmissionCount',
+                    width: 125,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    xtype: 'actioncolumn',
+
+                    region: 'center',
+                    width: 120,
+                    defaults: {
+                        metadata: {
+                            attr: 'style="padding-left:10px;width:auto;"'
+                        }
+                    },
+                    items: [
+                    {
+                        icon: '@Url.Content("~/Content/Images/edit.png")',  // Use a URL in the icon config
+                        iconCls: 'icon-padding',
+                        tooltip: 'Изменить проектную группу',
+                        handler: function (grid, rowIndex, colIndex) {
+                            var rec = grid.getStore().getAt(rowIndex);
+                            if (rec.data.canEdit) {
+                                setValuesToForm(rec.data);
+                                formPanel.setTitle('Редактирование проектных групп');
+                                var btn = Ext.getCmp('btnOk');
+                                btn.setText('Сохранить');
+                                var studentCourse = formPanel.getComponent('StudentCourse');
+                                studentCourse.setReadOnly(rec.data.HasAdmissions);
+                                formPanel.show();
+                            }
+                            else {
+                                Ext.MessageBox.alert('Ошибка', "У вас нет прав вносить изменения");
+                            }
+                        }
+                    }, {
+                        icon: '@Url.Content("~/Content/Images/remove.png")',
+                        iconCls: 'icon-padding',
+                        tooltip: 'Удалить проектную группу',
+                        handler: function (grid, rowIndex, colIndex) {
+                            var rec = grid.getStore().getAt(rowIndex);
+                            if (rec.data.canEdit) {
+                                var request = function () {
+                                    var rec = grid.getStore().getAt(rowIndex);
+                                    Ext.Ajax.request({
+                                        //method: 'POST',
+                                        url: '@Url.Action("DeleteCompetitionGroup")',
+                                        params: {
+                                            id: rec.get("Id"),
+                                            __RequestVerificationToken: gettoken()
+                                        },
+                                        success: function (response) {
+                                            if (response.responseText != "") {
+                                                var data = Ext.decode(response.responseText);
+                                                if (data.success)
+                                                    store.reload();
+                                                else
+                                                    Ext.MessageBox.show({
+                                                        title: 'Информационное сообщение',
+                                                        msg: data.message,
+                                                        buttons: Ext.MessageBox.OK
+                                                    });
+                                            }
+                                        },
+                                        failure: function (response) {
+                                            Ext.MessageBox.show({
+                                                title: 'Информационное сообщение',
+                                                msg: "Неизвестная ошибка",
+                                                buttons: Ext.MessageBox.OK
+                                            });
+                                        }
+                                    });
+                                }
+                                Ext.MessageBox.show({
+                                    title: 'Информационное сообщение',
+                                    msg: "Вы хотите удалить Проектную группу со всеми данными по зачислениям и подгруппам?",
+                                    buttons: Ext.MessageBox.YESNO,
+                                    fn: function (btn) {
+                                        if (btn === 'yes') {
+                                            request();
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                Ext.MessageBox.alert('Ошибка', "У вас нет прав вносить изменения");
+                            }
+                        }
+                    },
+                    {
+                        icon: '@Url.Content("~/Content/Images/list_bullets.png")',
+                        iconCls: 'icon-padding',
+                        tooltip: 'Состав проектной группы',
+                        handler: function (grid, rowIndex, colIndex) {
+                            var rec = grid.getStore().getAt(rowIndex);
+                            treePanel.getComponent('Id').setValue(rec.get('Id'));
+                            treePanel.getComponent('CanEdit').setValue(rec.get('canEdit'));
+                            Ext.ComponentQuery.query('#GroupName')[0].setValue("");
+                            treePanel.show();
+                            treePanel.mask('Загрузка');
+                            checkedNodes = {};
+                            treeStore.proxy.setUrl('@Url.Action("CompetitionGroupContentsTree")?course=' + rec.get('StudentCourse') + '&competitionGroupId=' + rec.get('Id'));
+
+                            treePanelCollapsed = true;
+                            if (treeStore.isFiltered())
+                                treeStore.clearFilter();
+                            else
+                                treeStore.reload();
+                            colExpTree();
+
+                        }
+
+                    },
+                    {
+                        icon: '@Url.Content("~/Content/Images/bag2.png")',  // Use a URL in the icon config
+                        iconCls: 'icon-padding',
+                        text: 'Проекты',
+                        tooltip: 'Проекты',
+                        handler: function (grid, rowIndex, colIndex) {
+                            var rec = grid.getStore().getAt(rowIndex);
+
+                            window.location = "@Url.Action("Properties")?competitionGroupId=" + rec.get('Id');
+                        }
+                    }
+
+                    ]
+                },
+                    {
+                        xtype: 'templatecolumn',
+                        sortable: false,
+                        tpl: tpl,
+                        width: 420
+                    }
+            ],
+            //selModel: {
+            //    selType: 'checkboxmodel',
+            //    headerWidth: 30
+            //}
+            });
+
+        gridPanel.getStore().on('load', function(store, records, options) {
+            var queryString = window.location.search;
+            var urlParams = new URLSearchParams(queryString);
+            var focus = urlParams.get('focus');
+            if (focus && focus.length > 0) {
+                var focusRow = store.findExact('Id', parseInt(focus));
+                if (focusRow > 0) {
+                    var rowData = store.getAt(focusRow);
+                    gridPanel.getView().focusRow(rowData);
+                    gridPanel.getSelectionModel().select(rowData);
+                }
+            }
+        });
+
+        treeStore.listeners = {
+
+        };
+
+        
+
+        var items = [
+            gridPanel
+        ];
+
+        Urfu.createViewport('border', items);
+
+    });
+</script>
+

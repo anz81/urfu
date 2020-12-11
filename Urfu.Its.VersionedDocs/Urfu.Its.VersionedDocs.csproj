@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="Properties\AssemblyInfo.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="Autofac" Version="4.9.1" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.10" />
+	  <PackageReference Include="Sandwych.QuickGraph.Core" Version="1.0.0" />
+	  <PackageReference Include="System.Reflection" Version="4.3.0" />
+	  <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+	  <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
+	  <PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\TemplateEngine\TemplateEngine.csproj">
+			<Project>{F663A930-A496-4C5C-B123-F97831417AD8}</Project>
+			<Name>TemplateEngine</Name>
+		</ProjectReference>
+		<ProjectReference Include="..\Urfu.Its.Common\Urfu.Its.Common.csproj">
+			<Project>{428583D8-56B6-4283-BAB1-A60A88F77E23}</Project>
+			<Name>Urfu.Its.Common</Name>
+		</ProjectReference>
+		<ProjectReference Include="..\Urfu.Its.Web.Model\Urfu.Its.Web.Model.csproj">
+			<Project>{0A35D37B-9127-4258-AAA6-88D9D3826D1F}</Project>
+			<Name>Urfu.Its.Web.Model</Name>
+		</ProjectReference>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Properties\" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,103 @@
+﻿@model Urfu.Its.Web.Models.CreateVariantViewModel
+
+@{
+    ViewBag.Title = "Создание траектории";
+}
+
+
+<h2>@ViewBag.Title</h2>
+
+
+@using (Html.BeginForm()) 
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        
+        <hr />
+        @Html.ValidationSummary(true)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, new {@class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Name)
+                @Html.ValidationMessageFor(model => model.Name)
+            </div>
+        </div>
+        
+        <div class="form-group">
+            @Html.LabelFor(model => model.directionId, "Направление", new {@class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.DropDownList("directionId", String.Empty)
+                @Html.ValidationMessageFor(model => model.directionId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.EduProgramId, "Образовательная программа", new {@class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.DropDownList("EduProgramId", String.Empty)
+                @Html.ValidationMessageFor(model => model.EduProgramId)
+            </div>
+        </div>
+        @*
+        <div class="form-group">
+            @Html.LabelFor(model => model.CopyFromVariantId, "Копировать из траектории", new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("CopyFromVariantId", String.Empty)
+                @Html.ValidationMessageFor(model => model.CopyFromVariantId)
+            </div>
+        </div>*@
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Создать" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Назад к списку", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+<script>
+    $(document).ready(function () {
+        $("#directionId").change(function () {
+/*
+            var directionsQuery = {};
+            directionsQuery.url = "/api/variantnames?okso=&directionId=" + $("#directionId").val();
+            directionsQuery.type = "GET";
+            directionsQuery.datatype = "json";
+            directionsQuery.contentType = "application/json";
+            directionsQuery.success = function (variantsList) {
+                $("#CopyFromVariantId").empty();
+                for (var i = 0; i < variantsList.length; i++) {
+                    $("#CopyFromVariantId").append("<option value=" + variantsList[i].id + ">" + variantsList[i].variantName + "</option>");
+                }
+                $("#CopyFromVariantId").append("<option value></option>");
+            };
+            directionsQuery.error = function () { alert("Ошибка получения списка траекторий"); };
+            $.ajax(directionsQuery);*/
+
+
+            var programsQuery = {};
+            programsQuery.url = "/api/programnames?okso=&directionId=" + $("#directionId").val();
+            programsQuery.type = "GET";
+            programsQuery.datatype = "json";
+            programsQuery.contentType = "application/json";
+            programsQuery.success = function (programsList) {
+                $("#EduProgramId").empty();
+                for (var i = 0; i < programsList.length; i++) {
+                    $("#EduProgramId").append("<option value=" + programsList[i].id + ">" + programsList[i].programName + "</option>");
+                }
+            };
+            programsQuery.error = function () { alert("Ошибка получения списка образовательный программ"); };
+            $.ajax(programsQuery);
+        });
+    });
+</script>
+}

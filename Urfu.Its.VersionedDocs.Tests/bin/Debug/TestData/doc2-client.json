@@ -1,0 +1,36 @@
+{
+  "Annotation": "TestAnnotation",
+  "Info": {
+    "Name": "TestName",
+    "ClientProperty1": true 
+  },
+  "Authors": [
+    {
+      "Id": 1,
+      "Fio": "TestFio",
+      "Post": "TestPost",
+      "Degree": "TestDegree",
+      "TeacherId": "TestTeacherId",
+      "AuthorId": null,
+      "id": "client id"
+    },
+    {
+      "Id": 2,
+      "Fio": "TestFio2",
+      "Post": "TestPost2",
+      "Degree": "TestDegree2",
+      "TeacherId": null,
+      "AuthorId": 2,
+      "id": "client id2"
+    }
+  ],   
+  "ArrayWithObjectHierarchy": [
+    {
+      "InnerObject": {
+        "Property": 1,
+        "ClientProperty": 2
+      },
+      "ClientProperty": 3 
+    }
+  ]
+}

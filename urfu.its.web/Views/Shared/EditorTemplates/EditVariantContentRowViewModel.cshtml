@@ -1,0 +1,49 @@
+﻿@model Urfu.Its.Web.Models.EditVariantContentRowViewModel
+
+<tr>
+        @Html.HiddenFor(model => model.ModuleId)
+        @Html.HiddenFor(model => model.Base)
+        @Html.HiddenFor(model => model.GroupType)
+    <td>
+        @Html.DisplayFor(model => model.RowNum)
+    </td>
+    <td style="text-align: center">
+        @if (Model.Base)
+        {
+            <div>В основной</div>
+        }
+        else
+        {
+            @Html.CheckBoxFor(model => model.Selected, new {onchange = "var requiredFor='" + @Model.RequiredFor + "';if(!this.checked && requiredFor.length>0)alert('Этот модуль является пререквизитом для '+requiredFor);"})
+        }
+    </td>
+    <td>
+        @Html.ActionLink(Model.ModuleName, "Plans", new {moduleId = Model.ModuleId, variantId = Model.VariantId})
+    </td>
+    <td>
+        @Html.DisplayFor(model => model.TestUnits)
+    </td>
+    <td style="text-align: center">
+        @Html.DisplayFor(model => model.GroupType)
+    </td>
+    <td style="text-align: center">
+        @Html.DropDownListFor(model => model.ModuleTypeId, (List<SelectListItem>)@ViewBag.ModuleTypes, htmlAttributes: Model.Base ? (object)new { @disabled = "disabled", @class = "form-control" } : new { @class = "form-control" })
+    </td>
+    <td style="text-align: center">
+        @Html.EditorFor(model => model.Selectable, new { htmlAttributes = Model.Base ? (object)new { @disabled = "disabled" } : new { } })
+    </td>
+    <td>
+        @Html.DisplayFor(model => model.Limits, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.ValidationMessageFor(model => model.Limits, "", new {@class = "text-danger"})
+    </td>
+    <td>
+        @Html.DisplayFor(model => model.Terms, new { htmlAttributes = new { @class = "form-control" } })
+    </td>
+    <td style="text-align: center">
+        @Html.DropDownListFor(model => model.SelectionGroupId, Model.SelectionGroups, htmlAttributes: Model.Base ? (object)new { @disabled = "disabled", @class = "form-control" } : new { @class = "form-control" })
+    </td>
+    <td style="text-align: center">
+        @Html.DisplayFor(model => model.PlanInfo)
+    </td>
+</tr>
+

@@ -1,0 +1,302 @@
+﻿@using Urfu.Its.Web.Model.Models
+@using Urfu.Its.Web.Models
+@model Urfu.Its.Web.DataContext.Module
+@{
+    ViewBag.Title = "Дисциплины модуля " + Model.title;
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+
+    var canManageWorkingPrograms = User.IsInRole(ItsRoles.WorkingProgramManager);
+    var canViewWorkingPrograms = User.IsInRole(ItsRoles.WorkingProgramView);
+    var showWorkingPrograms = canViewWorkingPrograms || canManageWorkingPrograms;
+}
+@section scripts
+{
+    <script src="@Url.Content("~/Scripts/VersionedDocs/versionedDocs.js")"></script>
+
+    <script type="text/javascript">
+        var moduleId = '@Model.uuid';
+        var canEditWorkingPrograms = @(canManageWorkingPrograms ? "true" : "false");
+
+        Ext.onReady(function() {
+            Ext.tip.QuickTipManager.init();
+            disciplinesStore = Ext.create("Ext.data.Store",
+                {
+                    fields: ["id", "title", "section", "testUnits", "file", "WorkingProgramResponsiblePersons"],
+                    autoLoad: true,
+                    proxy: {
+                        type: 'ajax',
+                        url: '/Modules/DisciplinesByModule?moduleId=@Model.uuid',
+                        reader: {
+                            type: 'json'
+                        }
+                    }
+
+                });
+
+            Ext.define('comboModel',
+                {
+                    extend: 'Ext.data.Model',
+                    fields: ["Id", "Name"]
+                });
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: disciplinesStore,
+                    loadMask: true,
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        {
+                            header: 'Название дисциплины',
+                            dataIndex: 'title',
+                            width: 500,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Тип',
+                            dataIndex: 'section',
+                            width: 210,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Зачётные единицы',
+                            align: 'center',
+                            dataIndex: 'testUnits',
+                            width: 180,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            xtype: 'templatecolumn',
+                            tpl: ' <a href="{file}">Файл</a>',
+                            width: 220
+                        },
+                        @if (showWorkingPrograms)
+                        {
+                            <text>
+                                {
+                                    xtype: 'actioncolumn',
+                                    header: 'Рабочая программа',
+                                    region: 'center',
+                                    width: 200,
+                                    defaults: {
+                                        metadata: {
+                                            attr: 'style="padding-left:10px;width:auto;"'
+                                        }
+                                    },
+                                    items: [
+                                        {
+                                            icon: '@Url.Content("~/Content/Images/document-go.png")',
+                                            iconCls: 'icon-padding',
+                                            text: 'Изменить',
+                                            tooltip: 'Изменить',
+                                            handler: function(grid, rowIndex, colIndex) {
+                                                var rec = grid.getStore().getAt(rowIndex);
+                                                var formPanel = Ext.create('VersionedDocs.Selector',
+                                                    {
+                                                        documentKind: @((int) DocumentKind.Discipline),
+                                                        linkedEntityId: rec.get('uid'),
+                                                        canView: @(canViewWorkingPrograms ? "true" : "false"),
+                                                        canEdit: canEditWorkingPrograms
+                                                    });
+                                                formPanel.show();
+                                            }
+                                        }, {
+                                            icon: '@Url.Content("~/Content/Images/teacher.png")',
+                                            getClass: function(v, meta, rec) {          // Or return a class from a function
+                                                if (!canEditWorkingPrograms)
+                                                    return 'x-hidden';
+                                                return 'icon-padding';
+                                            },
+                                            text: 'Назначить разработчиков РП',
+                                            tooltip: 'Назначить разработчиков РП',
+                                            handler: function(grid, rowIndex, colIndex) {
+                                                var rec = grid.getStore().getAt(rowIndex);
+                                                var formPanel = createWpResponsiblePersonsSelectorWindow(rec);
+                                                formPanel.show();
+                                            }
+                                        }
+                                    ]
+                                }
+                            </text>
+                        },
+                        {
+                            header: 'Пользователи',
+                            dataIndex: 'users',
+                            width: 500,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                    ]
+                });
+
+            Urfu.createViewport('border', [gridPanel]);
+        });
+
+        function createWpResponsiblePersonsSelectorWindow(disciplineRecord) {
+            function debounce(func, delay) {
+                var inDebounce;
+                return function() {
+                    var context = this;
+                    var args = arguments;
+                    clearTimeout(inDebounce);
+                    inDebounce = setTimeout(function() { func.apply(context, args) }, delay);
+                }
+            }
+            
+            var debounceFilter = debounce(function(userStore, value) {
+                userStore.clearFilter();
+                userStore.filterBy(function(r) {
+                    var split = value.split(' ').filter(function(i) { return i; });
+                    var r1 = new RegExp(Ext.String.escapeRegex(value), "i");
+                    return (r.get('Fio') || '').match(r1) ||
+                        split.every(function(s) {
+                            var r2 = new RegExp(Ext.String.escapeRegex(s), "i");
+                            return (r.get('LastName') || '').match(r2) ||
+                                (r.get('FirstName') || '').match(r2) ||
+                                (r.get('Patronymic') || '').match(r2);
+                        });
+                });
+            }, 300);
+
+            var window = new Ext.window.Window({
+                closeAction: 'destroy',
+                viewModel: {
+                    stores: {
+                        persons: {
+                            autoLoad: true,
+                            proxy: {
+                                type: 'ajax',
+                                url: '/WorkingPrograms/GetWorkingProgramResponsiblePersons',
+                                extraParams: {
+                                    disciplineId: disciplineRecord.get('uid'),
+                                    moduleId: moduleId
+                                }
+                            },
+                            listeners: {
+                                load: function (_, records) {
+                                    var users = records.filter(function(r) {
+                                        return r.get('IsSelected');
+                                    });
+                                    var mainGrid = Ext.ComponentQuery.query('#mainGrid')[0];
+                                    mainGrid.getSelectionModel().select(users);
+                                }
+                            }
+                        },
+                        selectedPersons: {}
+                    }
+                },
+                title: 'Выбор пользователей',
+                width: 600,
+                height: 600,
+                layout: { type: 'border' },
+                tbar: [
+                    {
+                        xtype: 'textfield',
+                        fieldLabel: 'Поиск',
+                        width: 400,
+                        listeners: {
+                            change: function(field, newValue) {
+                                var store = this.up('window').down('#mainGrid').getStore();
+                                debounceFilter(store, newValue);
+                            }
+                        }
+                    }
+                ],
+                items: [
+                    {
+                        xtype: 'grid',
+                        reference: 'mainGrid',
+                        itemId: 'mainGrid',
+                        region: 'center',
+                        flex: 1,
+                        loadMask: true,
+                        bind: {
+                            store: '{persons}'
+                        },
+                        selModel: Ext.create('Ext.selection.CheckboxModel',
+                            {
+                                listeners: {
+                                    selectionchange: function(grid, selection) {
+                                        var vm = this.view.lookupViewModel();
+                                        vm.get('selectedPersons').setData(selection);
+                                    }
+                                },
+                                checkOnly: true,
+                                allowDeselect: false
+                            }),
+                        columns: [
+                            {
+                                dataIndex: 'Fio',
+                                text: 'ФИО',
+                                flex: 1
+                            }
+                        ]
+                    }, {
+                        xtype: 'grid',
+                        region: 'south',
+                        title: 'Выбранные пользователи',
+                        maxHeight: 244,
+                        minHeight: 144,
+                        bind: {
+                            store: '{selectedPersons}'
+                        },
+                        columns: [
+                            {
+                                dataIndex: 'Fio',
+                                text: 'ФИО',
+                                flex: 1
+                            }, {
+                                xtype: 'actioncolumn',
+                                width: 50,
+                                items: [
+                                    {
+                                        icon: '/Content/Images/remove.png',
+                                        tooltip: 'Удалить',
+                                        handler: function(grid, rowIndex, colIndex, item, e, record) {
+                                            if (confirm('Вы действительно желаете удалить запись из списка?')) {
+                                                this.up('window').down('#mainGrid').getSelectionModel()
+                                                    .deselect(record);
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                buttons: [
+                    {
+                        text: 'ОК',
+                        handler: function () {
+                            var window = this.up('window');
+                            var selection = window.down('#mainGrid').getSelection();
+                            Ext.Ajax.request({
+                                url: '/WorkingPrograms/SetDisciplineWorkingProgramResponsiblePersons',
+                                method: 'POST',
+                                params: {
+                                    disciplineId: disciplineRecord.get('uid'),
+                                    moduleId: moduleId,
+                                    userIds: selection.map(function (r) { return r.get('Id'); })
+                                },
+                                success: function () {
+                                    disciplinesStore.reload();
+                                    window.close();
+
+                                },
+                                failure: function(d) {
+                                    console.error(d.responseText);
+                                    alert(d.responseText);
+                                }
+                            });                                                       
+                        }
+                    }, {
+                        text: 'Отмена',
+                        handler: function() {
+                            this.up('window').close();
+                        }
+                    }
+                ]
+            });
+            return window;
+        }
+    </script>
+}

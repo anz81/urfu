@@ -1,0 +1,323 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Xceed.Words.NET</name>
+    </assembly>
+    <members>
+        <member name="M:Xceed.Words.NET.WordsLicense.CreateLicense(System.String,System.Type)">
+            <summary>
+            Create xceed specific component license here.
+            </summary>
+            <param name="licenseKey"></param>
+            <param name="licenserType"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Xceed.Words.NET.WordsLicense.AllowedVersions">
+            <summary>
+            All the version number supported by this version of the product.
+            </summary>
+            <remarks>
+            The versions should be in descending order beginning with the
+            less restrictive up to the more restrictive.
+            </remarks>
+        </member>
+        <member name="P:Xceed.Words.NET.WordsLicense.LicenseeType">
+            <summary>
+            The type of the class or control that is licensed by this class (or, more
+            exactly, a class derived from this one).
+            </summary>
+            <remarks>
+            If more than one class is licensed by the XceedLicense class, the LicenseeType
+            can simply be typeof( Licenser ).
+            </remarks>
+        </member>
+        <member name="T:Xceed.Words.NET.DocX">
+            <summary>
+            Represents a DocX document.
+            </summary>
+        </member>
+        <member name="M:Xceed.Words.NET.DocX.Create(System.IO.Stream,Xceed.Document.NET.DocumentTypes)">
+             <summary>
+             Creates a document using a Stream.
+             </summary>
+             <param name="stream">The Stream to create the document from.</param>
+             <param name="documentType"></param>
+             <returns>Returns a Document object which represents the document.</returns>
+             <example>
+             Creating a document from a FileStream.
+             <code>
+             // Use a FileStream fs to create a new document.
+             using(FileStream fs = new FileStream(@"C:\Example\Test.docx", FileMode.Create))
+             {
+                 // Load the document using fs
+                 using (var document = DocX.Create(fs))
+                 {
+                     // Do something with the document here.
+            
+                     // Save all changes made to this document.
+                     document.Save();
+                 }// Release this document from memory.
+             }
+             </code>
+             </example>
+             <example>
+             Creating a document in a SharePoint site.
+             <code>
+             using(SPSite mySite = new SPSite("http://server/sites/site"))
+             {
+                 // Open a connection to the SharePoint site
+                 using(SPWeb myWeb = mySite.OpenWeb())
+                 {
+                     // Create a MemoryStream ms.
+                     using (MemoryStream ms = new MemoryStream())
+                     {
+                         // Create a document using ms.
+                         using (var document = DocX.Create(ms))
+                         {
+                             // Do something with the document here.
+            
+                             // Save all changes made to this document.
+                             document.Save();
+                         }// Release this document from memory
+            
+                         // Add the document to the SharePoint site
+                         web.Files.Add("filename", ms.ToArray(), true);
+                     }
+                 }
+             }
+             </code>
+             </example>
+             <seealso cref="M:Xceed.Words.NET.DocX.Load(System.IO.Stream)"/>
+             <seealso cref="M:Xceed.Words.NET.DocX.Load(System.String)"/>
+             <seealso cref="M:Xceed.Words.NET.DocX.Save"/>
+        </member>
+        <member name="M:Xceed.Words.NET.DocX.Create(System.String,Xceed.Document.NET.DocumentTypes)">
+             <summary>
+             Creates a document using a fully qualified or relative filename.
+             </summary>
+             <param name="filename">The fully qualified or relative filename.</param>
+             <param name="documentType"></param>
+             <returns>Returns a Document object which represents the document.</returns>
+             <example>
+             <code>
+             // Create a document using a relative filename.
+             using (var document = DocX.Create(@"..\Test.docx"))
+             {
+                 // Do something with the document here.
+            
+                 // Save all changes made to this document.
+                 document.Save();
+             }// Release this document from memory
+             </code>
+             <code>
+             // Create a document using a relative filename.
+             using (var document = DocX.Create(@"..\Test.docx"))
+             {
+                 // Do something with the document here.
+            
+                 // Save all changes made to this document.
+                 document.Save();
+             }// Release this document from memory
+             </code>
+             <seealso cref="M:Xceed.Words.NET.DocX.Load(System.IO.Stream)"/>
+             <seealso cref="M:Xceed.Words.NET.DocX.Load(System.String)"/>
+             <seealso cref="M:Xceed.Words.NET.DocX.Save"/>
+             </example>
+        </member>
+        <member name="M:Xceed.Words.NET.DocX.Load(System.IO.Stream)">
+             <summary>
+             Loads a document into a Document object using a Stream.
+             </summary>
+             <param name="stream">The Stream to load the document from.</param>
+             <returns>
+             Returns a Document object which represents the document.
+             </returns>
+             <example>
+             Loading a document from a FileStream.
+             <code>
+             // Open a FileStream fs to a document.
+             using (FileStream fs = new FileStream(@"C:\Example\Test.docx", FileMode.Open))
+             {
+                 // Load the document using fs.
+                 using (var document = DocX.Load(fs))
+                 {
+                     // Do something with the document here.
+                        
+                     // Save all changes made to the document.
+                     document.Save();
+                 }// Release this document from memory.
+             }
+             </code>
+             </example>
+             <example>
+             Loading a document from a SharePoint site.
+             <code>
+             // Get the SharePoint site that you want to access.
+             using (SPSite mySite = new SPSite("http://server/sites/site"))
+             {
+                 // Open a connection to the SharePoint site
+                 using (SPWeb myWeb = mySite.OpenWeb())
+                 {
+                     // Grab a document stored on this site.
+                     SPFile file = web.GetFile("Source_Folder_Name/Source_File");
+            
+                     // Document.Load requires a Stream, so open a Stream to this document.
+                     Stream str = new MemoryStream(file.OpenBinary());
+            
+                     // Load the file using the Stream str.
+                     using (var document = DocX.Load(str))
+                     {
+                         // Do something with the document here.
+            
+                         // Save all changes made to the document.
+                         document.Save();
+                     }// Release this document from memory.
+                 }
+             }
+             </code>
+             </example>
+             <seealso cref="M:Xceed.Words.NET.DocX.Load(System.String)"/>
+             <seealso cref="M:Xceed.Words.NET.DocX.Save"/>
+        </member>
+        <member name="M:Xceed.Words.NET.DocX.Load(System.String)">
+             <summary>
+             Loads a document into a Document object using a fully qualified or relative filename.
+             </summary>
+             <param name="filename">The fully qualified or relative filename.</param>
+             <returns>
+             Returns a DocX object which represents the document.
+             </returns>
+             <example>
+             <code>
+             // Load a document using its fully qualified filename
+             using (var document = DocX.Load(@"C:\Example\Test.docx"))
+             {
+                 // Do something with the document here
+            
+                 // Save all changes made to document.
+                 document.Save();
+             }// Release this document from memory.
+             </code>
+             <code>
+             // Load a document using its relative filename.
+             using(var document = DocX.Load(@"..\..\Test.docx"))
+             { 
+                 // Do something with the document here.
+                            
+                 // Save all changes made to document.
+                 document.Save();
+             }// Release this document from memory.
+             </code>
+             </example>
+        </member>
+        <member name="M:Xceed.Words.NET.DocX.Save">
+             <summary>
+             Save this document back to the location it was loaded from.
+             </summary>
+             <example>
+             <code>
+             // Load a document.
+             using (var document = DocX.Load(@"C:\Example\Test.docx"))
+             {
+                 // Add an Image from a file.
+                 document.AddImage(@"C:\Example\Image.jpg");
+            
+                 // Save all changes made to this document.
+                 document.Save();
+             }// Release this document from memory.
+             </code>
+             </example>
+             <seealso cref="M:Xceed.Words.NET.DocX.Load(System.IO.Stream)"/>
+             <seealso cref="M:Xceed.Words.NET.DocX.Load(System.String)"/> 
+             <!-- 
+             Bug found and fixed by krugs525 on August 12 2009.
+             Use TFS compare to see exact code change.
+             -->
+        </member>
+        <member name="M:Xceed.Words.NET.DocX.Copy">
+            <summary>
+            Copy the Document into a new Document
+            </summary>
+            <returns>Returns a copy of a the Document</returns>
+        </member>
+        <member name="T:Xceed.Words.NET.FeatureID">
+            <summary>
+            Contains each feature identifier requiring special 
+            licensing requirements permissions to execute.
+            </summary>
+        </member>
+        <member name="F:Xceed.Words.NET.FeatureID.NoFeatureSpecified">
+            <summary>
+            No feature was specified.
+            </summary>
+        </member>
+        <member name="T:Xceed.Words.NET.LicenseChecker">
+            <summary>
+            This class offers a method to check the validity of a license.
+            </summary>
+        </member>
+        <member name="F:Xceed.Words.NET.LicenseChecker.CheckProperty">
+            <summary>
+            Definition of the Check attached property.
+            </summary>
+        </member>
+        <member name="M:Xceed.Words.NET.LicenseChecker.GetCheck(System.Windows.DependencyObject)">
+            <summary>
+            Definition of the Check attached property.
+            </summary>
+        </member>
+        <member name="M:Xceed.Words.NET.LicenseChecker.SetCheck(System.Windows.DependencyObject,System.Boolean)">
+            <summary>
+            Sets the Check attached property.
+            </summary>
+        </member>
+        <member name="M:Xceed.Words.NET.LicenseChecker.CheckLicense">
+            <summary>
+            Check the validity of a license.
+            </summary>
+        </member>
+        <member name="T:Xceed.Words.NET.Licenser">
+            <summary>
+            License class setter.
+            </summary>
+        </member>
+        <member name="P:Xceed.Words.NET.Licenser.LicenseKey">
+            <summary>
+            Gets or sets the license key used to license this product.
+            </summary>
+            <value>A string value representing the license key used to license this product.</value>
+        </member>
+        <member name="M:Xceed.Words.NET.Licenser.VerifyLicense">
+            <summary>
+            Verifies that the license is valid for a specific product.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Xceed.Words.NET.Licenser.VerifyLicense(Xceed.Words.NET.FeatureID)">
+            <summary>
+            Verifies that the license is valid for a specific feature ID.
+            Use this method to inform user of newer versions is available 
+            that unlocks that feature if current key version does not unlock it.
+            </summary>
+            <param name="featureId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xceed.Words.NET.Licenser.VerifyLicenseDesignMode">
+            <summary>
+            Verifies that the license is valid for a specific product at design time.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Xceed.Words.NET.Licenser.VerifyLicenseDesignMode(Xceed.Words.NET.FeatureID)">
+            <summary>
+            Verifies that the license is valid for a specific product at design time.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Xceed.Words.NET.Licenser.License">
+            <summary>
+            Returns the Xceed license created by the LicenseKey assignment.
+            </summary>
+        </member>
+    </members>
+</doc>

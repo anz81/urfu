@@ -1,0 +1,145 @@
+﻿@model IEnumerable<Urfu.Its.Web.DataContext.EduProgram>
+@using PagedList
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "Копирование зачислений из " + ViewBag.Program.FullName;
+}
+
+<h2>@ViewBag.Title</h2>
+
+@using (Html.BeginForm("CopyAdmissions", "EduPrograms", FormMethod.Get))
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Profile.NAME)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Year)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    @Html.TextBox("name", (object)ViewBag.name)
+                </td>
+                <td>
+                    @Html.TextBox("profileName", (object)ViewBag.profileName)
+                </td>
+                <td>
+                    @Html.TextBox("year", (object)ViewBag.year)
+                </td>
+            </tr>
+            <tr>
+                <td colspan="11"><input type="submit" value="Применить" /> | @Html.ActionLink("Очистить фильтры", "Copy")</td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+
+<table class="table" id="tablePrograms">
+    <thead>
+
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Direction.okso)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Direction.title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HeadFullName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.qualification)
+            </th>
+            <th>
+                Подразделение
+            </th>
+            <th>
+                Кафедра
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Profile.NAME)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.familirizationType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.familirizationCondition)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Year)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Direction.okso)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Direction.title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.HeadFullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.qualification)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Division.shortTitle)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Chair.shortTitle)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Profile.NAME)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.familirizationType)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.familirizationCondition)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Year)
+                </td>
+                <td>
+                    @Html.ActionLink("Копировать зачисления в эту программу", "CopyExecute", new { srcId = ViewBag.id, dstId = item.Id })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@Html.PagedListPager((IPagedList)Model, page => Url.Action("CopyAdmissions",
+    new
+    {
+        page,
+        id = ViewBag.id,
+        name = ViewBag.name,
+        qualification = ViewBag.qualification,
+        divisionShortTitle = ViewBag.divisionShortTitle,
+        chairShortTitle = ViewBag.chairShortTitle,
+        profileName = ViewBag.profileName,
+        familirizationType = ViewBag.familirizationType,
+        familirizationCondition = ViewBag.familirizationCondition,
+        year = ViewBag.year
+    }))

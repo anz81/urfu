@@ -1,0 +1,265 @@
+﻿@using Newtonsoft.Json
+@using Urfu.Its.VersionedDocs.ViewModels
+@using Urfu.Its.Web.Models
+@model Urfu.Its.VersionedDocs.ViewModels.DocumentPartViewModel
+
+@{
+    ViewBag.Title = Model.DetailedDisplayName;
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+
+    var canEdit = Model.GetIsEditable();
+}
+
+<style>
+    .block {
+        margin-bottom: 15px
+    }
+
+    label {
+        font-weight: normal
+    }
+
+    .multiline-column {
+        min-height: 100px;        
+    }
+
+    .multiline-column .x-grid-cell-inner {
+        white-space: pre-wrap;
+        /*padding: 0*/
+    }
+
+    .widget-column .x-grid-cell-inner {
+        padding: 1px
+    }
+
+    .x-grid-cell-editor {
+        background: white;
+    }
+
+    /*https://tpodolak.com/blog/2013/06/30/extjs-vertical-header-in-grid/*/
+    .v-vertical-header-grid .x-column-header.column-header-vertical .x-column-header-text {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: left;
+        -webkit-transform: rotate(-90deg);
+        -moz-transform: rotate(-90deg);
+        -o-transform: rotate(-90deg);
+        -ms-transform: rotate(-90deg); /* IE  */
+    }
+
+    /*.v-vertical-header-grid .x-column-header.header-column-vertical {
+        background-image: -ms-linear-gradient(rgb(249, 249, 249), rgb(227, 228, 230)) !important;
+        filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#F9F9F9', endColorstr='#E3E4E6');
+    }
+
+    .v-vertical-header-grid .x-grid-header-ct .header-column-vertical {
+        background-image: -ms-linear-gradient(rgb(249, 249, 249), rgb(227, 228, 230)) !important;
+        filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#F9F9F9', endColorstr='#E3E4E6');
+    }*/
+
+    .table-cell-padding-normal td {
+        padding: 6px
+    }
+
+    .table-all-borders td {
+        border: 1px solid gray;
+    }
+
+    .grid-header-minimal .x-column-header-inner {
+        padding: 4px 1px 4px 1px;
+        font-size: 11px;
+        font-weight: 0
+    }
+
+    .grid-body-minimal td .x-grid-cell-inner {
+        font-size: 14px;
+        padding: 3px
+    }
+
+    .grouped-list .x-boundlist-item {
+        padding: 1px 3px 0 10px;
+    }
+    .grouped-list .group-header {
+        padding: 4px;
+        font-weight: bold;
+        border-bottom: 1px solid #ddd;
+    }
+</style>
+
+@functions {
+
+    string PreparePath(DocumentPartViewModel model)
+    {
+        var chain = new List<DocumentPartViewModel>();
+
+        var part = model;
+        while (part.Parent != null)
+        {
+            chain.Add(part);
+            part = part.Parent;
+        }
+        chain.Add(part);
+
+        chain.Reverse();
+
+        var path = string.Join("/", chain.Select(c => c.SystemName));
+        
+        if (!File.Exists(Server.MapPath("~/Scripts/VersionedDocs/" + path + ".js")))
+        {
+            // Если файл не найден, считаем, что он должен быть в shared папке
+            path = "Shared/" + model.SystemName;
+        }
+
+        return path;
+    }
+}
+
+@section scripts
+{
+    <script src="~/Scripts/VersionedDocs/versionedDocs.js"></script>
+    <script src="~/Scripts/VersionedDocs/@(PreparePath(Model)).js"></script>
+    <script src="~/Scripts/JSON.sortify.js"></script>
+    
+    <script>
+        var data = @Html.Raw(ViewBag.DataString);
+        var documentId = @Model.DocumentId;
+        var documentType = @((int) Model.DocumentType);
+        var schema = @Html.Raw(JsonConvert.SerializeObject(ViewBag.Schema));
+        var emptyData = @Html.Raw(JsonConvert.SerializeObject(ViewBag.EmptyData));
+        var user = { login: '@Html.Raw(User.Identity.Name)' };
+        var additionalData = {};
+        var saveUrl = '@Url.Action("Save")' + window.location.search;
+        @if (ViewBag.AdditionalData != null)
+        {
+            <text>
+            additionalData = @Html.Raw(JsonConvert.SerializeObject(ViewBag.AdditionalData));
+            </text>
+        }
+
+        var canEdit = @(canEdit ? "true" : "false");
+        data.canEdit = canEdit;
+        data.isBusy = false; // Какая-то критичная операция выполняется. Нужно дизейблить часть функциональности.
+
+        Ext.onReady(function() {
+            Ext.tip.QuickTipManager.init();
+
+            var uiEx;
+            if (window.uiInit) {
+                uiEx = uiInit(documentId, documentType, data, schema, emptyData, canEdit, user, additionalData);
+                Ext.applyIf(uiEx.viewModel || {}, {
+                    data: data,
+                    showMessage: function(msg) {
+                        alert(msg);
+                    },
+                    confirmMessage: function(msg) {
+                        return confirm(msg);
+                    }
+                });
+            } else {
+                uiEx = {
+                    items: {
+                        xtype: 'container',
+                        autoEl: {
+                            html: '<b style="color: red">Раздел еще не реализован</b>'
+                        }
+                    }
+                };
+            }
+
+            var goToSections = function () {
+                window.location.assign('@Url.Action("Index", new {id = Model.DocumentId, moduleId = Request.QueryString["moduleId"]})');
+            }
+
+            var root = Ext.merge({
+                itemId: 'rootPanel',
+                canEdit: canEdit,
+                xtype: 'panel',
+                controller: 'versioneddocument',
+                documentId: documentId,
+                saveUrl: saveUrl,
+                bodyPadding: 10,
+                autoScroll: true,
+                layout: {
+                    type: 'vbox',
+                    align: 'stretch'
+                },
+                defaults: {
+                    xtype: 'block'
+                },
+                buttons: [{
+                    xtype: 'button',
+                    itemId: 'goToSectionList',
+                    bind: {
+                        disabled: '{isBusy}'
+                    },
+                    text: 'Вернуться к разделам',
+                    handler: function (btn) {
+                        //goToSections();
+                        var hasChanges = Ext.ComponentQuery.query('block').some(function(b) {
+                            var hasChanges = b.detectChanges();
+                            return hasChanges;
+                        });
+                        if (hasChanges && canEdit) {
+                            Ext.MessageBox.show({
+                                title: 'Внимание',
+                                msg: 'У Вас не сохранен раздел. Сохранить?',
+                                width: 400,
+                                modal: true,
+                                buttons: Ext.MessageBox.YESNOCANCEL,
+                                buttonText: {
+                                    yes: "Сохранить",
+                                    no: "Не сохранять",
+                                    cancel: 'Отмена'
+                                },
+                                fn: function (answer) {
+                                    if (answer === "yes")
+                                        saveBlocks(saveUrl, findRootVm(Ext.ComponentQuery.query('#rootPanel')[0]), Ext.ComponentQuery.query('block'), 'Сохранение раздела выполнено', goToSections);
+                                    else if(answer === "no")
+                                        goToSections();
+                                }
+                            });
+                        }
+                        else {
+                            goToSections();
+                        }
+                    }
+                }, {
+                    xtype: 'button',
+                    itemId: 'saveSection',
+                    text: 'Сохранить раздел',
+                    bind: {
+                        disabled: '{isBusy}'
+                    },
+                    hidden: !canEdit
+                }]
+            },
+            uiEx,
+            {
+                listeners: Ext.merge({
+                    beforerender: function() {
+                        if (!canEdit) {
+                            Ext.ComponentQuery.query('button').forEach(function (c) { c.setDisabled(true); });
+                            Ext.ComponentQuery.query('button#goToSectionList').forEach(function(c) {
+                                c.setDisabled(false);
+                            });
+                            Ext.ComponentQuery.query('block button#saveBlock').forEach(function(c) {
+                                c.setHidden(true);
+                            });
+                            Ext.ComponentQuery.query('.field, filefield').forEach(function(c) {
+                                c.setReadOnly(true);
+                                if (c.setEditable)
+                                    c.setEditable(false);
+                            });
+
+                            Ext.ComponentQuery.query('grid actioncolumn').forEach(function (c) { c.setHidden(true); });
+                            Ext.ComponentQuery.query('grid checkcolumn').forEach(function (c) { c.setDisabled(true); });
+                        }
+                    }
+                }, uiEx.listeners || {})
+            });
+
+            Urfu.createViewport('fit', [root]);
+        });
+    </script>
+}

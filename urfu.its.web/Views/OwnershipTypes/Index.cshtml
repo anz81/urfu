@@ -1,0 +1,336 @@
+﻿
+@{
+    ViewBag.Title = "Формы собственности";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@{
+    <div class="form-horizontal">
+        <script type="text/javascript">
+            var lastFilter = [];
+            Ext.onReady(function () {
+                Ext.tip.QuickTipManager.init();
+
+                var localStorageName = "OwnershipTypesFilters";
+
+                var store = Ext.create("Ext.data.BufferedStore",
+                    {
+                        idProperty: 'Id',
+                        fields: [
+                            "Id", "Name"
+                        ],
+                        autoLoad: true,
+                        pageSize: 25,
+                        remoteSort: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/OwnershipTypes/Index',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                totalProperty: 'total'
+                            }
+                        }
+                    });
+
+                function setFilters() {
+                    settings = [
+                        { property: 'FullName', value: filtersWnd.getComponent("FullName").getValue() },
+                        { property: 'ShortName', value: filtersWnd.getComponent("ShortName").getValue() }
+                    ];
+                    store.setFilters(settings);
+                    localStorage.setItem(localStorageName, JSON.stringify(settings));
+                }
+
+                var prevSettings = {};
+                try {
+                    var prevSettingString = JSON.parse(localStorage.getItem(localStorageName) || "[]");
+
+                    for (var i = 0; i < prevSettingString.length; i++) {
+                        prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                    }
+                }
+                catch (err) {
+                }
+
+                var filtersWnd = Ext.create('Ext.window.Window',
+                    {
+                        title: "Фильтры",
+                        closeAction: 'hide',
+                        resizable: false,
+                        autoHeight: true,
+                        bodyPadding: 6,
+                        defaults: {
+                            xtype: 'textfield',
+                            width: 400
+                        },
+                        items: [
+                            {
+                                xtype: 'hidden',
+                                itemId: 'Id',
+                            },
+                            {
+                                xtype: 'textfield',
+                                fieldLabel: 'Форма собственности',
+                                labelWidth: 140,
+                                itemId: 'FullName',
+                                width: 500,
+                                value: prevSettings["FullName"],
+                            },
+                            {
+                                xtype: 'textfield',
+                                fieldLabel: 'Аббревиатура',
+                                labelWidth: 140,
+                                itemId: 'ShortName',
+                                width: 300,
+                                value: prevSettings["ShortName"],
+                            }
+                        ],
+                        buttons: [
+                            {
+                                text: "ОК",
+                                handler: function () {
+                                    setFilters();
+                                    filtersWnd.hide();
+                                }
+                            },
+                            {
+                                text: "Отмена",
+                                handler: function () { filtersWnd.hide(); }
+                            }
+                        ]
+                    });
+
+                setFilters();
+
+                function required(value) {
+                    return (value != undefined && value.length > 0) ? true : "Поле не может быть пустым";
+                }
+
+                var editWnd = Ext.create('Ext.window.Window',
+                    {
+                        title: "Форма собственности",
+                        closeAction: 'hide',
+                        resizable: false,
+                        autoHeight: true,
+                        bodyPadding: 6,
+                        rowHeight: 100,
+                        defaults: {
+                            xtype: 'textfield',
+                            width: 400
+                        },
+                        items: [
+                            {
+                                xtype: 'hidden',
+                                itemId: 'Id',
+                            },
+                            {
+                                xtype: 'textfield',
+                                fieldLabel: 'Форма собственности*',
+                                labelWidth: 140,
+                                itemId: 'FullName',
+                                width: 500,
+                                validator: required
+                            },
+                            {
+                                xtype: 'textfield',
+                                fieldLabel: 'Аббревиатура*',
+                                labelWidth: 140,
+                                itemId: 'ShortName',
+                                width: 300,
+                                validator: required
+                            }
+                        ],
+                        buttons: [
+                            {
+                                id: 'btnSaveCountry',
+                                text: "Сохранить",
+                                handler: function () {
+                                    var isValid = true;
+                                    editWnd.items.items.forEach(function (element, index, array) {
+                                        if (!element.isValid()) isValid = false;
+                                    });
+                                    if (!isValid) return false;
+
+                                    Ext.Ajax.request({
+                                            url: '@Url.Action("EditOwnershipType")',
+                                            params: {
+                                                id: editWnd.getComponent("Id").getValue() ? editWnd.getComponent("Id").getValue() : 0,
+                                                name: editWnd.getComponent("FullName").getValue(),
+                                                shortName: editWnd.getComponent("ShortName").getValue()
+                                            },
+                                            success: function (response) {
+                                                if (response.responseText != "") {
+                                                    var data = Ext.decode(response.responseText);
+                                                    if (data.success) {
+                                                        editWnd.hide();
+                                                        store.reload();
+                                                    }
+                                                    else
+                                                    {
+                                                        Ext.MessageBox.alert('Ошибка', data.message);
+                                                    }
+                                                }
+                                            },
+                                            failure: function (response) {
+                                                Ext.MessageBox.alert('Ошибка', 'Неизвестная ошибка');
+                                            }
+                                        });
+                                }
+                            },
+                            {
+                                text: "Отмена",
+                                handler: function () { editWnd.hide(); }
+                            }
+                        ]
+                    });
+                
+                var gridPanel = Ext.create('Ext.grid.Panel',
+                    {
+                        region: 'center',
+                        store: store,
+                        loadMask: true,
+                        columnLines: true,
+                        tbar: [
+                            {
+                                xtype: 'button',
+                                text: "Фильтры",
+                                handler: function () {
+                                    filtersWnd.show();
+                                }
+                            },
+                            {
+                                xtype: 'button',
+                                text: "Отменить фильтры",
+                                handler: function () {
+                                    store.clearFilter();
+                                    settings = [];
+                                    localStorage.setItem(localStorageName, JSON.stringify([]));
+                                }
+                            }, '-',
+                            {
+                                xtype: 'button',
+                                text: "Добавить форму собственности",
+                                handler: function () {
+                                    editWnd.items.items.forEach(function (element, index, array) {
+                                        element.setValue("");
+                                        element.clearInvalid();
+                                    });
+                                    editWnd.show();
+                                }
+                            }
+                        ],
+                        columns: [
+                            { xtype: 'rownumberer', width: 50 },
+                            {
+                                header: 'Форма собственности',
+                                align: 'left',
+                                dataIndex: 'FullName',
+                                width: 500,
+                                cellWrap: true,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Аббревиатура',
+                                align: 'left',
+                                dataIndex: 'ShortName',
+                                width: 200,
+                                cellWrap: true,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                xtype: 'actioncolumn',
+                                region: 'center',
+                                sortable: false,
+                                width: 70,
+                                items: [
+                                    {
+                                        icon: '@Url.Content("~/Content/Images/edit.png")',
+                                        iconCls: 'icon-padding',
+                                        text: 'Редактировать',
+                                        tooltip: 'Редактировать',
+                                        handler: function (grid, rowIndex, colIndex) {
+                                            var rec = grid.getStore().getAt(rowIndex);
+                                            editWnd.items.items.forEach(function (element, index, array) {
+                                              if (rec.data[element.itemId] != undefined)
+                                                element.setValue(rec.data[element.itemId]);
+                                            });
+                                            editWnd.show();
+                                        }
+                                    },
+                                    {
+                                        icon: '@Url.Content("~/Content/Images/remove.png")',
+                                        iconCls: 'icon-padding',
+                                        text: 'Удалить',
+                                        tooltip: 'Удалить',
+                                        handler: function (grid, rowIndex, colIndex) {
+                                            var request = function () {
+                                            var rec = grid.getStore().getAt(rowIndex);
+                                            Ext.Ajax.request({
+                                                    url: '@Url.Action("RemoveOwnershipType")',
+                                                    params: {
+                                                        id: rec.get("Id")
+                                                    },
+                                                    success: function (response) {
+                                                        if (response.responseText != "") {
+                                                            var data = Ext.decode(response.responseText);
+                                                            if (data.success) {
+                                                                store.reload();
+                                                            }
+                                                            else
+                                                            {
+                                                                Ext.MessageBox.alert('Ошибка', data.message);
+                                                            }
+                                                        }
+                                                    },
+                                                    failure: function (response) {
+                                                        Ext.MessageBox.alert('Ошибка', 'Неизвестная ошибка');
+                                                    }
+                                                });
+                                            }
+                                            Ext.MessageBox.show({
+                                                title: 'Информационное сообщение',
+                                                msg: "Удалить форму собственности?",
+                                                buttons: Ext.MessageBox.YESNO,
+                                                fn: function (btn) {
+                                                    if (btn === 'yes') {
+                                                        request();
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+
+                    });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+
+
+                gridPanel.getStore()
+                .on('load',
+                    function(store, records, options) {
+                        var focus = '@ViewBag.Focus';
+                        if (focus && focus.length > 0) {
+
+                            var focusRow = store.findExact('Id', parseInt(focus));
+                            if (focusRow >= 0) {
+                                var rowData = store.getAt(focusRow);
+                                gridPanel.getView().focusRow(rowData);
+                                gridPanel.getSelectionModel().select(rowData);
+                            }
+                        }
+                        return false;
+                    });
+
+            });
+        </script>
+    </div>
+}

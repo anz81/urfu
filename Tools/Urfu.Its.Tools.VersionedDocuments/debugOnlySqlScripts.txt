@@ -1,0 +1,6 @@
+﻿delete VersionedDocumentBlocks
+delete VersionedDocumentBlockLinks
+delete DisciplineWorkingPrograms
+delete ModuleWorkingProgram
+delete VersionedDocuments
+delete VersionedDocumentTemplates

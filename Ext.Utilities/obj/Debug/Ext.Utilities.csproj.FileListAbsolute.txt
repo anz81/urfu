@@ -1,0 +1,9 @@
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\bin\Debug\Ext.Utilities.dll
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\bin\Debug\Ext.Utilities.pdb
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\bin\Debug\Newtonsoft.Json.dll
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\bin\Debug\Newtonsoft.Json.xml
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Debug\Ext.Utilities.csprojAssemblyReference.cache
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Debug\Ext.Utilities.csproj.CoreCompileInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Debug\Ext.Utilities.csproj.CopyComplete
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Debug\Ext.Utilities.dll
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Debug\Ext.Utilities.pdb

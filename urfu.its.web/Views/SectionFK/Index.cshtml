@@ -1,0 +1,14 @@
+﻿@using Urfu.Its.Web.Models
+
+@{
+    ViewBag.Title = "Секции ФК";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+@section scripts{
+
+    @Html.Partial("_AdditionalModules", new AdditionalModulesView(
+            controllerName: "SectionFk",
+            reportActionName: "DownloadSectionFkReport",
+            localStorageName: "SectionFkFilters",
+            moduleType: ModuleTypes.SectionFK))
+}

@@ -1,0 +1,673 @@
+﻿@using Urfu.Its.Web.Models
+@model Urfu.Its.Web.Models.AdditionalModulesView
+
+<script type="text/javascript">
+
+        function downloadReport() {
+            var fileUrl = '@Url.Action(@Model.ReportActionName,@Model.ControllerName)'
+                .concat('?filter=' + encodeURIComponent(localStorage.getItem("@Model.LocalStorageName") || "[]"));
+            window.location.href = fileUrl;
+            return false;
+        }
+
+        Ext.onReady(function() {
+            Ext.tip.QuickTipManager.init();
+
+            Ext.define('Semester',
+                {
+                    extend: 'Ext.data.Model',
+                    fields:
+                    [
+                        { type: 'string', name: 'Id' },
+                        { type: 'string', name: 'Name' }
+                    ]
+                });
+
+            var SemestersStore = Ext.create('Ext.data.Store',
+                {
+                    model: 'Semester',
+                    proxy:
+                    {
+                        type: 'ajax',
+                        url: '/Minors/Semesters',
+                        reader: { type: 'json', rootProperty: 'data' }
+                    }
+                });
+
+            var FKСourseStore = Ext.create('Ext.data.Store',
+                {
+                    data: [
+                        { Id : "", Name : "Все"},
+                        { Id : 1,Name : "1"},
+                        { Id: 2, Name: "2" },
+                        { Id: 3, Name: "3" }
+                    ]
+                });
+
+            var statesStore = Ext.create('Ext.data.Store',
+                {
+                    model: 'Semester',
+                    proxy:
+                    {
+                        type: 'ajax',
+                        url: '/Minors/States',
+                        reader: { type: 'json', rootProperty: 'data' }
+                    }
+                });
+
+            var store = Ext.create("Ext.data.BufferedStore",
+            {
+                idProperty: 'id',
+                //fields: [
+                //    "id", "title", "shortTitle", "coordinator", "type", "competence", "testUnits", "priority", "state",
+                //    "approvedDate", "comment", "file", "specialities"
+                //],
+                autoLoad: true,
+                pageSize: 300,
+                remoteSort: true,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '/@Model.ControllerName/Index',
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    }
+                }
+                });
+
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("@Model.LocalStorageName") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+            }
+
+            var filtersWnd = null;
+            //направление, название модуля, координатор, учебный год, семестр
+            var setFilters = function() {
+                var settings = [
+                    { property: 'specialities', value: filtersWnd.getComponent("specialities").getValue() },
+                    { property: 'title', value: filtersWnd.getComponent("title").getValue() },
+                    { property: 'coordinator', value: filtersWnd.getComponent("coordinator").getValue() },
+                    { property: 'year', value: filtersWnd.getComponent("year").getValue() },
+                    { property: 'semester', value: filtersWnd.getComponent("semester").getValue() },
+                    { property: 'state', value: filtersWnd.getComponent("state").getValue() }
+
+                ];
+                store.setFilters(settings);
+                localStorage.setItem("@Model.LocalStorageName", JSON.stringify(settings));
+            };
+
+            filtersWnd = Ext.create('Ext.window.Window',
+            {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: false,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "Направление", itemId: "specialities", value: prevSettings["specialities"] },
+                    { fieldLabel: "Название модуля", itemId: "title", value: prevSettings["title"] },
+                    { fieldLabel: "Координатор", itemId: "coordinator", value: prevSettings["coordinator"] },
+                    { fieldLabel: "Учебный год", itemId: "year", value: prevSettings["year"] },
+                    {
+                        fieldLabel: "Семестр",
+                        itemId: "semester",
+                        value: prevSettings["semester"],
+                        xtype: "combobox",
+                        store: SemestersStore,
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'remote'
+                    },
+                    {
+                        fieldLabel: "Состояние",
+                        itemId: "state",
+                        value: prevSettings["state"],
+                        xtype: "combobox",
+                        store: statesStore,
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'remote'
+                    }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function() {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function() { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+            setFilters();
+
+
+            var tpl = '<a href="{file}">Файл</a> | <a href="@Url.Action("Edit",Model.ControllerName)?id={id}">Изменить</a>\
+                     | <a href="@Url.Action("Disciplines", Model.ControllerName)?moduleId={id}">Дисциплины</a>';
+            @if (Model.ModuleType == ModuleTypes.Minor)
+            {
+                <text>tpl = tpl + '\| <a href="@Url.Action("EditRequirments",Model.ControllerName)?moduleId={id}">Пререквизиты</a>';</text>
+            }
+
+            var agreementStore = Ext.create('Ext.data.Store', {
+                proxy: {
+                    type: 'ajax',
+                    url: '/@Model.ControllerName/GetMinorAgreement',
+                    reader: {
+                        type: 'json'
+                    }
+                },
+                autoLoad: false,
+                listeners: {
+                    load: function (t, records) {
+                        if (records[0].data.data.length == 0) {
+                            Ext.Msg.show({
+                                title: 'Уведомление',
+                                message: 'Соглашений для данного майнора нет',
+                                buttons: Ext.Msg.OK
+                            });
+                            return;
+                        }
+                        var agreementWnd = Ext.create('Ext.window.Window',
+                        {
+                            title: "Соглашения",
+                            closeAction: 'hide',
+                            resizable: true,
+                            x: 100,
+                            y: 100,
+                            title: agreementTitle,
+                            autoHeight: true,
+                            autoWidth: true,
+                            maxHeight: 600,
+                            store: agreementStore,
+                            bodyPadding: 6,
+                            scrollable: true,
+                            items: [
+                            ]
+                        });
+
+                        records[0].data.data.forEach(function (item, index, arr) {
+                            var container = Ext.create('Ext.container.Container', {
+                                layout: {
+                                    type: 'vbox'
+                                },
+                                autoWidth: true,
+                                renderTo: Ext.getBody(),
+                                margin: '0 0 10 0',
+                                items: [
+                                    {
+                                        xtype: 'label',
+                                        text: item.yearAndSemester,
+                                        style: 'font-size: 110%; text-decoration: underline;'
+                                    },
+                                    {
+                                        xtype: 'label',
+                                        text: item.dates,
+                                        style: 'font-weight: normal;'
+                                    },
+                                    {
+                                        xtype: 'fieldcontainer',
+                                        margin: '0 0 0 0',
+                                        layout: {
+                                            type: 'hbox',
+                                            align: 'stretch'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'label',
+                                                text: 'Курс:',
+                                                width: 45
+                                            },
+                                            {
+                                                xtype: 'label',
+                                                text: item.courseTitle,
+                                                style: 'font-weight: normal;'
+                                            },
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'fieldcontainer',
+                                        margin: '0 0 0 0',
+                                        layout: {
+                                            type: 'hbox',
+                                            align: 'stretch'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'label',
+                                                text: 'Тип: ',
+                                                width: 40
+                                            },
+                                            {
+                                                xtype: 'label',
+                                                text: item.courseType,
+                                                style: 'font-weight: normal;'
+                                            },
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'fieldcontainer',
+                                        margin: '0 0 0 0',
+                                        layout: {
+                                            type: 'hbox',
+                                            align: 'stretch'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'label',
+                                                text: 'URL курса: ',
+                                                width: 85
+                                            },
+                                            {
+                                                xtype: 'component',
+                                                autoEl: {
+                                                    tag: 'a',
+                                                    href: item.courseURL,
+                                                    html: item.courseURL
+                                                }
+                                            },
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'fieldcontainer',
+                                        layout: {
+                                            type: 'vbox',
+                                            align: 'stretch'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'label',
+                                                text: 'URL информационного сообщения для курса: ',
+                                                width: 400
+                                            },
+                                            {
+                                                xtype: 'component',
+                                                autoEl: {
+                                                    tag: 'a',
+                                                    href: item.urfuInfoUrl,
+                                                    html: item.urfuInfoUrl
+                                                }
+                                            },
+                                        ]
+                                    }
+                                ]
+                            });
+                            agreementWnd.items.items.push(container);
+                        });
+                        agreementWnd.show();
+                    }
+                }
+            });
+
+            var agreementTitle = '';
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+            {
+                region: 'center',
+                store: store,
+                loadMask: true,
+                columnLines: true,
+                selModel:
+                {
+                    selType: 'checkboxmodel',
+                    headerWidth: 34,
+                    mode:'SIMPLE'
+                },
+                tbar: [
+                    {
+                    xtype: 'button',
+                        text: 'Фильтры...',
+                        handler: function() { filtersWnd.show(); }
+                },
+                    {
+                    xtype: 'button',
+                        text: "Отменить фильтры",
+                        handler: function() {
+                        store.clearFilter();
+                        localStorage.setItem("@Model.LocalStorageName", JSON.stringify([]));
+                    }
+                },
+                    '-',
+                    {
+                    xtype: 'button',
+                        text: "Отчёт по @(Model.ModuleType == ModuleTypes.Minor ? "майнорам" : Model.ModuleType == ModuleTypes.SectionFK ? "секциям ФК" : Model.ModuleType == ModuleTypes.Project ? "проектам" : "иностранным языкам" ) в Excel",
+                    handler: downloadReport
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Дата выбора",
+                        hidden: '@Model.ModuleType' == '@ModuleTypes.Minor',
+                        handler: function() {
+                            if (gridPanel.getSelectionModel().getSelection().length == 0) {
+                                    Ext.MessageBox.alert("Дата выбора","Для назначения даты выбора необходимо указать  модули")
+                                    return;
+                            }
+                            periodsWindow.show();
+                        }
+                    }
+                ],
+                plugins: [
+                    {
+                    ptype: "rowexpander",
+                        rowBodyTpl: new Ext.XTemplate(
+                            '<p><b>Компетенции: </b>{competence}</p>',
+                            '<p><b>Зачётные единицы: </b>{testUnits}</p>',
+                            '<p><b>Приоритет: </b>{priority}</p>',
+                            '<p><b>Состояние: </b>{state}</p>',
+                            '<p><b>Дата утверждения: </b>{approvedDate}</p>',
+                            '<p><b>Комментарий: </b>{comment}</p>'
+                        )
+                    }
+                ],
+                columns: [
+                    { xtype: 'rownumberer', width: 50 },
+                    {
+                    header: 'Направления',
+                        align: 'left',
+                        dataIndex: 'specialities',
+                        sortable: false,
+                        width: 150,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                    header: 'Название модуля',
+                        dataIndex: 'title',
+                        width: 400,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                    header: 'Короткое название модуля',
+                        dataIndex: 'shortTitle',
+                        width: 400,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                    header: 'Координатор',
+                        align: 'left',
+                        dataIndex: 'coordinator',
+                        width: 400,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        xtype: 'actioncolumn',
+                        region: 'center',
+                        hidden: '@Model.ModuleType' != '@ModuleTypes.Minor',
+                        sortable: false,
+                        width: 50,
+                        items: [
+                            {
+                                icon: '@Url.Content("~/Content/Images/info.png")',
+                                iconCls: 'icon-padding',
+                                tooltip: 'Соглашения',
+                                handler: function (grid, rowIndex, colIndex) {
+                                    var rec = grid.getStore().getAt(rowIndex);
+                                    agreementTitle = "Соглашения для модуля " + rec.get('title');
+                                    agreementStore.proxy.setUrl('@Url.Action("GetMinorAgreement", Model.ControllerName)?moduleUuid=' + rec.get('id'));
+                                    agreementStore.load();
+                                }
+                            },
+                        ]
+                    },
+                    {
+                    xtype: 'templatecolumn',
+                        sortable: false,
+                        tpl: tpl,
+                        width: 420
+                    }
+                ]
+            });
+
+            var periodContainer = {
+                xtype: 'fieldcontainer',
+                layout: {
+                    type: 'hbox'
+                },
+                border: 1,
+                padding: '0 10 10 10',
+                items: [
+                    {
+                        xtype: 'numberfield',
+                        itemId: 'year',
+                        anchor: '100%',
+                        value: @DateTime.Now.Year,
+                        width: 130,
+                        minValue: 2000,
+                        margin: '0 20 0 0',
+                        allowBlank :false
+                    },
+                    {
+                        xtype: 'combobox',
+                        itemId: 'semester',
+                        editable: false,
+                        store: SemestersStore,
+                        width: 110,
+                        queryMode: 'remote',
+                        displayField: 'Name',
+                        valueField: 'Id',
+                        margin: '0 20 0 0',
+                        allowBlank :false
+                    },
+                    {
+                        xtype: 'combobox',
+                        itemId: 'course',
+                        editable: false,
+                        store: FKСourseStore,
+                        queryMode: 'local',
+                        width: 80,
+                        displayField: 'Name',
+                        valueField: 'Id',
+                        margin: '0 20 0 0',
+
+                    },
+                    {
+                        xtype: 'datefield',
+                        itemId: 'startdate',
+                        hidden:'@Model.ModuleType' == '@ModuleTypes.ForeignLanguage',
+                        labelWidth: 5,
+                        width: 130,
+                        format: 'd.m.Y',
+                        startDay: 1,
+                        margin: '0 20 0 0',
+                        formatText: "",
+                        invalidText: "Дата должна быть указана в формате дд.мм.гггг ",
+                    },
+                    {
+                        xtype: 'datefield',
+                        itemId: 'enddate',
+                        labelWidth: 5,
+                        width: 130,
+                        format: 'd.m.Y',
+                        startDay: 1,
+                        margin: '0 20 0 0',
+                        formatText: "",
+                        invalidText: "Дата должна быть указана в формате дд.мм.гггг ",
+                        listeners: {
+                            blur: function (t) {
+                                var startdate = t.up().down('#startdate').value;
+                                t.setMinValue(startdate);
+                            }
+                        }
+                    },
+                    {
+                        xtype: 'image',
+                        src: '@Url.Content("~/Content/Images/remove.png")',
+                        height: 16,
+                        width: 16,
+                        margin: '10 0 0 0',
+                        listeners: {
+                            click: {
+                                element: 'el',
+                                fn: function () {
+                                    var periodsContainer = Ext.getCmp('periodsContainerId');
+                                    if (periodsContainer != null) {
+                                        periodsContainer.remove(Ext.getCmp(this.up().el.component.id));
+                                        if (periodsContainer.items.items.length == 0) {
+                                            Ext.getCmp('OK').setDisabled(true);
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+
+                ]
+
+            };
+
+
+            var periodsContainer = Ext.create('Ext.container.Container',
+                {
+                    id: 'periodsContainerId',
+                    layout: {
+                        type: 'vbox'
+                    },
+                    items: [
+                        periodContainer
+            ]
+
+        });
+
+            var periodsWindow = Ext.create('Ext.window.Window',
+                {
+                    closeAction: 'hide',
+                    resizable: false,
+                    width: 760,
+                    dockedItems: [{
+                        xtype: 'toolbar',
+                        dock: 'top',
+                        padding: '10 10 3 10',
+                        defaults: {
+                            style: {
+                                padding: 0,
+                            }
+                        },
+                        items: [{ xtype: 'tbtext', html: 'Год',   width: 130,    margin:'0 20 0 0' },
+                            { xtype: 'tbtext', html: 'Семестр', width: 110,    margin:'0 20 0 0' },
+                            { xtype: 'tbtext', html: 'Курс', width: 80,   margin:'0 20 0 0' },
+                            { xtype: 'tbtext', html: 'Дата начала', hidden:'@Model.ModuleType' == '@ModuleTypes.ForeignLanguage', width: 130, margin: '0 20 0 0' },
+                            { xtype: 'tbtext', html: 'Дата окончания', width: 130,     margin:'0 20 0 0'}
+                        ]
+                    }],
+                    items: [
+                        periodsContainer
+                    ],
+                    buttons: [
+                        {
+                            text: 'Добавить период',
+                            handler: function() {
+                                var length = periodsContainer.items.items.length;
+
+                                periodContainer.id = 'periodContainer' + length;
+                                    periodsContainer.add(periodContainer);
+
+                                if (periodsContainer.items.items.length == 1)
+                                    Ext.getCmp('OK').setDisabled(false);
+                            }
+
+                        },
+                    {
+                        text: "OK",
+                        id: "OK",
+                        handler: function () {
+
+                                var selectedmodules = gridPanel.getSelectionModel().getSelection();
+
+                                var modulesIds =[];
+                                selectedmodules.forEach(function (element) {
+                                    modulesIds.push(element.id);
+                                });
+
+
+
+                                var deadlines = [];
+
+                                for (var i = 0; i < periodsContainer.items.items.length; i++) {
+
+                                    var yearcomponent = periodsContainer.items.items[i].getComponent('year');
+                                    var semestercomponent = periodsContainer.items.items[i].getComponent('semester');
+
+                                    if (!yearcomponent.isValid() || !semestercomponent.isValid()) {
+                                        Ext.Msg.alert('Ошибка', 'Заполнены не все обязательные поля!!');
+                                        return;
+                                    }
+
+                                    var year = periodsContainer.items.items[i].getComponent('year').value;
+                                    var semester = periodsContainer.items.items[i].getComponent('semester').value;
+                                    var course = periodsContainer.items.items[i].getComponent('course').value;
+                                    var startdate = periodsContainer.items.items[i].getComponent('startdate').value;
+                                    var enddate = periodsContainer.items.items[i].getComponent('enddate').value;
+                                    deadlines.push({ year: year, semesterId: semester, course: course, selectionbegin: startdate, selectiondeadline: enddate });
+                                }
+                                Ext.Ajax.request({
+                                    method: 'POST',
+                                    dataType: 'json',
+                                    url: '/@Model.ControllerName/SetDeadlines',
+                                    params: {
+                                        modules: JSON.stringify(modulesIds),
+                                        deadlines:Ext.JSON.encode(deadlines)
+                                    },
+                                    success: function (response) {
+                                        if (Ext.decode(response.responseText) != null) {
+                                            Ext.Msg.alert('Предупреждение', 'Даты выбора уже установлены для:<br></br>' + Ext.decode(response.responseText));
+                                        }
+                                        else
+                                        Ext.Msg.alert('OK', 'Даты выбора установлены');
+                                    },
+                                    failure: function (response) {
+                                            console.log(response.status);
+                                        }
+                                });
+
+                                periodsWindow.close();
+                                gridPanel.getSelectionModel().deselectAll();
+
+                            }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () {
+                            periodsWindow.close();
+                            gridPanel.getSelectionModel().deselectAll();
+                        }
+                    }
+                    ]
+                });
+
+
+           var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+            gridPanel.getStore().on('load', function (store, records, options) {
+                var focus = '@ViewBag.Focus';
+                if (focus && focus.length > 0) {
+
+                    var focusRow = store.findExact('id', focus);
+                    if (focusRow > 0) {
+                        var rowData = store.getAt(focusRow);
+                        gridPanel.getView().focusRow(rowData);
+                        gridPanel.getSelectionModel().select(rowData);
+                    }
+                }
+                return false;
+            });
+        });
+</script>

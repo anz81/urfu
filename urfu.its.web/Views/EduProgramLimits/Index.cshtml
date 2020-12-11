@@ -1,0 +1,160 @@
+﻿@using Urfu.Its.Web.DataContext
+@model IList<Urfu.Its.Web.Models.LimitViewModel>
+
+@if (ViewBag.Variant.IsBase)
+{
+    <h2>Лимиты версии ОП &quot;@ViewBag.Variant.Program.Name&quot; направление @ViewBag.Variant.Program.Direction.okso</h2>
+}
+else
+{
+    <h2>Лимиты траектории &quot;@ViewBag.Variant.Name&quot; направление @ViewBag.Variant.Program.Direction.okso</h2>
+}
+
+<nav class="navbar navbar-default">
+    <ul class="nav navbar-nav">
+        <li>@Html.ActionLink("Вернутся к " + (ViewBag.Variant.IsBase ? "версии" : "траектории") + " ОП", "BasicContentEdit", "Variant", new { variantId = ViewBag.Variant.Id }, null)</li>
+    </ul>
+</nav>
+
+@if (ViewBag.Error)
+{
+    <div class="alert alert-danger">
+        <b>Для модулей не определена часть УП:</b> @ViewBag.WrongModules
+    </div>
+}
+else
+{
+
+<table class="table table-bordered table-nonfluid">
+    <thead>
+        <tr>
+            <th>Название модуля</th>
+            <th>Группа модуля</th>
+            <th>Количество студентов</th>
+
+            @if (!ViewBag.Variant.IsBase)
+            {
+                <th>Общий лимит</th>
+            }
+            else
+            {
+                <th>Распределение по траекториям</th>
+            }
+            <th>Комментарий</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(m => item.ModuleNumberAndTitle)</td>
+                <td>@Html.DisplayFor(m => item.GroupType)</td>
+                <td style="text-align: center">
+                    @if (ViewBag.Variant.State != VariantState.Approved)
+                    {
+                        @Html.TextBoxFor(m => item.StudentsCount, new
+                   {
+                       @class = "autosave form-control",
+                       @autocomplete = "off",
+                       @data_path = Url.Action("SetStudentsCount", new { variantId = ViewBag.Variant.Id, moduleId = item.ModuleId }),
+                       @data_message = "message_" + item.ModuleId
+                   })
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(m => item.StudentsCount)
+                    }
+                </td>
+
+                @if (!ViewBag.Variant.IsBase)
+                {
+                    <td>@item.ProgramStudentsCount</td>
+                }
+                else
+                {
+                    <td>
+                        @foreach (var limit in item.VariantLimits)
+                        {
+                            <text>@limit.Variant.Program.Direction.okso @limit.Variant.Name - <strong>@limit.StudentsCount</strong></text><br />
+                        }
+                    </td>
+                }
+                <td id="message_@(item.ModuleId)">@item.Comment</td>
+            </tr>
+        }
+    </tbody>
+</table>
+}
+
+@section scripts
+{
+    <script>
+        $(function () {
+            function debounce() {
+                var el = $(this);
+                var value = $(this).val();
+
+                $.post(el.data("path"), { "value": value }, function (data) {
+                    el.removeClass("modified");
+                    if (data.status) {
+                        el.removeClass("modified");
+                        el.addClass("saved");
+                        setTimeout(function () {
+                            el.removeClass("saved");
+                        }, 1000);
+                    } else {
+                        el.addClass("error");
+                    }
+
+                    var messageid = el.data("message");
+                    if (data.message && messageid) {
+                        $("#" + messageid).html(data.message);
+                    } else if (data.message) {
+                        el.attr("title", data.message);
+                    }
+                });
+            }
+
+            function oninput() {
+
+                var that = $(this);
+                that.removeClass("error");
+                that.removeAttr("title");
+                that.removeClass("saved");
+                that.addClass("modified");
+
+                var messageid = that.data("message");
+                if (messageid) {
+                    var message = $("#" + messageid);
+                    if (message) {
+                        message.html("");
+                    }
+                } else {
+                    that.attr("title", "");
+                }
+
+                var timerid = that.data("timerid");
+                if (timerid) {
+                    clearTimeout(timerid);
+                    that.removeData("timerid");
+                }
+                timerid = setTimeout(function () {
+                    debounce.call(that);
+                }, 500);
+                that.data("timerid", timerid);
+            }
+
+            $("input.autosave").on('input', oninput);
+            $(".delete").on("click", function (event) {
+                if (confirm("Удалить запись?")) {
+                    var el = $(this);
+                    $.post(el.attr("href"), null, function () {
+                        location.reload();
+                    });
+                }
+                return false;
+            });
+        });
+    </script>
+
+}

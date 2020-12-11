@@ -1,0 +1,822 @@
+﻿@model Urfu.Its.Web.DataContext.SectionFKCompetitionGroup
+@{
+    ViewBag.Title = Model.ToString();
+
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+<script type="text/javascript">
+    var trainingPlaceCounter = 0;
+    var teachersCounter = 0;
+    
+    Ext.onReady(function () {
+
+        Ext.tip.QuickTipManager.init();
+        function gettoken() {
+            var token = '@Html.AntiForgeryToken()';
+            token = $(token).val();
+            return token;
+        }
+
+
+        var store = Ext.create("Ext.data.Store",
+        {
+            idProperty: 'Id',
+            autoLoad: true,
+            //pageSize: 300,
+            remoteSort: true,
+            remoteFilter: true,
+            proxy: {
+                type: 'ajax',
+                url: '@Url.Action("Properties",new {competitionGroupId = Model.Id})',
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data'
+                }
+            }
+        });
+        var prevSettings = {};
+        try {
+            var prevSettingString = JSON.parse(localStorage.getItem("SectionFKPropertiesFilters") || "[]");
+
+            for (var i = 0; i < prevSettingString.length; i++) {
+                prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+            }
+        } catch (err) {
+
+        }
+
+        var filtersWnd = null;
+        var setFilters = function () {
+            var settings = [
+                { property: 'SectionFKName', value: filtersWnd.getComponent("SectionFKName").getValue() },
+                { property: 'Male', value: filtersWnd.getComponent("Male").getValue()   },
+            ];
+            store.setFilters(settings);
+            localStorage.setItem("SectionFKPropertiesFilters", JSON.stringify(settings));
+        };
+
+        filtersWnd = Ext.create('Ext.window.Window', {
+            title: "Фильтры",
+            closeAction: 'hide',
+            resizable: false,
+            autoHeight: true,
+            bodyPadding: 6,
+            defaults: {
+                xtype: 'textfield',
+                width: 500
+            },
+            items: [
+                { fieldLabel: "Секция", itemId: "SectionFKName", value: prevSettings["SectionFKName"] },
+                {
+                    fieldLabel: "Пол", itemId: "Male", value: prevSettings["Male"],
+                    xtype: "combobox",
+                    store: Ext.create('Ext.data.Store', {
+                        data: [
+                            { Id: "-1", Name: "Все" },
+                            { Id: "True", Name: "Женский" },
+                            { Id: "False", Name: "Мужской" }
+                            ]
+
+                        }),
+                    valueField: 'Id', displayField: 'Name', queryMode: 'remote'
+                },
+                
+            ],
+            buttons: [
+                {
+                    text: "OK",
+                    handler: function () {
+                        setFilters();
+                        filtersWnd.hide();
+                    }
+                },
+                {
+                    text: "Отмена",
+                    handler: function () { filtersWnd.hide(); }
+                }
+            ]
+        });
+
+        setFilters();
+        teachersPanel = {}; trainingPlacePanel = {};
+        var teacherStore = Ext.create("Ext.data.BufferedStore",
+        {
+            idProperty: 'Id',
+            autoLoad: false,
+            pageSize: 300,
+            remoteSort: true,
+            remoteFilter: true,
+            proxy: {
+                type: 'ajax',
+                url: '@Url.Action("PropertyTeachers")',
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    totalProperty: 'total'
+                }
+            },
+            listeners: {
+                'load': function () {
+
+                    if (teachersCounter >= 1 && teachersPanel.isMasked()) teachersPanel.unmask();
+                    else {
+                        teachersCounter++;
+                    }
+
+                }
+            }
+        });
+        var selectedTeacherStore = Ext.create("Ext.data.Store",
+        {
+            idProperty: 'Id',
+            autoLoad: false,
+            pageSize: 300,
+            remoteSort: true,
+            remoteFilter: true,
+            proxy: {
+                type: 'ajax',
+                url: '@Url.Action("PropertyTeachers")',
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    totalProperty: 'total'
+                }
+            },
+            filters: { selected: true },
+            listeners: {
+                'load': function () {
+
+                    if (teachersCounter >= 1 && teachersPanel.isMasked()) teachersPanel.unmask();
+                    else {
+                        teachersCounter++;
+                    }
+
+                }
+            }
+        });
+        var trainingPlaceStore = Ext.create("Ext.data.Store",
+        {
+            idProperty: 'Id',
+            autoLoad: false,
+            //pageSize: 300,
+            remoteSort: true,
+            remoteFilter: true,
+            proxy: {
+                type: 'ajax',
+                url: '@Url.Action("PropertyTrainingPlace")',
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    totalProperty: 'total'
+                }
+            },
+            listeners: {
+                'load': function () {
+
+                    if (trainingPlaceCounter >= 1 && trainingPlacePanel.isMasked()) trainingPlacePanel.unmask();
+                    else {
+                        trainingPlaceCounter++;
+                    }
+
+                }
+            }
+        });
+        var selectedTrainingPlaceStore = Ext.create("Ext.data.Store",
+        {
+            idProperty: 'Id',
+            autoLoad: false,
+            //pageSize: 300,
+            remoteSort: true,
+            remoteFilter: true,
+            proxy: {
+                type: 'ajax',
+                url: '@Url.Action("PropertyTrainingPlace")',
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    totalProperty: 'total'
+                }
+            },
+            filters: { selected: true },
+            listeners: {
+                'load': function () {
+                    if (trainingPlaceCounter >= 1 && trainingPlacePanel.isMasked()) trainingPlacePanel.unmask();
+                    else {
+                        trainingPlaceCounter++;
+                    }
+                }
+            }
+        });
+
+        
+
+        var gridPanel = Ext.create('Ext.grid.Panel',
+        {
+            region: 'center',
+            store: store,
+            loadMask: true,
+            columnLines: true,
+            tbar: [
+                {
+                    xtype: 'button',
+                    text: 'Фильтры...',
+                    handler: function () { filtersWnd.show(); }
+                },
+                    {
+                        xtype: 'button',
+                        text: "Отменить фильтры",
+                        handler: function () {
+                            localStorage.setItem("SectionFKPropertiesFilters", []);
+                            store.clearFilter();
+                        }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Зачисления",
+                        handler: function () {
+                            window.location = "/SectionFKAdmission/Index?competitionGroupId=@Model.Id";
+                        }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "В Excel",
+                        handler: function () {
+                            window.location = "/SectionFK/DownloadProperties?competitionGroupId=@Model.Id";
+                        }
+                    }
+            ],
+            plugins: [
+                    Ext.create('Ext.grid.plugin.CellEditing', {
+                        clicksToEdit: 1,
+                        listeners: {
+                            'beforeedit': function (e, editor) {
+
+                            }
+                        }
+                    })],
+            columns: [
+                { xtype: 'rownumberer', width: 50 },
+                {
+                    header: 'Наименование',
+                    dataIndex: 'SectionFKName',
+                    width: 300,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Лимит',
+                    dataIndex: 'Limit',
+                    width: 150,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip,
+                    editor: {
+                        xtype: 'numberfield',
+                        hideTrigger: true,
+                        allowBlank: false,
+                        minValue: 0
+                    }
+                },
+                {
+                    header: 'Зачислено всего',
+                    dataIndex: 'Admitted',
+                    width: 150,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip,
+                },
+                {
+                    header: 'Зачислено активных (без спортсменов)',
+                    dataIndex: 'AdmittedAWoSportsmens',
+                    //cls: 'multiline',
+                    width: 150,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip,
+                },
+                {
+                    header: 'Свободно мест',
+                    dataIndex: 'PlacesAvailable',
+                    width: 150,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip,
+              
+                },
+                {
+                    header: 'Зачислено спортсменов',
+                    dataIndex: 'admittedSportsmens',
+                    //cls: 'multiline',
+                    width: 150,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip,
+               
+                },
+                {
+                    header: 'Место проведения',
+                    dataIndex: 'TrainingPlaces',
+                    width: 300,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Преподаватели',
+                    dataIndex: 'Teachers',
+                    width: 300,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Пол',
+                    dataIndex: 'Male',
+                    width: 100,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    xtype: 'actioncolumn',
+
+                    region: 'center',
+                    width: 200,
+                    defaults: {
+                        metadata: {
+                            attr: 'style="padding-left:10px;width:auto;"'
+                        }
+                    },
+                    items: [
+                    {
+                        icon: '@Url.Content("~/Content/Images/teacher.png")',  // Use a URL in the icon config
+                        iconCls: 'icon-padding',
+                        text: 'Назначение преподавателей',
+                        tooltip: 'Назначение преподавателей',
+                        handler: function (grid, rowIndex, colIndex) {
+                            var rec = grid.getStore().getAt(rowIndex);
+                            teachersPanel.getComponent('Id').setValue(rec.get('Id'));
+                            teacherStore.proxy.setUrl('@Url.Action("PropertyTeachers")?propertyId=' + rec.get('Id'));
+                            teacherStore.load();
+
+                            selectedTeacherStore.proxy.setUrl('@Url.Action("PropertyTeachers")?propertyId=' + rec.get('Id'));
+                            selectedTeacherStore.filter({ property: 'selected', value: true });
+                            selectedTeacherStore.load();
+                            teachersCounter = 0;
+                            teachersPanel.show();
+                            teachersPanel.mask('Загрузка');
+
+
+                        }
+                    }, {
+                        icon: '@Url.Content("~/Content/Images/training-place.png")',  // Use a URL in the icon config
+                        iconCls: 'icon-padding',
+                        text: 'Назначение места проведения',
+                        tooltip: 'Назначение места проведения',
+                        handler: function (grid, rowIndex, colIndex) {
+                            var rec = grid.getStore().getAt(rowIndex);
+                            trainingPlacePanel.getComponent('Id').setValue(rec.get('Id'));
+                            trainingPlaceStore.proxy.setUrl('@Url.Action("PropertyTrainingPlace")?propertyId=' + rec.get('Id'));
+                            trainingPlaceStore.load();
+
+                            selectedTrainingPlaceStore.proxy.setUrl('@Url.Action("PropertyTrainingPlace")?propertyId=' + rec.get('Id'));
+                            selectedTrainingPlaceStore.filter({ property: 'selected', value: true });
+                            selectedTrainingPlaceStore.load();
+                            trainingPlaceCounter = 0;
+                            trainingPlacePanel.show();
+                            trainingPlacePanel.mask('Загрузка');
+
+
+
+                        }
+                    },
+
+
+                    ]
+                }
+            ]
+
+        });
+        gridPanel.on('edit',
+                function (editor, eValue) {
+                    var record = eValue.record;
+                    Ext.Ajax.request({
+                        url: '@Url.Action("SetSectionFKPropertyLimit")',
+                        params: {
+                            propertyId: record.data.Id,
+                            limit: eValue.value,
+                            __RequestVerificationToken: gettoken()
+                        },
+                        success: function (response) {
+                            record.commit();
+                            //gridPanel.getView().refresh();
+                        },
+                        error: function (response) {
+                            record.reject();
+                        },
+                        failure: function (response) {
+                            record.reject();
+                        }
+                    });
+
+                    // commit the changes right after editing finished
+                    //e.grid.store.save();
+
+                });
+
+        var keyUpEvent = function (textField) {
+            var store = this.up('tablepanel').store;
+         
+            store.filter({
+                property: textField.datapropName,
+                value: this.value,
+                //anyMatch: true,
+                //caseSensitive: false
+            });
+            store.reload();
+        };
+
+        teachersPanel = Ext.create('Ext.window.Window',
+            {
+                title: "Преподаватели",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: false,
+                bodyPadding: 6,
+                height: 600,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 800,
+
+                },
+                items: [
+                      {
+                          xtype: 'hidden',
+                          itemId: 'Id',
+                      },
+                    {
+                        xtype: 'grid',
+                        id: 'teachersGrid',
+                        store: teacherStore,
+                        loadMask: true,
+                        columnLines: true,
+                        height: 300,
+                        listeners: {
+                        },
+                        columns: [
+                            { xtype: 'checkcolumn', text: '', dataIndex: 'selected', width: 50, sortable: false },
+                            { xtype: 'rownumberer', width: 60 },
+                            {
+                                header: 'Фамилия',
+                                dataIndex: 'lastName',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip,
+                                items: {
+                                    xtype: 'textfield',
+                                    flex: 1,
+                                    datapropName: 'lastName',
+                                    margin: 2,
+                                    enableKeyEvents: true,
+                                    listeners: {
+                                        keyup: keyUpEvent,
+                                        buffer: 500
+                                    }
+                                }
+                            },
+                            {
+                                header: 'Имя',
+                                dataIndex: 'firstName',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip,
+                                items: {
+                                    xtype: 'textfield',
+                                    flex: 1,
+                                    datapropName: 'firstName',
+                                    margin: 2,
+                                    enableKeyEvents: true,
+                                    listeners: {
+                                        keyup: keyUpEvent,
+                                        buffer: 500
+                                    }
+                                }
+
+                            },
+                            {
+                                header: 'Отчество',
+                                dataIndex: 'middleName',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip,
+                                items: {
+                                    xtype: 'textfield',
+                                    flex: 1,
+                                    datapropName: 'middleName',
+                                    margin: 2,
+                                    enableKeyEvents: true,
+                                    listeners: {
+                                        keyup: keyUpEvent,
+                                        buffer: 500
+                                    }
+                                }
+                            },
+                            {
+                                header: 'Место работы',
+                                dataIndex: 'workPlace',
+                                width: 200,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip,
+                                items: {
+                                    xtype: 'textfield',
+                                    flex: 1,
+                                    datapropName: 'workPlace',
+                                    margin: 2,
+                                    enableKeyEvents: true,
+                                    listeners: {
+                                        keyup: keyUpEvent,
+                                        buffer: 500
+                                    }
+                                }
+                            },
+                        ]
+
+                    },
+                    {
+                        xtype: 'grid',
+                        id: 'selectedTeachersGrid',
+                        store: selectedTeacherStore,
+                        title: 'Выбранные преподаватели',
+                        loadMask: true,
+                        columnLines: true,
+                        dataBuffered: true,
+
+                        height: 200,
+                        listeners: {
+                        },
+                        columns: [
+                            { xtype: 'checkcolumn', text: '', dataIndex: 'selected', width: 50, sortable: false },
+                            { xtype: 'rownumberer', width: 60 },
+                            {
+                                header: 'Фамилия',
+                                dataIndex: 'lastName',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Имя',
+                                dataIndex: 'firstName',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+
+                            },
+                            {
+                                header: 'Отчество',
+                                dataIndex: 'middleName',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Место работы',
+                                dataIndex: 'workPlace',
+                                width: 200,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                        ]
+
+                    }
+                ],
+                buttons: [
+                    {
+                        text: "Сохранить",
+                        handler: function () {
+                            teachersPanel.mask('Сохранение..');
+                            var teachers = new Array();
+                            selectedTeachersGrid.store.data.items.forEach(function (item, i, arr) {
+                                teachers[i] = {
+                                    id: item.data.teacherId,
+                                    selected: item.data.selected
+                                };
+                            });
+                            Ext.Ajax.request({
+                                method: 'POST',
+                                dataType: 'json',
+                                url: '@Url.Action("UpdateSectionFKPropertyTeachers")?propertyId=' + teachersPanel.getComponent("Id").getValue(),
+                                params: { teacherRows: JSON.stringify(teachers) },
+                                traditional: true,
+                                success: function (response) {
+                                    teachersPanel.unmask();
+                                    teachersPanel.hide();
+                                    store.reload();
+                                },
+                                failure: function (response) {
+                                    teachersPanel.unmask();
+                                    teachersPanel.hide();
+                                }
+                            });
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { teachersPanel.hide(); }
+                    }],
+                listeners: {
+                    'shown': function () {
+
+                    }
+                }
+            });
+        trainingPlacePanel = Ext.create('Ext.window.Window',
+            {
+                title: "Место проведения",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: false,
+                bodyPadding: 6,
+                height: 600,
+                dataBuffered: false,
+
+                defaults: {
+                    xtype: 'textfield',
+                    width: 630,
+
+                },
+                items: [
+                      {
+                          xtype: 'hidden',
+                          itemId: 'Id',
+                      },
+                    {
+                        xtype: 'grid',
+                        id: 'trainingPlaceGrid',
+                        store: trainingPlaceStore,
+                        loadMask: true,
+                        columnLines: true,
+                        height: 300,
+                        
+                        listeners: {
+                        },
+                        columns: [
+                            {
+                                xtype: 'checkcolumn', text: '', dataIndex: 'selected', width: 50, sortable: false,
+                                renderer: function(val, m, rec) {
+                                    if (!rec.get('selected') && rec.dirty)
+                                        return (new Ext.ux.CheckColumn()).renderer(true);
+                                    else
+                                        return (new Ext.ux.CheckColumn()).renderer(val);
+                                }
+                                
+                            },
+                            { xtype: 'rownumberer', width: 40 },
+                            {
+                                header: 'Описание',
+                                dataIndex: 'description',
+                                width: 200,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip,
+                                items: {
+                                    xtype: 'textfield',
+                                    flex: 1,
+                                    datapropName: 'description',
+                                    margin: 2,
+                                    enableKeyEvents: true,
+                                    listeners: {
+                                        keyup: keyUpEvent,
+                                        buffer: 500
+                                    }
+                                }
+                            },
+                            {
+                                header: 'Адрес',
+                                dataIndex: 'address',
+                                width: 300,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip,
+                                items: {
+                                    xtype: 'textfield',
+                                    flex: 1,
+                                    datapropName: 'address',
+                                    margin: 2,
+                                    enableKeyEvents: true,
+                                    listeners: {
+                                        keyup: keyUpEvent,
+                                        buffer: 500
+                                    }
+                                }
+
+                            },
+
+                        ]
+
+                    },
+                    {
+                        xtype: 'grid',
+                        id: 'selectedTrainingPlaceGrid',
+                        store: selectedTrainingPlaceStore,
+                        title: 'Выбранные места проведения',
+                        loadMask: true,
+                        columnLines: true,
+                        height: 200,
+                        listeners: {
+                        },
+                        columns: [
+                            { xtype: 'checkcolumn', text: '', dataIndex: 'selected', width: 50, sortable: false },
+                            { xtype: 'rownumberer', width: 60 },
+                            {
+                                header: 'Описание',
+                                dataIndex: 'description',
+                                width: 200,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Адрес',
+                                dataIndex: 'address',
+                                width: 300,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+
+                            }
+                        ]
+
+                    }
+                ],
+                buttons: [
+                    {
+                        text: "Сохранить",
+                        handler: function () {
+                            trainingPlacePanel.mask('Сохранение..');
+                            var trainingPlaces = new Array();
+                            selectedTrainingPlaceGrid.store.data.items.forEach(function (item, i, arr) {
+
+                                trainingPlaces[i] = {
+                                    id: item.data.id,
+                                    selected: item.data.selected
+                                };
+                            });
+                            Ext.Ajax.request({
+                                method: 'POST',
+                                dataType: 'json',
+                                url: '@Url.Action("UpdateSectionFKPropertyTrainingPlaces")?propertyId=' + trainingPlacePanel.getComponent("Id").getValue(),
+                                params: { trainingPlaceRows: JSON.stringify(trainingPlaces) },
+                                traditional: true,
+                                success: function (response) {
+                                    trainingPlacePanel.unmask();
+                                    trainingPlacePanel.hide();
+                                    store.reload();
+                                },
+                                failure: function (response) {
+                                    trainingPlacePanel.unmask();
+                                    trainingPlacePanel.hide();
+                                }
+                            });
+
+
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { trainingPlacePanel.hide(); }
+                    }],
+                listeners: {
+                    'shown': function () {
+
+                    }
+                }
+            });
+        teachersGrid = Ext.getCmp('teachersGrid');
+        selectedTeachersGrid = Ext.getCmp('selectedTeachersGrid');
+        trainingPlaceGrid = Ext.getCmp('trainingPlaceGrid');
+        selectedTrainingPlaceGrid = Ext.getCmp('selectedTrainingPlaceGrid');
+        var selectableCellClick = function (grid, td, columnIndex, record, tr, rowIndex, e, eOpts,selectedGrid) {
+            //remember to change - it must be column number (first has 0)
+            if (columnIndex == 0) {
+
+                if (record.data.selected) {
+                    $(td).children('div').children('div').addClass('x-grid-checkcolumn-checked');
+                    var clone = record.clone();
+                    clone.commit();
+                    if (grid.store.$className !== 'Ext.data.BufferedStore') {
+                        record.commit();
+                    }
+                    
+                    selectedGrid.store.add(clone); // добавляем в выбранных
+                    //record.commit();
+
+                }
+                else {
+                    if (grid.store.$className !== 'Ext.data.BufferedStore') record.reject();
+
+                }
+            }
+        };
+        var selectedCellClick = function (grid, td, columnIndex, record, tr, rowIndex, e, eOpts) {
+            //remember to change - it must be column number (first has 0)
+            if (columnIndex == 0) {
+                if (record.data.selected) {
+                    $(td).children('div').children('div').addClass('x-grid-checkcolumn-checked');
+                }
+                else {
+                    $(td).children('div').children('div').removeClass('x-grid-checkcolumn-checked');
+                }
+            }
+        };
+
+        teachersGrid.on('cellclick', function (grid, td, columnIndex, record, tr, rowIndex, e, eOpts) {
+            selectableCellClick(grid, td, columnIndex, record, tr, rowIndex, e, eOpts, selectedTeachersGrid);
+        });
+        
+        selectedTeachersGrid.on('cellclick', selectedCellClick);
+
+
+        trainingPlaceGrid.on('cellclick', function (grid, td, columnIndex, record, tr, rowIndex, e, eOpts) {
+            selectableCellClick(grid, td, columnIndex, record, tr, rowIndex, e, eOpts, selectedTrainingPlaceGrid);
+        });
+        
+        selectedTrainingPlaceGrid.on('cellclick', selectedCellClick);
+
+        var items = [
+            gridPanel
+        ];
+
+        Urfu.createViewport('border', items);
+
+    });
+</script>
+

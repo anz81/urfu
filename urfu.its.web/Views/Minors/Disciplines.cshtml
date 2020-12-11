@@ -1,0 +1,60 @@
+﻿@model IEnumerable<Urfu.Its.Web.Models.MinorDisciplineViewModel>
+
+<h2>@ViewBag.Title</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Discipline.title)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Discipline.section)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Discipline.testUnits)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Discipline.file)
+        </th>
+        <th></th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Discipline.title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Discipline.section)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Discipline.testUnits)
+            </td>
+            <td>
+                <a href="@Html.DisplayFor(modelItem => item.Discipline.file)">@Html.DisplayFor(modelItem => item.Discipline.file)</a>
+            </td>
+            <td>
+                @if (item.MinorDiscipline == null )
+                {
+                    if (ViewBag.CanEdit)
+                    {
+                        @Html.ActionLink("Назначить аудиторную нагрузку, контрольные мероприятия и формы контроля", "EditTmers", new { minorId = ViewBag.MinorId, disciplineId = item.Discipline.uid })
+                    }
+                }
+                else
+                {
+                    @Html.ActionLink("Редактировать аудиторную нагрузку, контрольные мероприятия и формы контроля", "Tmers", new { id = item.MinorDiscipline.Id })
+                }
+                @*@Html.ActionLink("Details", "Details", new { id = item.uid }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.uid })|
+                @Html.ActionLink("Модули", "ModuleByDiscipline", "Disciplines", new { disciplineId = item.uid }, null)*@
+            </td>
+        </tr>
+    }
+</table>
+
+<div>
+    @Html.ActionLink("Вернуться к списку", "Index")
+</div>
+
+

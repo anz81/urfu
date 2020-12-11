@@ -1,0 +1,14 @@
+﻿@{
+    ViewBag.Title = "Тестовая страница с использованием Ext JS";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            mainPanel.setHtml("Hello world");
+        });
+        
+    </script>
+}

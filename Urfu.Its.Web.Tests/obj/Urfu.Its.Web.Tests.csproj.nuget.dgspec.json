@@ -1,0 +1,969 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Tests\\Urfu.Its.Web.Tests.csproj": {}
+  },
+  "projects": {
+    "D:\\-urfu\\its\\Urfu.Its.Web\\Ext.Utilities\\Ext.Utilities.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\-urfu\\its\\Urfu.Its.Web\\Ext.Utilities\\Ext.Utilities.csproj",
+        "projectName": "Ext.Utilities",
+        "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Ext.Utilities\\Ext.Utilities.csproj",
+        "packagesPath": "C:\\Users\\lara\\.nuget\\packages\\",
+        "outputPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Ext.Utilities\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
+        ],
+        "configFilePaths": [
+          "D:\\-urfu\\its\\Urfu.Its.Web\\.nuget\\NuGet.Config",
+          "C:\\Users\\lara\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[12.0.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\-urfu\\its\\Urfu.Its.Web\\TemplateEngine\\TemplateEngine.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\-urfu\\its\\Urfu.Its.Web\\TemplateEngine\\TemplateEngine.csproj",
+        "projectName": "TemplateEngine",
+        "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\TemplateEngine\\TemplateEngine.csproj",
+        "packagesPath": "C:\\Users\\lara\\.nuget\\packages\\",
+        "outputPath": "D:\\-urfu\\its\\Urfu.Its.Web\\TemplateEngine\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
+        ],
+        "configFilePaths": [
+          "D:\\-urfu\\its\\Urfu.Its.Web\\.nuget\\NuGet.Config",
+          "C:\\Users\\lara\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "dependencies": {
+            "DocXCore": {
+              "target": "Package",
+              "version": "[1.0.9, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[12.0.3, )"
+            },
+            "Newtonsoft.Json.Schema": {
+              "target": "Package",
+              "version": "[3.0.13, )"
+            },
+            "System.IO.Packaging": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "System.Linq.Dynamic.Core": {
+              "target": "Package",
+              "version": "[1.0.7.13, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Common\\Urfu.Its.Common.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Common\\Urfu.Its.Common.csproj",
+        "projectName": "Urfu.Its.Common",
+        "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Common\\Urfu.Its.Common.csproj",
+        "packagesPath": "C:\\Users\\lara\\.nuget\\packages\\",
+        "outputPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Common\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
+        ],
+        "configFilePaths": [
+          "D:\\-urfu\\its\\Urfu.Its.Web\\.nuget\\NuGet.Config",
+          "C:\\Users\\lara\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "dependencies": {
+            "Microsoft.AspNetCore.Authorization": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.AspNetCore.Mvc.Core": {
+              "target": "Package",
+              "version": "[2.2.5, )"
+            },
+            "Microsoft.AspNetCore.Routing": {
+              "target": "Package",
+              "version": "[2.2.2, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.EntityFrameworkCore.Relational": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.IdentityModel.Tokens": {
+              "target": "Package",
+              "version": "[6.8.0, )"
+            },
+            "log4net": {
+              "target": "Package",
+              "version": "[2.0.12, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Integration\\Urfu.Its.Integration.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Integration\\Urfu.Its.Integration.csproj",
+        "projectName": "Urfu.Its.Integration",
+        "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Integration\\Urfu.Its.Integration.csproj",
+        "packagesPath": "C:\\Users\\lara\\.nuget\\packages\\",
+        "outputPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Integration\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
+        ],
+        "configFilePaths": [
+          "D:\\-urfu\\its\\Urfu.Its.Web\\.nuget\\NuGet.Config",
+          "C:\\Users\\lara\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Common\\Urfu.Its.Common.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Common\\Urfu.Its.Common.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "dependencies": {
+            "CsvHelper": {
+              "target": "Package",
+              "version": "[17.0.0, )"
+            },
+            "Oracle.ManagedDataAccess.Core": {
+              "target": "Package",
+              "version": "[2.19.100, )"
+            },
+            "RabbitMQ.Client": {
+              "target": "Package",
+              "version": "[4.1.3, )"
+            },
+            "System.Data.SqlClient": {
+              "target": "Package",
+              "version": "[4.6.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Practice\\Urfu.Its.Practice.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Practice\\Urfu.Its.Practice.csproj",
+        "projectName": "Urfu.Its.Practice",
+        "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Practice\\Urfu.Its.Practice.csproj",
+        "packagesPath": "C:\\Users\\lara\\.nuget\\packages\\",
+        "outputPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Practice\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
+        ],
+        "configFilePaths": [
+          "D:\\-urfu\\its\\Urfu.Its.Web\\.nuget\\NuGet.Config",
+          "C:\\Users\\lara\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {
+              "D:\\-urfu\\its\\Urfu.Its.Web\\TemplateEngine\\TemplateEngine.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\TemplateEngine\\TemplateEngine.csproj"
+              },
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Common\\Urfu.Its.Common.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Common\\Urfu.Its.Common.csproj"
+              },
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Integration\\Urfu.Its.Integration.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Integration\\Urfu.Its.Integration.csproj"
+              },
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Model\\Urfu.Its.Web.Model.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Model\\Urfu.Its.Web.Model.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "dependencies": {
+            "Microsoft.Windows.Compatibility": {
+              "target": "Package",
+              "version": "[3.1.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.VersionedDocs\\Urfu.Its.VersionedDocs.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.VersionedDocs\\Urfu.Its.VersionedDocs.csproj",
+        "projectName": "Urfu.Its.VersionedDocs",
+        "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.VersionedDocs\\Urfu.Its.VersionedDocs.csproj",
+        "packagesPath": "C:\\Users\\lara\\.nuget\\packages\\",
+        "outputPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.VersionedDocs\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
+        ],
+        "configFilePaths": [
+          "D:\\-urfu\\its\\Urfu.Its.Web\\.nuget\\NuGet.Config",
+          "C:\\Users\\lara\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {
+              "D:\\-urfu\\its\\Urfu.Its.Web\\TemplateEngine\\TemplateEngine.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\TemplateEngine\\TemplateEngine.csproj"
+              },
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Common\\Urfu.Its.Common.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Common\\Urfu.Its.Common.csproj"
+              },
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Model\\Urfu.Its.Web.Model.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Model\\Urfu.Its.Web.Model.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "dependencies": {
+            "Autofac": {
+              "target": "Package",
+              "version": "[4.9.1, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Sandwych.QuickGraph.Core": {
+              "target": "Package",
+              "version": "[1.0.0, )"
+            },
+            "System.Reflection": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "System.Reflection.Emit": {
+              "target": "Package",
+              "version": "[4.7.0, )"
+            },
+            "System.Reflection.Emit.Lightweight": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "System.Runtime.Extensions": {
+              "target": "Package",
+              "version": "[4.3.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.LoadTests\\Urfu.Its.Web.LoadTests.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.LoadTests\\Urfu.Its.Web.LoadTests.csproj",
+        "projectName": "Urfu.Its.Web.LoadTests",
+        "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.LoadTests\\Urfu.Its.Web.LoadTests.csproj",
+        "packagesPath": "C:\\Users\\lara\\.nuget\\packages\\",
+        "outputPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.LoadTests\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
+        ],
+        "configFilePaths": [
+          "D:\\-urfu\\its\\Urfu.Its.Web\\.nuget\\NuGet.Config",
+          "C:\\Users\\lara\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "dependencies": {
+            "MSTest.TestFramework": {
+              "target": "Package",
+              "version": "[2.1.2, )"
+            },
+            "Microsoft.AspNetCore.TestHost": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[16.8.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Model\\Urfu.Its.Web.Model.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Model\\Urfu.Its.Web.Model.csproj",
+        "projectName": "Urfu.Its.Web.Model",
+        "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Model\\Urfu.Its.Web.Model.csproj",
+        "packagesPath": "C:\\Users\\lara\\.nuget\\packages\\",
+        "outputPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Model\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
+        ],
+        "configFilePaths": [
+          "D:\\-urfu\\its\\Urfu.Its.Web\\.nuget\\NuGet.Config",
+          "C:\\Users\\lara\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Common\\Urfu.Its.Common.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Common\\Urfu.Its.Common.csproj"
+              },
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Integration\\Urfu.Its.Integration.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Integration\\Urfu.Its.Integration.csproj"
+              },
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.LoadTests\\Urfu.Its.Web.LoadTests.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.LoadTests\\Urfu.Its.Web.LoadTests.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "dependencies": {
+            "AutoMapper": {
+              "target": "Package",
+              "version": "[10.1.1, )"
+            },
+            "AutoMapper.Extensions.Microsoft.DependencyInjection": {
+              "target": "Package",
+              "version": "[8.1.0, )"
+            },
+            "Microsoft.AspNetCore.Authorization": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.AspNetCore.Mvc.Core": {
+              "target": "Package",
+              "version": "[2.2.5, )"
+            },
+            "Microsoft.AspNetCore.Mvc.ViewFeatures": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Toolbelt.EntityFrameworkCore.IndexAttribute": {
+              "target": "Package",
+              "version": "[3.1.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Tests\\Urfu.Its.Web.Tests.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Tests\\Urfu.Its.Web.Tests.csproj",
+        "projectName": "Urfu.Its.Web.Tests",
+        "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Tests\\Urfu.Its.Web.Tests.csproj",
+        "packagesPath": "C:\\Users\\lara\\.nuget\\packages\\",
+        "outputPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Tests\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
+        ],
+        "configFilePaths": [
+          "D:\\-urfu\\its\\Urfu.Its.Web\\.nuget\\NuGet.Config",
+          "C:\\Users\\lara\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Integration\\Urfu.Its.Integration.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Integration\\Urfu.Its.Integration.csproj"
+              },
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.VersionedDocs\\Urfu.Its.VersionedDocs.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.VersionedDocs\\Urfu.Its.VersionedDocs.csproj"
+              },
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Model\\Urfu.Its.Web.Model.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Model\\Urfu.Its.Web.Model.csproj"
+              },
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web\\Urfu.Its.Web.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web\\Urfu.Its.Web.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "dependencies": {
+            "Microsoft.QualityTools.Testing.Fakes": {
+              "target": "Package",
+              "version": "[16.7.4-beta.20330.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web\\Urfu.Its.Web.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web\\Urfu.Its.Web.csproj",
+        "projectName": "Urfu.Its.Web",
+        "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web\\Urfu.Its.Web.csproj",
+        "packagesPath": "C:\\Users\\lara\\.nuget\\packages\\",
+        "outputPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
+        ],
+        "configFilePaths": [
+          "D:\\-urfu\\its\\Urfu.Its.Web\\.nuget\\NuGet.Config",
+          "C:\\Users\\lara\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Ext.Utilities\\Ext.Utilities.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Ext.Utilities\\Ext.Utilities.csproj"
+              },
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Practice\\Urfu.Its.Practice.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Practice\\Urfu.Its.Practice.csproj"
+              },
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.VersionedDocs\\Urfu.Its.VersionedDocs.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.VersionedDocs\\Urfu.Its.VersionedDocs.csproj"
+              },
+              "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Model\\Urfu.Its.Web.Model.csproj": {
+                "projectPath": "D:\\-urfu\\its\\Urfu.Its.Web\\Urfu.Its.Web.Model\\Urfu.Its.Web.Model.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "dependencies": {
+            "Antlr4.Runtime": {
+              "target": "Package",
+              "version": "[4.6.6, )"
+            },
+            "AutoMapper": {
+              "target": "Package",
+              "version": "[10.1.1, )"
+            },
+            "AutoMapper.Extensions.Microsoft.DependencyInjection": {
+              "target": "Package",
+              "version": "[8.1.0, )"
+            },
+            "Autofac": {
+              "target": "Package",
+              "version": "[4.9.1, )"
+            },
+            "Autofac.AspNetCore.Extensions": {
+              "target": "Package",
+              "version": "[2.0.7, )"
+            },
+            "Autofac.Engine": {
+              "target": "Package",
+              "version": "[5.0.0.1, )"
+            },
+            "CsvHelper": {
+              "target": "Package",
+              "version": "[17.0.0, )"
+            },
+            "ElmahCore": {
+              "target": "Package",
+              "version": "[1.2.5, )"
+            },
+            "Microsoft.ApplicationInsights": {
+              "target": "Package",
+              "version": "[2.16.0, )"
+            },
+            "Microsoft.AspNetCore.Authorization": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.AspNetCore.Identity": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.AspNetCore.Mvc.TagHelpers": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.AspNetCore.Mvc.ViewFeatures": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.EntityFrameworkCore.Relational": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[3.1.10, )"
+            },
+            "Microsoft.IdentityModel.Tokens": {
+              "target": "Package",
+              "version": "[6.8.0, )"
+            },
+            "Microsoft.Windows.Compatibility": {
+              "target": "Package",
+              "version": "[3.1.1, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[12.0.3, )"
+            },
+            "OfficeOpenXml.Core.ExcelPackage": {
+              "target": "Package",
+              "version": "[1.0.0, )"
+            },
+            "OlivierL.OfficeOpenXml.Extensions": {
+              "target": "Package",
+              "version": "[1.0.0, )"
+            },
+            "PagedList.Core": {
+              "target": "Package",
+              "version": "[1.17.4, )"
+            },
+            "RestSharp": {
+              "target": "Package",
+              "version": "[106.11.7, )"
+            },
+            "System.Net.Requests": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
+            "X.PagedList": {
+              "target": "Package",
+              "version": "[8.0.7, )"
+            },
+            "X.PagedList.Mvc.Core": {
+              "target": "Package",
+              "version": "[8.0.7, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

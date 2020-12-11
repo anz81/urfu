@@ -1,0 +1,46 @@
+﻿@using Urfu.Its.Common
+@using Urfu.Its.Web.DataContext
+@model Urfu.Its.VersionedDocs.ViewModels.DocumentViewModel
+
+@{
+    ViewBag.Title = Model.DisplayName;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+<a class="btn btn-default" href="@Url.Action("Print", new RouteValueDictionary(Request.QueryStringToRouteValueDictionary()) { { "id", Model.DocumentId }, { "format", "docx"} })" download>Печатная форма (docx)</a>
+
+@if (Model.DocumentType == VersionedDocumentType.BasicCharacteristicOP)
+{
+    <a class="btn btn-default" href="@Url.Action("Archive", new RouteValueDictionary(Request.QueryStringToRouteValueDictionary()) { { "id", Model.DocumentId } })" download>Архив (zip)</a>
+}
+
+@if (new []
+{
+    VersionedDocumentType.ModuleWorkingProgram,
+    //VersionedDocumentType.ModuleWorkingProgramFgosVo3,
+//    VersionedDocumentType.GiaWorkingProgram,
+//    VersionedDocumentType.GiaWorkingProgramFgosVo3,
+//    VersionedDocumentType.PracticesWorkingProgram,
+//    VersionedDocumentType.PracticesWorkingProgramFgosVo3
+}.Contains(Model.DocumentType))
+{
+    <a class="btn-link btn-default" style="margin-left: 30px" href="@Url.Action("DisciplinesByModule", "Modules", new {moduleId = ViewBag.ModuleId})">Дисциплины модуля</a>
+}
+
+@if (Model.IsSchemaActual)
+{
+    <ul class="list-group" style="margin-top: 30px">
+        @foreach (var s in Model.Sections)
+        {
+            <li class="list-group-item"><a href="@Url.Action("Section", new RouteValueDictionary(Request.QueryStringToRouteValueDictionary()) {{"id", Model.DocumentId}, {"section", s.SystemName}})">@s.DisplayName</a></li>
+        }
+    </ul>
+}
+else
+{
+    <div class="alert alert-warning" style="margin-top: 30px">Схема документа устарела. Доступна только его <a class="alert-link" href="@Url.Action("Print", new { id = Model.DocumentId })" download>печатная форма</a>.</div>
+}

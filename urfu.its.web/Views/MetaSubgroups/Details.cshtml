@@ -1,0 +1,82 @@
+﻿@model Urfu.Its.Web.DataContext.MetaSubgroup
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>MetaSubgroup</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Group.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Group.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Module.title)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Module.title)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Program.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Program.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Tmer.rmer)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Tmer.rmer)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Term)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Term)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.catalogDisciplineUuid)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.catalogDisciplineUuid)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Count)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Count)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Selectable)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Selectable)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

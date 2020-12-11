@@ -1,0 +1,366 @@
+﻿@model Urfu.Its.Web.DataContext.MinorSubgroup
+@{
+    ViewBag.Title = "Редактирование подгруппы";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+
+}
+@section scripts{
+    <script>
+        function gettoken() {
+            var token = '@Html.AntiForgeryToken()';
+            token = $(token).val();
+            return token;
+        }
+
+        Ext.onReady(function() {
+            Ext.define('Ext.ux.CustomTrigger',
+            {
+                extend: 'Ext.form.field.Trigger',
+                alias: 'widget.customtrigger',
+                initComponent: function() {
+                    var me = this;
+
+                    me.triggerCls = 'x-form-clear-trigger'; // native ExtJS class & icon
+                    me.callParent(arguments);
+                },
+                // override onTriggerClick
+                onTriggerClick: function() {
+
+                }
+                });
+    
+            Ext.Ajax.timeout = 60000;
+            Ext.tip.QuickTipManager.init();
+            teachersPanel = {};
+            var selectedTeacher = {};
+
+            var teacherStore = Ext.create("Ext.data.BufferedStore",
+            {
+                idProperty: 'Id',
+                autoLoad: false,
+                pageSize: 300,
+                remoteSort: true,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '@Url.Action("PropertyTeachers")',
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    }
+                },
+                listeners: {
+                    'load': function() {
+                        teachersPanel.unmask();
+                        //if (teachersCounter >= 1 && teachersPanel.isMasked())
+                        //else {
+                        //    teachersCounter++;
+                        //}
+
+                    }
+                }
+            });
+            var formPanel = Ext.create('Ext.form.Panel',
+            {
+                //title: '@ViewBag.Title',
+                collapsible: false,
+                padding: '5px',
+                //border: true,
+                frame: true,
+                width: 800,
+                defaults: {
+                    width: 700,
+                    cls: 'field-margin'
+                },
+                items: [
+                    {
+                        xtype: 'hidden',
+                        name: '__RequestVerificationToken',
+                        value: gettoken()
+                    },
+                    {
+                        xtype: 'hidden',
+                        name: 'Id',
+                        value: '@Model.Id'
+                    },
+                    {
+                        xtype: 'textfield',
+                        fieldLabel: '@Html.DisplayNameFor(m => m.Name)',
+                        name: 'Name',
+                        cls: 'field-margin',
+                        value: '@Model.Name',
+                        readOnly:true,
+                        allowBlank: false
+                    }, {
+                        xtype: 'numberfield',
+                        fieldLabel: '@Html.DisplayNameFor(m => m.Limit)',
+                        name: 'Limit',
+                        cls: 'field-margin',
+                        hideTrigger: true,
+                        minValue: 0,
+                        value: '@Model.Limit'
+                    }, {
+                        xtype: 'customtrigger',
+                        fieldLabel: '@Html.DisplayNameFor(m => m.Teacher)',
+                        name: 'TeacherX',
+                        //hideTrigger: true,
+                        cls: 'field-margin',
+                        value: '@(Model.Teacher != null ? Model.Teacher.initials : "")',
+                        editable: false,
+                        emptyText: 'Преподаватель не выбран',
+                        onTriggerClick: function () {
+                            selectedTeacher = { teacherId: "", lastName: "", firstName: "", middleName: "" };
+                            teacherStore.proxy.setUrl('@Url.Action("MinorTeacher")?minorId=@Model.Id');
+                            teacherStore.load();
+                            teachersCounter = 0;
+                            teachersPanel.show();
+                            teachersPanel.mask('Загрузка');
+                        }
+                    }
+                ],
+                buttons: [
+                    {
+                        text: 'Сохранить',
+                        handler: function() {
+                            formPanel.getForm()
+                                .submit({
+                                    url: '@Url.Action("Edit")',
+                                    success: function(form, action) {
+                                        Ext.MessageBox.alert('Параметры сохранены. ');
+                                        window.location = '@Url.Action("Index","MinorSubgroup")?focus=@Model.Id';
+                                    },
+                                    failure: function(form, action) {
+                                        Ext.MessageBox.alert('Параметры не сохранены. ', action.result.message);
+                                    }
+                                });
+                        }
+                    }
+                ]
+            });
+            var keyUpEvent = function(textField) {
+                var store = this.up('tablepanel').store;
+
+                store.filter({
+                    property: textField.datapropName,
+                    value: this.value,
+                    //anyMatch: true,
+                    //caseSensitive: false
+                });
+                store.reload();
+            };
+            teachersPanel = Ext.create('Ext.window.Window',
+            {
+                title: "Преподаватели",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: false,
+                bodyPadding: 6,
+                height: 500,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 800,
+
+                },
+                items: [
+                    {
+                        xtype: 'hidden',
+                        itemId: 'Id'
+                    },
+                    {
+                        xtype: 'grid',
+                        id: 'teachersGrid',
+                        store: teacherStore,
+                        loadMask: true,
+                        columnLines: true,
+                        dataBuffered: true,
+                        height: 400,
+                        listeners: {
+
+                        },
+                        columns: [
+                            { xtype: 'checkcolumn', text: '', dataIndex: 'selected', width: 50, sortable: false },
+                            { xtype: 'rownumberer', width: 60 },
+                            {
+                                header: 'Фамилия',
+                                dataIndex: 'lastName',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip,
+                                items: {
+                                    xtype: 'textfield',
+                                    flex: 1,
+                                    datapropName: 'lastName',
+                                    margin: 2,
+                                    enableKeyEvents: true,
+                                    listeners: {
+                                        keyup: keyUpEvent,
+                                        buffer: 500
+                                    }
+                                }
+                            },
+                            {
+                                header: 'Имя',
+                                dataIndex: 'firstName',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip,
+                                items: {
+                                    xtype: 'textfield',
+                                    flex: 1,
+                                    datapropName: 'firstName',
+                                    margin: 2,
+                                    enableKeyEvents: true,
+                                    listeners: {
+                                        keyup: keyUpEvent,
+                                        buffer: 500
+                                    }
+                                }
+
+                            },
+                            {
+                                header: 'Отчество',
+                                dataIndex: 'middleName',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip,
+                                items: {
+                                    xtype: 'textfield',
+                                    flex: 1,
+                                    datapropName: 'middleName',
+                                    margin: 2,
+                                    enableKeyEvents: true,
+                                    listeners: {
+                                        keyup: keyUpEvent,
+                                        buffer: 500
+                                    }
+                                }
+                            },
+                            {
+                                header: 'Место работы',
+                                dataIndex: 'workPlace',
+                                width: 200,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip,
+                                items: {
+                                    xtype: 'textfield',
+                                    flex: 1,
+                                    datapropName: 'workPlace',
+                                    margin: 2,
+                                    enableKeyEvents: true,
+                                    listeners: {
+                                        keyup: keyUpEvent,
+                                        buffer: 500
+                                    }
+                                }
+                            },
+                        ]
+
+                    }
+                ],
+                buttons: [
+                    {
+                        text: "Сохранить",
+                        handler: function() {
+                              teachersPanel.mask('Сохранение..');
+                              Ext.Ajax.request({
+                                method: 'POST',
+                                dataType: 'json',
+                                url: '@Url.Action("UpdateMinorTeacher")?minorSubgroupId=' + formPanel.getForm().findField("Id").getValue(),
+                                params: { teacherId: selectedTeacher.teacherId },
+                                traditional: true,
+                                success: function (response) {
+                                    var teacher = formPanel.getForm().findField('TeacherX');
+                                    teacher.setValue(selectedTeacher.lastName +
+                                        ' ' +
+                                        selectedTeacher.firstName +
+                                        ' ' +
+                                        selectedTeacher.middleName);
+                                    teachersPanel.unmask();
+                                    teachersPanel.hide();
+                                    
+                                },
+                                failure: function (response) {
+                                    teachersPanel.unmask();
+                                    teachersPanel.hide();
+                                }
+                            });
+                            
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function() { teachersPanel.hide(); }
+                    }
+                ],
+                listeners: {
+                    'shown': function() {
+
+                    }
+                }
+            });
+            teachersGrid = Ext.getCmp('teachersGrid');
+            var selectableCellClick = function(grid, td, columnIndex, record, tr, rowIndex, e, eOpts) {
+                //remember to change - it must be column number (first has 0)
+                if (columnIndex == 0) {
+
+                    if (record.data.selected) {
+                        uncheckRows(grid, rowIndex);
+                        $(td).children('div').children('div').addClass('x-grid-checkcolumn-checked');
+                        selectedTeacher = record.data;
+                    } else {
+                        $(td).children('div').children('div').removeClass('x-grid-checkcolumn-checked');
+                        selectedTeacher = { teacherId: "", lastName: "", firstName: "", middleName: "" };
+                    }
+
+
+                    if (grid.store.$className !== 'Ext.data.BufferedStore') {
+                        record.commit();
+                    }
+
+                    //selectedGrid.store.add(clone); // добавляем в выбранных
+                    //record.commit();
+
+                } else {
+                    if (grid.store.$className !== 'Ext.data.BufferedStore') record.reject();
+
+                }
+
+            };
+
+            function uncheckRows(grid, rowIndex) {
+                rowI = rowIndex;
+                grid.store.data.forEach(function(recordX, recordIdx) {
+                    if (recordX.data.selected && recordIdx != rowI) {
+
+                        recordX.data.selected = false;
+                        //recordX.;
+                    }
+                    //do stuff with the text
+                });
+                var rows = $('.x-grid-checkcolumn-checked');
+                rows.removeClass('x-grid-checkcolumn-checked');
+            }
+
+            var selectedCellClick = function(grid, td, columnIndex, record, tr, rowIndex, e, eOpts) {
+                //remember to change - it must be column number (first has 0)
+                if (columnIndex == 0) {
+                    if (record.data.selected) {
+                        $(td).children('div').children('div').addClass('x-grid-checkcolumn-checked');
+                    } else {
+                        $(td).children('div').children('div').removeClass('x-grid-checkcolumn-checked');
+                    }
+                }
+            };
+            teachersGrid.on('cellclick',
+                function(grid, td, columnIndex, record, tr, rowIndex, e, eOpts) {
+                    selectableCellClick(grid, td, columnIndex, record, tr, rowIndex, e, eOpts);
+                });
+
+
+            var items = [formPanel];
+
+            var settings = {
+                //autoscroll: true
+                overflowY: 'scroll'
+            };
+            Urfu.createViewport('anchor', items, settings);
+        })
+    </script>
+}

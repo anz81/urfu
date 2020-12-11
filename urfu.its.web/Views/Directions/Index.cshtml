@@ -1,0 +1,134 @@
+﻿@{
+    ViewBag.Title = "Направления";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            var directions = Ext.create("Ext.data.Store",
+                {
+                    fields: ["id", "okso", "title"],
+                    autoLoad: true,
+                    pageSize: false,
+                    proxy: {
+                        type: 'ajax',
+                        url: '/Directions/Index',
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        }
+                    }
+                });
+
+
+            var tpl = '<a href="/Directions/Edit?id={id}">Изменить</a> | <a href="/Directions/Details?id={id}">Просмотреть</a>\
+                | <a href="/Directions/Delete?id={id}">Удалить</a> | <a href="/Sync/SyncDirection?directionId={id}">Синхронизация</a>';
+
+            function funSearch() {
+                directions.clearFilter();
+                directions.filterBy(function (record) {
+                    var searchTxt = Ext.getCmp("txtSearch").getValue().toUpperCase();
+                    return record.get("okso").toUpperCase().indexOf(searchTxt) > -1 || record.get("title").toUpperCase().indexOf(searchTxt) > -1 || record.get("ministerialCode").toUpperCase().indexOf(searchTxt) > -1 ||
+                        record.get("ugnTitle").toUpperCase().indexOf(searchTxt) > -1 || record.get("standard").toUpperCase().indexOf(searchTxt) > -1 || record.get("qualifications").toUpperCase().indexOf(searchTxt) > -1
+                });
+            }
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: directions,
+                    loadMask: true,
+                    tbar: [
+                        {
+                            xtype: 'box',
+                            autoEl: { tag: 'a', href: '/Directions/Create', html: 'Создать направление' }
+                        },
+                        '-',
+                        {
+                            xtype: "label",
+                            text: "Поиск"
+                        },
+                        {
+                            id: 'txtSearch',
+                            xtype: 'textfield',
+                            width: 200,
+                            listeners: {
+                                'specialkey': function (cmp, event) {
+                                    if (event.getKey() == event.ENTER) {
+                                        funSearch();
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            id: "btnSearch",
+                            text: "Найти",
+                            handler: funSearch
+                        },
+                        {
+                            text: "Очистить фильтр",
+                            handler: function () {
+                                Ext.getCmp("txtSearch").setValue("");
+                                directions.clearFilter();
+                            }
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        {
+                            header: 'ОКСО',
+                            dataIndex: 'okso',
+                            width: 100,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Название направления',
+                            dataIndex: 'title',
+                            width: 500,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Код',
+                            dataIndex: 'ministerialCode',
+                            width: 100,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'УГН',
+                            dataIndex: 'ugnTitle',
+                            width: 500,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Стандарт',
+                            dataIndex: 'standard',
+                            width: 100,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Квалификация',
+                            dataIndex: 'qualifications',
+                            width: 250,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: "Ссылки",
+                            xtype: 'templatecolumn',
+                            tpl: tpl,
+                            width: 400
+                        }
+                    ]
+                });
+
+            var items = [
+                gridPanel
+            ];
+            window.directions = directions;
+
+            Urfu.createViewport('border', items);
+        });
+    </script>
+}

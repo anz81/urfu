@@ -1,0 +1,138 @@
+﻿
+@{
+    ViewBag.Title = "Учебные планы";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@section scripts
+{
+<script type="text/javascript">
+    Ext.onReady(function () {
+        Ext.tip.QuickTipManager.init();
+            var plansStore = Ext.create("Ext.data.BufferedStore",
+                {
+                    fields: ["id", "eduplanNumber", "versionNumber", "disciplineTitle", "directionId", "controls", "loads", "terms", "allTermsExtracted"],
+                    autoLoad: true,
+                    pageSize: 300,
+                    remoteSort: true,
+                    remoteFilter: true,
+                    proxy: {
+                        type: 'ajax',
+                        url: '/Plans/Index',
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        }
+                    }
+                });
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: plansStore,
+                    loadMask: true,
+                    tbar: [
+                        {
+                            xtype: 'box',
+                            autoEl: { tag: 'a', href: '/Plans/Create', html: 'Создать новый учебный план' }
+                        },
+                        '-',
+                        {
+                            xtype: 'label',
+                            text: 'Номер'
+                        },
+                        {
+                            id: 'txtNumber',
+                            xtype: 'textfield',
+                        },
+                        {
+                            xtype: 'label',
+                            text: 'Название дисциплины'
+                        },
+                        {
+                            id: 'txtTitle',
+                            xtype: 'textfield',
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Применить',
+                            handler: function () {
+                                plansStore.filter([
+                                    { property: 'eduplanNumber', value: Ext.getCmp('txtNumber').getValue() },
+                                    { property: 'disciplineTitle', value: Ext.getCmp('txtTitle').getValue() },
+                                    ]);
+                            }
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Отменить',
+                            handler: function () { plansStore.clearFilter(); }
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        {
+                            header: 'Номер',
+                            dataIndex: 'eduplanNumber',
+                            sortable: true,
+                            width: 80,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Версия',
+                            dataIndex: 'versionNumber',
+                            sortable: false,
+                            width: 120,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Название дисциплины',
+                            dataIndex: 'disciplineTitle',
+                            sortable: true,
+                            width: 400,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Направление',
+                            align: 'center',
+                            dataIndex: 'DirectionOkso',
+                            sortable: false,
+                            width: 130,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Контрольные мероприятия',
+                            align: 'center',
+                            dataIndex: 'controls',
+                            sortable: false,
+                            width: 250,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Нагрузка',
+                            align: 'center',
+                            dataIndex: 'loads',
+                            sortable: false,
+                            width: 240,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Семестры',
+                            align: 'center',
+                            dataIndex: 'terms',
+                            sortable: false,
+                            width: 110,
+                            renderer: Ext.util.Format.htmlEncode
+                        }
+                    ]
+                });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+</script>
+}

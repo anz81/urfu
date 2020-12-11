@@ -1,0 +1,42 @@
+﻿{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "Collection": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "IntProp": {
+            "type": "integer"
+          },
+          "SubCollection": {
+            "type": "array",
+            "additionalItems": false,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "IntSubProp": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "IntSubProp"
+              ] 
+            }
+          }
+        },
+        "required": [
+          "IntProp",
+          "SubCollection"
+        ] 
+      }
+    }
+  },
+  "required": [
+    "Collection"    
+  ]
+}

@@ -1,0 +1,363 @@
+﻿@model List<Urfu.Its.Web.Controllers.MinorReportVM>
+
+@{
+    ViewBag.Title = "Отчет по майнорам";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        
+        Ext.onReady(function () {
+            function showSpecialities(id) {
+                Ext.Ajax.request({
+                    url: '@Url.Action("GetSpecialities","Admission2")?moduleId=' + id,
+                    success: function (response) {
+                        var data = Ext.decode(response.responseText);
+                        Ext.MessageBox.alert('Направления', data.specialities, function () {
+                            //action to complete when user clicks ok.
+                        });
+                    }
+                });
+            }
+            Ext.tip.QuickTipManager.init();
+
+            Ext.define('ComboBoxModel',
+            {
+                extend: 'Ext.data.Model',
+                fields:
+                [
+                    { type: 'string', name: 'Id' },
+                    { type: 'string', name: 'Name' }
+                ]
+            });
+
+            // Amir: Это как то крыво но другого варианта не было...
+            Ext.define('Override.grid.feature.Grouping', {
+                override: 'Ext.grid.feature.Grouping',
+
+                vetoEvent: function (record, row, rowIndex, e) {
+                    // Do not veto mouseover/mouseout or mousedown if clicks on a Link
+                    if ((e.type === 'mousedown' || e.type === 'mouseover') && e.getTarget('a') && e.getTarget('a').innerText.indexOf("Направления") > -1) {
+                        showSpecialities(record.data.moduleId);
+                        return true;
+                    }
+                }
+            });
+
+            var SemestersStore = Ext.create('Ext.data.Store',
+            {
+                model: 'ComboBoxModel',
+                proxy:
+                {
+                    type: 'ajax',
+                    url: '/Minors/Semesters',
+                    reader: { type: 'json', root: 'data' }
+                }
+            });
+            var store = Ext.create("Ext.data.Store",
+            {
+                fields: [
+                    "Id", "GroupName", "Surname", "Name", "PatronymicName", "Rating", "IsTarget", "IsInternational",
+                    "Compensation", "MinStudentsCount", "MaxStudentsCount", "specialities"
+                ],
+                groupField: 'numberAndTitle',
+                autoLoad: false,
+                //pageSize: 300,
+                remoteSort: true,
+                remoteFilter: true,
+                
+                proxy: {
+                    type: 'ajax',
+                    url: window.location.pathname + window.location.search,
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    }
+                }
+            });
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("MinorsReportFilters") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+
+            }
+
+            var filtersWnd = null;
+            function loadStore() {
+                store.proxy.setUrl(window.location.pathname + window.location.search +
+                    '?filter=' +
+                    encodeURIComponent(localStorage.getItem("MinorsReportFilters")));
+                store.load();
+            }
+            var setFilters = function() {
+                var settings = [
+                    { property: 'number', value: filtersWnd.getComponent("number").getValue() },
+                    { property: 'GroupName', value: filtersWnd.getComponent("GroupNameField").getValue() },
+                    { property: 'Surname', value: filtersWnd.getComponent("SurnameField").getValue() },
+                    { property: 'Name', value: filtersWnd.getComponent("NameField").getValue() },
+                    { property: 'semesterId', value: filtersWnd.getComponent("semester").getValue() },
+                    { property: 'PatronymicName', value: filtersWnd.getComponent("PatronymicNameField").getValue() },
+                    { property: 'IsTarget', value: filtersWnd.getComponent("IsTargetField").getValue().IsTargetField },
+                    { property: 'Year', value: filtersWnd.getComponent("Year").getValue() },
+                    {
+                        property: 'IsInternational',
+                        value: filtersWnd.getComponent("IsInternationalField").getValue().IsInternationalField
+                    }
+                ];
+                localStorage.setItem("MinorsReportFilters", JSON.stringify(settings));
+                loadStore();
+            };
+            var grouping = Ext.create('Ext.grid.feature.Grouping',
+            {
+                ftype: 'grouping',
+                collapsible: true,
+                startCollapsed: true,
+                hideGroupedHeader: true,
+                groupHeaderTpl: '{name} / Лимит нижний {[values.rows[0].data.MinStudentsCount]} / Лимит верхний {[values.rows[0].data.MaxStudentsCount]} / Зачислено: {rows.length} / <a>Направления</a>'
+            });
+
+            filtersWnd = Ext.create('Ext.window.Window',
+            {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "Номер модуля", itemId: "number", value: prevSettings["number"] },
+                    { fieldLabel: "Название группы", itemId: "GroupNameField", value: prevSettings["GroupName"] },
+                    { fieldLabel: "Фамилия", itemId: "SurnameField", value: prevSettings["Surname"] },
+                    { fieldLabel: "Имя", itemId: "NameField", value: prevSettings["Name"] },
+                    { fieldLabel: "Номер", itemId: "PersonalNumber", value: prevSettings["PersonalNumber"] },
+                    { fieldLabel: "Год", itemId: "Year", value: prevSettings["Year"] },
+                    { fieldLabel: "Отчество", itemId: "PatronymicNameField", value: prevSettings["PatronymicName"] },
+                    {
+                        fieldLabel: "Семестр",
+                        itemId: "semester",
+                        value: prevSettings["semesterId"],
+                        xtype: "combobox",
+                        store: SemestersStore,
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'remote'
+                    },
+                    {
+                        xtype: 'radiogroup',
+                        fieldLabel: 'Целевой',
+                        itemId: "IsTargetField",
+                        value: prevSettings["IsTarget"],
+                        items: [
+                            {
+                                boxLabel: 'Все',
+                                name: 'IsTargetField',
+                                inputValue: ''
+
+                            }, {
+                                boxLabel: 'Да',
+                                name: 'IsTargetField',
+                                inputValue: 'true'
+                            }, {
+                                boxLabel: 'Нет',
+                                name: 'IsTargetField',
+                                inputValue: 'false'
+                            }
+                        ]
+                    },
+                    {
+                        xtype: 'radiogroup',
+                        fieldLabel: 'Иностранный',
+                        itemId: "IsInternationalField",
+                        value: prevSettings["IsInternational"],
+                        items: [
+                            {
+                                boxLabel: 'Все',
+                                name: 'IsInternationalField',
+                                inputValue: ''
+
+                            }, {
+                                boxLabel: 'Да',
+                                name: 'IsInternationalField',
+                                inputValue: 'true'
+                            }, {
+                                boxLabel: 'Нет',
+                                name: 'IsInternationalField',
+                                inputValue: 'false'
+                            }
+                        ]
+                    }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function() {
+                            //store.filter([
+                            //    { property: 'GroupName', value: filtersWnd.getComponent("GroupNameField").getValue() },
+                            //    { property: 'Surname', value: filtersWnd.getComponent("SurnameField").getValue() },
+                            //    { property: 'Name', value: filtersWnd.getComponent("NameField").getValue() },
+                            //    { property: 'StudentStatus', value: filtersWnd.getComponent("StudentStatus").getValue() },
+                            //    { property: 'PersonalNumber', value: filtersWnd.getComponent("PersonalNumber").getValue() },
+                            //    { property: 'PatronymicName', value: filtersWnd.getComponent("PatronymicNameField").getValue() },
+                            //    { property: 'IsTarget', value: filtersWnd.getComponent("IsTargetField").getValue() },
+                            //    { property: 'IsInternational', value: filtersWnd.getComponent("IsInternationalField").getValue() }
+                            //]);
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function() { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+            setFilters();
+            var gridPanel = null;
+
+            var downloadReport = Ext.create('Ext.Button',
+            {
+                xtype: 'button',
+                text: 'Отчёт по майнорам в Excel',
+                handler: function() {
+                    var fileUrl = '@Url.Action("DownloadMinorsReport")' +
+                        "?filter=" +
+                        encodeURIComponent(localStorage.getItem("MinorsReportFilters") || "[]");
+                    window.location.href = fileUrl;
+                }
+            });
+
+            
+
+            gridPanel = Ext.create('Ext.grid.Panel',
+            {
+                multiSelect: true,
+                region: 'center',
+                store: store,
+                loadMask: true,
+                columnLines: true,
+                tbar: [
+                    {
+                        xtype: 'button',
+                        text: 'Фильтры...',
+                        handler: function() { filtersWnd.show(); }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Отменить фильтры",
+                        handler: function() {
+                            localStorage.setItem("MinorsReportFilters", []);
+                            store.clearFilter();
+                        }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Развернуть\\Свернуть группировку",
+                        handler: function() {
+                            window.groupsCollapsed = !window.groupsCollapsed;
+                            if (window.groupsCollapsed)
+                                grouping.expandAll();
+                            else
+                                grouping.collapseAll();
+                        }
+                    },
+                    '-',
+                    downloadReport
+                ],
+                columns: [
+                    { xtype: 'rownumberer', width: 50 },
+                    {
+                        header: 'Год',
+                        dataIndex: 'Year',
+                        width: 80,
+                        renderer: Ext.util.Format.htmlEncode
+                    },
+                    {
+                        header: 'Название группы',
+                        dataIndex: 'GroupName',
+                        width: 160,
+                        renderer: Ext.util.Format.htmlEncode
+                    },
+                    {
+                        header: 'Фамилия',
+                        dataIndex: 'Surname',
+                        width: 200,
+                        renderer: function(value, metaData, record) {
+                            return '<a href="/PersonalInfo/Student?studentId=' + record.data.Id + '">' + value + '</a>';
+                        }
+                    },
+                    {
+                        header: 'Имя',
+                        dataIndex: 'Name',
+                        width: 200,
+                        renderer: Urfu.renders.htmlEncode
+                    },
+                    {
+                        header: 'Отчество',
+                        dataIndex: 'PatronymicName',
+                        width: 200,
+                        renderer: Ext.util.Format.htmlEncode
+                    },
+                    {
+                        header: 'Рейтинг',
+                        dataIndex: 'Rating',
+                        width: 90
+                    },
+                    {
+                        header: 'Целевой',
+                        dataIndex: 'IsTarget',
+                        width: 100,
+                        align: 'center',
+                        renderer: function(val) { return val ? 'Да' : "Нет" }
+                    },
+                    {
+                        header: 'Иностранный студент',
+                        dataIndex: 'IsInternational',
+                        width: 200,
+                        align: 'center',
+                        renderer: function(val) { return val ? 'Да' : "Нет" }
+                    },
+                    {
+                        header: 'Вид возмещения затрат',
+                        align: 'center',
+                        dataIndex: 'Compensation',
+                        width: 210,
+                        renderer: Urfu.renders.htmlEncode
+                    },
+                    {
+                        header: 'Лимит нижний',
+                        align: 'center',
+                        dataIndex: 'MinStudentsCount',
+                        width: 200,
+                        renderer: Urfu.renders.htmlEncode
+                    },
+                    {
+                        header: 'Лимит верхний',
+                        align: 'center',
+                        dataIndex: 'MaxStudentsCount',
+                        width: 200,
+                        renderer: Urfu.renders.htmlEncode
+                    }
+                ],
+                features: [grouping]
+            });
+            d = null;
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+    </script>
+}
+

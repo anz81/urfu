@@ -1,0 +1,2517 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>Xceed.Words.NET</name>
+  </assembly>
+  <members>
+    <member name="T:Xceed.Words.NET.Alignment">
+      <summary>Value indicating the Alignment of the Text in a Paragraph.</summary>
+    </member>
+    <member name="F:Xceed.Words.NET.Alignment.left">
+      <summary>Align the Paragraph's text to the left.</summary>
+    </member>
+    <member name="F:Xceed.Words.NET.Alignment.center">
+      <summary>Align the Paragraph's text as centered.</summary>
+    </member>
+    <member name="F:Xceed.Words.NET.Alignment.right">
+      <summary>Align the Paragraph's text to the right.</summary>
+    </member>
+    <member name="F:Xceed.Words.NET.Alignment.both">
+      <summary>Align the Paragraph's text to both the left and right margins, adding extra space between the content as necessary.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.AutoFit">
+      <summary>Value indicating how a Table should auto resize.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.BarDirection">
+      <summary>Value indicating the Direction of the bars in a BarChart.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.BarGrouping">
+      <summary>Value indicating the type of Grouping in a BarChart.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.BasicShapes">
+      <summary>Value indicating a basic shape to apply to a Picture.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.BlockArrowShapes">
+      <summary>Value indicating a block arrow shape to apply to a Picture.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.BorderSize">
+      <summary>Value indicating the size to apply to a border.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.BorderStyle">
+      <summary>Value indicating the style to apply to a border.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.CalloutShapes">
+      <summary>Value indicating a callout shape to apply to a Picture.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.CapsStyle">
+      <summary>Value indicating the caps style to apply to the text.</summary>
+    </member>
+    <member name="F:Xceed.Words.NET.CapsStyle.none">
+      <summary>No caps : every character will be lowercase.</summary>
+    </member>
+    <member name="F:Xceed.Words.NET.CapsStyle.caps">
+      <summary>All caps : every character will be uppercase.</summary>
+    </member>
+    <member name="F:Xceed.Words.NET.CapsStyle.smallCaps">
+      <summary>Small caps : every character will be uppercase, but with a small font size.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.ChartLegendPosition">
+      <summary>Value indicating the position of a ChartLegend.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.ContainerType">
+      <summary>Value indicating the Type of Container.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Direction">
+      <summary>Value indicating the direction of the content.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.DisplayBlanksAs">
+      <summary>Value indicating how to display blanks.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.DocumentTypes">
+      <summary>Value indicating the Type of Document.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.EditRestrictions">
+      <summary>Value indicating an edit restriction on a Document.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.EquationShapes">
+      <summary>Value indicating an equation shape to apply to a Picture.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.FlowchartShapes">
+      <summary>Value indicating a flow chart shape to apply to a Picture.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Grouping">
+      <summary>Value indicating the type of Grouping in a LineChart.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.HeadingType">
+      <summary>Value indicating the type of heading.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Highlight">
+      <summary>Value indicating the color of the highlight.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.HorizontalBorderPosition">
+      <summary>Value indicating the position of a horizontal line within a Paragraph.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.LineSpacingType">
+      <summary>Value indicating the type of line spacing.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.LineSpacingTypeAuto">
+      <summary>Value indicating the type of automatic line spacing.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.ListItemType">
+      <summary>Value indicating the type of List.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.MatchFormattingOptions">
+      <summary>Value indicating the match formatting option to use.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Misc">
+      <summary>Value indicating the miscellanous property to apply.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Orientation">
+      <summary>Value indicating the orientation of the document.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.PageNumberFormat">
+      <summary>Value indicating the format for the page numbers.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.RectangleShapes">
+      <summary>Value indicating a rectangle shape to apply to a Picture.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Script">
+      <summary>Value indicating the Script formatting.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.SectionBreakType">
+      <summary>Value indicating the type of section break.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.ShadingType">
+      <summary>Value indicating the type of shading.</summary>
+    </member>
+    <member name="F:Xceed.Words.NET.ShadingType.Text">
+      <summary>Text Shading.</summary>
+    </member>
+    <member name="F:Xceed.Words.NET.ShadingType.Paragraph">
+      <summary>Paragraph Shading.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.StarAndBannerShapes">
+      <summary>Value indicating a star and banner shape to apply to a Picture.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.StrikeThrough">
+      <summary>Value indicating the strike through formatting.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.TableBorderType">
+      <summary>Value indicating the type of table border.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.TableCellBorderType">
+      <summary>Value indicating the type of cell border.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.TableCellMarginType">
+      <summary>Value indicating the type of cell margin.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.TableDesign">
+      <summary>Value indicating the design/style to apply to a table.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.TableOfContentsSwitches">
+      <summary>Value indicating the Table of Content Switch to use.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.TabStopPositionLeader">
+      <summary>Value indicating the leader for a tab stop.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.TextDirection">
+      <summary>Value indicating the direction of the text.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.UnderlineStyle">
+      <summary>Value indicating the style to apply to an underline.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.VerticalAlignment">
+      <summary>Value indicating the vertical alignment of a Cell.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Axis">
+      <summary>Represents the base class for an Axis.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.BarChart">
+      <summary>Represents a Bar Chart.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Bookmark">
+      <summary>Represents a Bookmark.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.BookmarkCollection">
+      <summary>Represents a collection of Bookmarks.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Border">
+      <summary>Represents a Border of a Table or <see cref="Xceed.Words.NET~Xceed.Words.NET.Cell.html">Cell</see>.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.CategoryAxis">
+      <summary>Represents a Category Axis</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Cell">
+      <summary>Represents a Cell in a Table.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Chart">
+      <summary>Represents the base class for a Chart.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.ChartLegend">
+      <summary>Represent a Chart's Legend.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Container">
+      <summary>Represents the base class for a Container.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.CustomProperty">
+      <summary>Represents a Custom Property.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.DocProperty">
+      <summary>Represents a Document Property.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.DocX">
+      <summary>Represents a Document.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.DocXElement">
+      <summary>Represents the base class for all DocX Elements.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Font">
+      <summary>Represents a Font.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Footer">
+      <summary>Represents a Footer.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Footers">
+      <summary>Represents the Footers in a Document (Even, First, Odd).</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.FormattedText">
+      <summary>Represents a FormattedText.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Formatting">
+      <summary>Represents a group of formatting options that can be applied to text.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Header">
+      <summary>Represents a Header.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Headers">
+      <summary>Represents the Headers in a Document (Even, First, Odd).</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Hyperlink">
+      <summary>Represents a Hyperlink.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Image">
+      <summary>Represents an Image.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.InsertBeforeOrAfter">
+      <summary>Represents the base class for DocXElements that support the ablity to insert new DocXElements
+before or after the current DocXElement.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Licenser">
+      <summary>Represents the class that registers the classes defined in the Xceed.Words.NET assembly.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.LineChart">
+      <summary>Represents a Line Chart.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.List">
+      <summary>Represents a List.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.PackagePartStream">
+      <summary>Represents a PackagePartStream.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.PageLayout">
+      <summary>Represents a PageLayout.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Paragraph">
+      <summary>Represents a Paragraph.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Picture">
+      <summary>Represents a Picture.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.PieChart">
+      <summary>Represents a Pie Chart.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Row">
+      <summary>Represents a Row in a Table.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Run">
+      <summary>Represents a Run.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Section">
+      <summary>Represents a Section.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Series">
+      <summary>Represents a Series.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.Table">
+      <summary>Represents a Table.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.TableLook">
+      <summary>Represents a TableLook.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.TableOfContents">
+      <summary>Represents a table of contents.</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.ValueAxis">
+      <summary>Represents a Value Axis</summary>
+    </member>
+    <member name="T:Xceed.Words.NET.XmlTemplates">
+      <summary>Provides a set of Xml Templates.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Axis.Id">
+      <summary>Gets the Id of this Axis.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Axis.IsVisible">
+      <summary>Gets or sets if this Axis is visible.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.BarChart.#ctor">
+      <summary>Initializes a new instance of the <strong>BarChart</strong> class.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.BarChart.CreateChartXml">
+      <summary>Creates the XML for this BarChart.</summary>
+      <returns>An XElement value representing the XML for the BarChart.</returns>
+    </member>
+    <member name="P:Xceed.Words.NET.BarChart.BarDirection">
+      <summary>Gets or sets the direction of the bars in this BarChart.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.BarChart.BarGrouping">
+      <summary>Gets or sets the type of grouping used for this BarChart.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.BarChart.GapWidth">
+      <summary>Gets or sets which percentage of the bar is used as a gap (value between 0% and 500%).</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Bookmark.#ctor">
+      <summary>Initializes a new instance of the <strong>Bookmark</strong> class.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Bookmark.SetText(System.String)">
+      <summary>Sets the Text of this Bookmark.</summary>
+      <param name="text">The Text of the Bookmark.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.Bookmark.Name">
+      <summary>Gets or sets the Name of this Bookmark.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Bookmark.Paragraph">
+      <summary>Gets or sets at which Paragraph this Bookmark is located.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.BookmarkCollection.#ctor">
+      <summary>Initializes a new instance of the <strong>BookmarkCollection</strong> class.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Border.#ctor">
+      <summary>Initializes a new instance of the <strong>Border</strong> class.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Border.#ctor">
+      <summary>Initializes a new instance of the <strong>Border</strong> class.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Border.#ctor(Xceed.Words.NET.BorderStyle,Xceed.Words.NET.BorderSize,System.Int32,System.Drawing.Color)">
+      <summary>Initializes a new instance of the <strong>Border</strong> class, using the provided BorderStyle, BorderSize, Space and Color.</summary>
+      <param name="tcbs">The BorderStyle of the Border.</param>
+      <param name="size">The BorderSize of the Border.</param>
+      <param name="space">The Space of the Border.</param>
+      <param name="color">The <strong>Color</strong> of the Border.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.Border.Color">
+      <summary>Gets or sets the Color of this Border.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Border.Size">
+      <summary>Gets or sets the Size of this Border.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Border.Space">
+      <summary>Gets or sets the Space of this Border.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Border.Tcbs">
+      <summary>Gets or sets the Style of this Border.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.CategoryAxis.#ctor(System.String)">
+      <summary>Initializes a new instance of the <strong>CategoryAxis</strong> class.</summary>
+      <param name="id">The Id of the Axis.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Cell.GetBorder(Xceed.Words.NET.TableCellBorderType)">
+      <summary>Gets the Border of this Cell.</summary>
+      <returns>The Border of the Cell.</returns>
+      <param name="borderType">A TableCellBorderType value representing the type of border to get.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Cell.SetBorder(Xceed.Words.NET.TableCellBorderType,Xceed.Words.NET.Border)">
+      <summary>Sets the Border on this Cell.</summary>
+      <param name="borderType">A TableCellBorderType value representing the type of
+border to set.</param>
+      <param name="border">The Border to set.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Cell.InsertTable(System.Int32,System.Int32)">
+      <summary>Inserts a Table in this Cell.</summary>
+      <returns>A reference to the newly created Table.</returns>
+      <param name="rowCount">The number of rows.</param>
+      <param name="columnCount">The number of columns.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.Cell.FillColor">
+      <summary>Gets or sets the color to use to fill the background of this Cell.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Cell.GridSpan">
+      <summary>Gets the grid span of this cell (how many cells are merged).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Cell.MarginBottom">
+      <summary>Gets or sets the bottom margin of this Cell (in pixels).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Cell.MarginLeft">
+      <summary>Gets or sets the left margin of this Cell (in pixels).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Cell.MarginRight">
+      <summary>Gets or sets the right margin of this Cell (in pixels).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Cell.MarginTop">
+      <summary>Gets or sets the top margin of this Cell (in pixels).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Cell.Paragraphs">
+      <summary>Gets the collection of Paragraphs in this Cell.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Cell.Shading">
+      <summary>Gets or sets the color to use for the shading of this Cell.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Cell.TextDirection">
+      <summary>Gets or sets the direction for the text in this Cell.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Cell.VerticalAlignment">
+      <summary>Gets or sets the vertical alignment of this Cell.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Cell.Width">
+      <summary>Gets or sets the width of this Cell (in pixels).</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Chart.AddLegend">
+      <summary>Adds a ChartLegend to this Chart.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Chart.AddSeries(Xceed.Words.NET.Series)">
+      <summary>Adds a new Series to this Chart.</summary>
+      <param name="series">The Series to add to the Chart.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Chart.CreateChartXml">
+      <summary>Creates the XML for this Chart.</summary>
+      <returns>An XElement value representing the XML for the Chart.</returns>
+    </member>
+    <member name="M:Xceed.Words.NET.Chart.RemoveLegend">
+      <summary>Removes the ChartLegend from this Chart.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Chart.AddLegend">
+      <summary>Adds a standard ChartLegend to this Chart.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Chart.AddLegend(Xceed.Words.NET.ChartLegendPosition,System.Boolean)">
+      <summary>Adds a ChartLegend to this Chart, using the provided
+ChartLegendPosition, and specifying if overlapping is allowed.</summary>
+      <param name="position">A ChartLegendPosition value indicating the position of the <see cref="Xceed.Words.NET~Xceed.Words.NET.ChartLegend.html">ChartLegend</see>.</param>
+      <param name="overlay">
+        <strong>true</strong> if other chart elements are allowed to overlap the ChartLegend, otherwise
+<strong>false</strong>.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.Chart.CategoryAxis">
+      <summary>Gets the category axis of this Chart.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Chart.ChartRootXml">
+      <summary>Gets or sets the Root XML for this Chart.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Chart.ChartXml">
+      <summary>Gets or sets the XML for this Chart.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Chart.DisplayBlanksAs">
+      <summary>Gets or sets how blank cells are displayed in this Chart.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Chart.IsAxisExist">
+      <summary>Gets if the Axis exists in this Chart.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Chart.Legend">
+      <summary>Gets the Legend of this Chart.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Chart.MaxSeriesCount">
+      <summary>Gets the maximum number of Series in this Chart.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Chart.Series">
+      <summary>Gets the collection of Series in this Chart.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Chart.ValueAxis">
+      <summary>Gets the value axis of this Chart.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Chart.View3D">
+      <summary>Gets or sets if this is a 3D Chart.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Chart.Xml">
+      <summary>Gets the XML for this Chart.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.ChartLegend.Overlay">
+      <summary>Gets or sets if other chart elements are allowed to overlap this ChartLegend.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.ChartLegend.Position">
+      <summary>Gets or sets the position of this ChartLegend in its associated Chart.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.FindAll">
+      <summary>Retrieves all the indexes in this Container that match the provided search conditions.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.FindUniqueByPattern(System.String,System.Text.RegularExpressions.RegexOptions)">
+      <summary>Finds all unique instances of the provided Regex pattern.</summary>
+      <returns>A list of all the unique string values that were found.</returns>
+      <param name="pattern">The pattern to search for.</param>
+      <param name="options">The regular expression options to use.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertAtBookmark(System.String,System.String)">
+      <summary>Inserts text to this Container, at the provided bookmark position.</summary>
+      <param name="toInsert">The text to insert.</param>
+      <param name="bookmarkName">A value representing the name of the Bookmark where the text will be inserted.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertBookmark(System.String)">
+      <summary>Inserts a Bookmark to this Container.</summary>
+      <returns>The Paragraph with the new bookmark added.</returns>
+      <param name="bookmarkName">The name for the Bookmark to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertEquation(System.String)">
+      <summary>Inserts an equation to this Container.</summary>
+      <returns>The Paragraph with the new equation added.</returns>
+      <param name="equation">The equation to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertList">
+      <summary>Inserts a List to this Container.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertParagraph">
+      <summary>Inserts a Paragraph in this Container.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertSection">
+      <summary>Inserts a Section to this Container.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertSectionPageBreak(System.Boolean)">
+      <summary>Inserts a section page break to this Container, and optionally track this change.</summary>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertTable">
+      <summary>Inserts a Table in this Container.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.RemoveParagraph(Xceed.Words.NET.Paragraph)">
+      <summary>Removes a Paragraph from this Container.</summary>
+      <returns>
+        <strong>true</strong> if the paragraph was removed successfully, otherwise <strong>false</strong>.</returns>
+      <param name="paragraph">The Paragraph to remove.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.RemoveParagraphAt(System.Int32)">
+      <summary>Removes the Paragraph found at a specific location from this
+Container.</summary>
+      <returns>
+        <strong>true</strong> if the paragraph was removed successfully, otherwise <strong>false</strong>.</returns>
+      <param name="index">The Index of the Paragraph to remove.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.RemoveTextInGivenFormat(Xceed.Words.NET.Formatting,Xceed.Words.NET.MatchFormattingOptions)">
+      <summary>Removes all text occurences that match the provided format.</summary>
+      <returns>The number of text occurences that were removed.</returns>
+      <param name="formattingToMatch">The formatting that the text must match in order to be removed.</param>
+      <param name="formattingOptions">A MatchFormattingOptions value indicating how the
+formatting should be matched.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.ReplaceText">
+      <summary>Replaces all instances of a string with another string.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.SetDirection(Xceed.Words.NET.Direction)">
+      <summary>Sets the Direction of the content of this Container.</summary>
+      <param name="direction">The Direction of the content.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.ValidateBookmarks(System.String[])">
+      <param name="bookmarkNames">The names of the bookmarks to validate.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.FindAll(System.String)">
+      <summary>Retrieves all the indexes in this Container where the provided search value is found.</summary>
+      <returns>A list of indexes that match the search conditions.</returns>
+      <param name="str">The value to search for.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.FindAll(System.String,System.Text.RegularExpressions.RegexOptions)">
+      <summary>Retrieves all the indexes in this Container where the provided search value is found, using the provided RegexOptions.</summary>
+      <returns>A list of indexes that match the search conditions.</returns>
+      <param name="str">The value to search for.</param>
+      <param name="options">A value representing the regular expression options to use.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertList(Xceed.Words.NET.List)">
+      <summary>Inserts a List to this Container.</summary>
+      <returns>The List that was inserted.</returns>
+      <param name="list">The List to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertList(Xceed.Words.NET.List,System.Double)">
+      <summary>Inserts a List to this Container, using the provided font size.</summary>
+      <returns>The List that was inserted.</returns>
+      <param name="list">The List to insert.</param>
+      <param name="fontSize">The font size to apply to the list items.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertList(Xceed.Words.NET.List,Xceed.Words.NET.Font,System.Double)">
+      <summary>Inserts a List to this Container, using the provided font family
+and font size.</summary>
+      <returns>The List that was inserted.</returns>
+      <param name="list">The List to insert.</param>
+      <param name="fontFamily">The font family to apply to the list items.</param>
+      <param name="fontSize">The font size to apply to the list items.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertList(System.Int32,Xceed.Words.NET.List)">
+      <summary>Inserts a List to this Container at a specific index position.</summary>
+      <returns>The List that was inserted.</returns>
+      <param name="index">The index position at which to insert the List.</param>
+      <param name="list">The List to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertParagraph(System.Int32,System.String,System.Boolean)">
+      <summary>Inserts a Paragraph at a specific location in this Container,
+using the provided text, and optionally track this change.</summary>
+      <param name="index">The index of the Paragraph where the new Paragraph is to be inserted.</param>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertParagraph">
+      <summary>Inserts a blank Paragraph in this Container.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertParagraph(System.Int32,Xceed.Words.NET.Paragraph)">
+      <summary>Inserts the provided Paragraph at a specific location in this
+Container.</summary>
+      <param name="index">The index of the Paragraph where the new Paragraph is to be inserted.</param>
+      <param name="p">The Paragraph to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertParagraph(Xceed.Words.NET.Paragraph)">
+      <summary>Inserts the provided Paragraph in this Container.</summary>
+      <param name="p">The Paragraph to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertParagraph(System.Int32,System.String,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts a Paragraph at a specific location in this Container, using the provided text and
+formatting, and optionally track this change.</summary>
+      <param name="index">The index of the Paragraph where the new Paragraph is to be inserted.</param>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="formatting">The format to apply to the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertParagraph(System.String)">
+      <summary>Inserts a Paragraph in this Container, using the provided text.</summary>
+      <param name="text">The text for the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertParagraph(System.String,System.Boolean)">
+      <summary>Inserts a Paragraph in this Container, using the provided text, and optionally track this change.</summary>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertParagraph(System.String,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts a Paragraph in this Container, using the provided text and formatting, and optionally
+track this change.</summary>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="formatting">The format to apply to the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertSection">
+      <summary>Inserts a Section to this Container.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertSection(System.Boolean)">
+      <summary>Inserts a Section to this Container, and optionally track this
+change.</summary>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertTable(System.Int32,System.Int32)">
+      <summary>Inserts a Table of a specific size in this Container.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="rowCount">The row count for the new Table.</param>
+      <param name="columnCount">The column count for the new Table.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertTable(System.Int32,System.Int32,System.Int32)">
+      <summary>Inserts a Table of a specific size and at a specific location, in this Container.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="index">The index of the Paragraph where the Table is to be inserted.</param>
+      <param name="rowCount">The row count for the new Table.</param>
+      <param name="columnCount">The column count for the new Table.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertTable(Xceed.Words.NET.Table)">
+      <summary>Inserts the provided Table in this Container.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="t">The Table to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.InsertTable(System.Int32,Xceed.Words.NET.Table)">
+      <summary>Inserts the provided Table at a specific location in this Container.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="index">The index of the Paragraph where the Table is to be inserted.</param>
+      <param name="t">The Table to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.ReplaceText(System.String,System.String,System.Boolean,System.Text.RegularExpressions.RegexOptions,Xceed.Words.NET.Formatting,Xceed.Words.NET.Formatting,Xceed.Words.NET.MatchFormattingOptions,System.Boolean,System.Boolean,System.Boolean)">
+      <summary>Replaces all instances of a string with another string.</summary>
+      <param name="searchValue">The value to be replaced.</param>
+      <param name="newValue">The new value to replace with.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="options">The regular expression options to use.</param>
+      <param name="newFormatting">The formatting to apply to the new text.</param>
+      <param name="matchFormatting">The formatting that the text must match in order to be replaced.</param>
+      <param name="fo">A MatchFormattingOptions value indicating how the
+formatting should be matched.</param>
+      <param name="escapeRegEx">
+        <strong>true</strong> if if the searchValue needs to be escaped, otherwise <strong>false</strong>. If it represents a valid RegEx pattern, this should be
+false.</param>
+      <param name="useRegExSubstitutions">
+        <strong>true</strong> if a RegEx-like replace should be performed (i.e. if the newValue contains RegEx substitutions), otherwise <strong>false</strong>. Does
+not perform named-group substitutions (only numbered groups).</param>
+      <param name="removeEmptyParagraph">
+        <strong>true</strong> if the paragraph should be removed if it's empty, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Container.ReplaceText(System.String,System.Func{System.String,System.String},System.Boolean,System.Text.RegularExpressions.RegexOptions,Xceed.Words.NET.Formatting,Xceed.Words.NET.Formatting,Xceed.Words.NET.MatchFormattingOptions,System.Boolean)">
+      <summary>Replaces all instances of a string with another string, using the provided Func to match a regex search group value to its corresponding replacement string.</summary>
+      <param name="searchValue">The value to be replaced.</param>
+      <param name="regexMatchHandler">A Func that accepts the matching regex search group value and passes it to this to return the replacement string.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="options">The regular expression options to use.</param>
+      <param name="newFormatting">The formatting to apply to the new text.</param>
+      <param name="matchFormatting">The formatting that the text must match in order to be replaced.</param>
+      <param name="fo">A MatchFormattingOptions value indicating how the
+formatting should be matched.</param>
+      <param name="removeEmptyParagraph">
+        <strong>true</strong> if the paragraph should be removed if it's empty, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.Container.Hyperlinks">
+      <summary>Gets the collection of Hyperlinks in this Container.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Container.Lists">
+      <summary>Gets the collection of Lists in this Container.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Container.Paragraphs">
+      <summary>Gets the collection of Paragraphs in this Container.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Container.Pictures">
+      <summary>Gets the collection of Pictures in this Container.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Container.Sections">
+      <summary>Gets the collection of Sections in this Container.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Container.Tables">
+      <summary>Gets the collection of Tables in this Container.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.CustomProperty.#ctor">
+      <summary>Initializes a new instance of the <strong>CustomProperty</strong> class.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.CustomProperty.#ctor(System.String,System.String)">
+      <summary>Initializes a new instance of the CustomProperty class to hold a String value.</summary>
+      <param name="name">The name of the CustomProperty.</param>
+      <param name="value">The value of the CustomProperty.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.CustomProperty.#ctor(System.String,System.Int32)">
+      <summary>Initializes a new instance of the CustomProperty class to hold an Int value.</summary>
+      <param name="name">The name of the CustomProperty.</param>
+      <param name="value">The value of the CustomProperty.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.CustomProperty.#ctor(System.String,System.Double)">
+      <summary>Initializes a new instance of the CustomProperty class to hold a Double value.</summary>
+      <param name="name">The name of the CustomProperty.</param>
+      <param name="value">The value of the CustomProperty.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.CustomProperty.#ctor(System.String,System.DateTime)">
+      <summary>Initializes a new instance of the CustomProperty class to hold a DateTime value.</summary>
+      <param name="name">The name of the CustomProperty.</param>
+      <param name="value">The value of the CustomProperty.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.CustomProperty.#ctor(System.String,System.Boolean)">
+      <summary>Initializes a new instance of the CustomProperty class to hold a Boolean value.</summary>
+      <param name="name">The name of the CustomProperty.</param>
+      <param name="value">The value of the CustomProperty.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.CustomProperty.Name">
+      <summary>Gets the Name of this CustomProperty.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.CustomProperty.Value">
+      <summary>Gets the Value of this CustomProperty.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocProperty.Name">
+      <summary>Gets the Name of this DocProperty.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.AddCoreProperty(System.String,System.String)">
+      <summary>Add a core property to this document. If a core property already exists with the same name it will be replaced. Core property names are case insensitive.</summary>
+      <param name="propertyName">The property name.</param>
+      <param name="propertyValue">The property value.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.AddCustomProperty(Xceed.Words.NET.CustomProperty)">
+      <summary>Add a custom property to this document. If a custom property already exists with the same name it will be replace. CustomProperty names are case insensitive.</summary>
+      <param name="cp">The CustomProperty to add to this document.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.AddFooters">
+      <summary>Adds three new Footers to this document. One for the first page, one for odd pages and one for even pages.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.AddHeaders">
+      <summary>Adds three new Headers to this document. One for the first page, one for odd pages and one for even pages.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.AddHyperlink">
+      <summary>Adds a Hyperlink to a Document's Hyperlink collection.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.AddList(System.String,System.Int32,Xceed.Words.NET.ListItemType,System.Nullable{System.Int32},System.Boolean,System.Boolean)">
+      <summary>Create a new List</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.AddListItem(Xceed.Words.NET.List,System.String,System.Int32,Xceed.Words.NET.ListItemType,System.Nullable{System.Int32},System.Boolean,System.Boolean)">
+      <summary>Add a list item to an existing list</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.AddProtection(Xceed.Words.NET.EditRestrictions)">
+      <summary>Add editing protection to this document.</summary>
+      <param name="er">The type of protection to add to this document.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.ConvertToPdf(Xceed.Words.NET.DocX,System.String)">
+      <summary>Converts a DocX document into a PDF document.</summary>
+      <param name="fileToConvert">The DocX document to convert.</param>
+      <param name="outputFileName">The filename of the PDF file to create.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.Copy">
+      <summary>Copy the Document into a new Document</summary>
+      <returns>Returns a copy of a the Document</returns>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.Dispose">
+      <summary>Releases all resources used by this document.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.GetProtectionType">
+      <summary>Returns the type of editing protection imposed on this document.</summary>
+      <returns>The type of editing protection imposed on this document.</returns>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.InsertChartAfterParagraph(Xceed.Words.NET.Chart,Xceed.Words.NET.Paragraph)">
+      <summary>Insert a chart in document after the specified paragraph</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.InsertDefaultTableOfContents">
+      <summary>Insert a default Table of Contents in the current document</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.InsertDocument(Xceed.Words.NET.DocX,System.Boolean)">
+      <summary>Insert the contents of another document at the end of this document.</summary>
+      <param name="remote_document">The document to insert at the end of this document.</param>
+      <param name="append">When true, document is added at the end. If False, document is added at the beginning.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.InsertEquation(System.String)">
+      <summary>Create an equation and insert it in the new paragraph</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.RemoveProtection">
+      <summary>Remove editing protection from this document.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.Save">
+      <summary>Save this document back to the location it was loaded from.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.AddHyperlink(System.String,System.Uri)">
+      <summary>Adds a Hyperlink to a Document and creates a Paragraph which uses it.</summary>
+      <returns>The newly created Hyperlink.</returns>
+      <param name="text">The text as displayed by the Hyperlink.</param>
+      <param name="uri">The Uri for the Hyperlink.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.AddHyperlink(System.String,System.String)">
+      <summary>Adds a Hyperlink with a Bookmark anchor to a Document and creates a Paragraph which uses it.</summary>
+      <returns>The newly created Hyperlink.</returns>
+      <param name="text">The text as displayed by the Hyperlink.</param>
+      <param name="anchor">The anchor to a Bookmark.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.AddImage(System.String)">
+      <summary>Add an Image into this document from a fully qualified or relative filename.</summary>
+      <returns>An Image file.</returns>
+      <param name="filename">The fully qualified or relative filename.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.AddImage(System.IO.Stream,System.String)">
+      <summary>Add an Image into this document from a Stream.</summary>
+      <returns>An Image file.</returns>
+      <param name="stream">A Stream stream.</param>
+      <param name="contentType">MIME type of image.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.ApplyTemplate(System.String)">
+      <summary>Applies document template to the document. Document template may include styles, headers, footers, properties, etc. as well as text content.</summary>
+      <exception caption="" cref="T:System.IO.FileNotFoundException">The document template file not found.</exception>
+      <param name="templateFilePath">The path to the document template file.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.ApplyTemplate(System.String,System.Boolean)">
+      <summary>Applies document template to the document. Document template may include styles, headers, footers, properties, etc. as well as text content.</summary>
+      <exception caption="" cref="T:System.IO.FileNotFoundException">The document template file not found.</exception>
+      <param name="templateFilePath">The path to the document template file.</param>
+      <param name="includeContent">Whether to copy the document template text content to document.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.ApplyTemplate(System.IO.Stream)">
+      <summary>Applies document template to the document. Document template may include styles, headers, footers, properties, etc. as well as text content.</summary>
+      <param name="templateStream">The stream of the document template file.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.ApplyTemplate(System.IO.Stream,System.Boolean)">
+      <summary>Applies document template to the document. Document template may include styles, headers, footers, properties, etc. as well as text content.</summary>
+      <param name="templateStream">The stream of the document template file.</param>
+      <param name="includeContent">Whether to copy the document template text content to document.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.Create(System.IO.Stream,Xceed.Words.NET.DocumentTypes)">
+      <summary>Creates a document using a Stream.</summary>
+      <returns>Returns a DocX object which represents the document.</returns>
+      <param name="stream">The Stream to create the document from.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.Create(System.String,Xceed.Words.NET.DocumentTypes)">
+      <summary>Creates a document using a fully qualified or relative filename.</summary>
+      <returns>Returns a DocX object which represents the document.</returns>
+      <param name="filename">The fully qualified or relative filename.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.InsertChart(Xceed.Words.NET.Chart)">
+      <summary>Insert a chart in document</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.InsertList(Xceed.Words.NET.List)">
+      <summary>Insert a list in the document</summary>
+      <returns>The list that was inserted into the document.</returns>
+      <param name="list">The list to insert into the document.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.InsertList(System.Int32,Xceed.Words.NET.List)">
+      <summary>Insert a list at an index location in the document</summary>
+      <param name="index">Index in document to insert the list.</param>
+      <param name="list">The list that was inserted into the document.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.InsertTable(System.Int32,System.Int32)">
+      <summary>Insert a new Table at the end of this document.</summary>
+      <returns>A new Table.</returns>
+      <param name="rowCount">The number of rows to create.</param>
+      <param name="columnCount">The number of columns to create.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.InsertTable(System.Int32,Xceed.Words.NET.Table)">
+      <summary>Insert a Table into this document. The Table's source can be a completely different document.</summary>
+      <returns>The Table now associated with this document.</returns>
+      <param name="index">The index to insert this Table at.</param>
+      <param name="t">The Table to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.InsertTable(Xceed.Words.NET.Table)">
+      <summary>Insert a Table into this document. The Table's source can be a completely different document.</summary>
+      <returns>The Table now associated with this document.</returns>
+      <param name="t">The Table to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.InsertTable(System.Int32,System.Int32,System.Int32)">
+      <summary>Insert a new Table at the end of this document.</summary>
+      <returns>A new Table.</returns>
+      <param name="index">The index to insert this Table at.</param>
+      <param name="rowCount">The number of rows to create.</param>
+      <param name="columnCount">The number of columns to create.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.InsertTableOfContents(System.String,Xceed.Words.NET.TableOfContentsSwitches,System.String,System.Int32,System.Nullable{System.Int32})">
+      <summary>Insert a Table of Contents in the current document</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.InsertTableOfContents(Xceed.Words.NET.Paragraph,System.String,Xceed.Words.NET.TableOfContentsSwitches,System.String,System.Int32,System.Nullable{System.Int32})">
+      <summary>Insert a Table of Contents in the current document at a specific location (prior to the referenced paragraph)</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.Load(System.IO.Stream)">
+      <summary>Loads a document into a DocX object using a Stream.</summary>
+      <returns>Returns a DocX object which represents the document.</returns>
+      <param name="stream">The Stream to load the document from.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.Load(System.String)">
+      <summary>Loads a document into a DocX object using a fully qualified or relative filename.</summary>
+      <returns>Returns a DocX object which represents the document.</returns>
+      <param name="filename">The fully qualified or relative filename.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.SaveAs(System.String)">
+      <summary>Save this document to a file.</summary>
+      <param name="filename">The filename to save this document as.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.DocX.SaveAs(System.IO.Stream)">
+      <summary>Save this document to a Stream.</summary>
+      <param name="stream">The Stream to save this document to.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.Bookmarks">
+      <summary>Gets the collection of Bookmarks in this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.CoreProperties">
+      <summary>Gets the dictionary for the core properties in this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.CustomProperties">
+      <summary>Gets the dictionary for the CustomProperties in this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.DifferentFirstPage">
+      <summary>Gets or sets if the first page of the Document uses an independant Header and <see cref="Xceed.Words.NET~Xceed.Words.NET.Footer.html">Footer</see>.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.DifferentOddAndEvenPages">
+      <summary>Gets or sets if the even and odd pages of the Document use different Headers and <see cref="Xceed.Words.NET~Xceed.Words.NET.Footer.html">Footers</see>.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.EndnotesText">
+      <summary>Gets the list of end notes in this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.Footers">
+      <summary>Gets the collection of Footers of this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.FootnotesText">
+      <summary>Gets the list of foot notes in this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.Headers">
+      <summary>Gets the collection of Headers of this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.Images">
+      <summary>Gets the collection of Images in this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.isProtected">
+      <summary>Gets if any editing restrictions are imposed on this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.Lists">
+      <summary>Gets the collection of Lists in this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.MarginBottom">
+      <summary>Gets or sets the bottom margin in this Document (in points).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.MarginFooter">
+      <summary>Gets or sets the footer margin in this Document (in points).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.MarginHeader">
+      <summary>Gets or sets the header margin in this Document (in points).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.MarginLeft">
+      <summary>Gets or sets the left margin in this Document (in points).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.MarginRight">
+      <summary>Gets or sets the right margin in this Document (in points).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.MarginTop">
+      <summary>Gets or sets the top margin in this Document (in points).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.MirrorMargins">
+      <summary>Gets or sets if the mirror margins option is enabled in this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.PageHeight">
+      <summary>Gets or sets the page height in this Document (in points).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.PageLayout">
+      <summary>Gets the PageLayout in this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.PageWidth">
+      <summary>Gets or sets the page width in this Document (in points).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.Paragraphs">
+      <summary>Gets the collection of Paragraphs in this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.Tables">
+      <summary>Gets the collection of Tables in this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocX.Text">
+      <summary>Gets the Text in this Document.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocXElement.PackagePart">
+      <summary>Gets or sets the PackagePart for this element.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.DocXElement.Xml">
+      <summary>Gets or sets the XML for this element.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Font.#ctor(System.String)">
+      <summary>Initializes a new instance of the <strong>Font</strong> class.</summary>
+      <param name="name">The name of the Font.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Font.ToString">
+      <summary>Retrieves the string representation of this <strong>Font</strong> instance.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Font.Name">
+      <summary>Gets the name of this <strong>Font</strong>.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertEquation(System.String)">
+      <summary>Inserts an equation to this Footer.</summary>
+      <returns>A Paragraph with the new equation inserted.</returns>
+      <param name="equation">The equation to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertParagraph">
+      <summary>Inserts a Paragraph in this Footer.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertTable">
+      <summary>Inserts a Table to this Footer.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertParagraph">
+      <summary>Inserts a blank Paragraph in this Footer.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertParagraph(System.Int32,System.String,System.Boolean)">
+      <summary>Inserts a Paragraph at a specific location in this Footer,
+using the provided text, and optionally track this change.</summary>
+      <param name="index">The index of the Paragraph where the new Paragraph is to be inserted.</param>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertParagraph(Xceed.Words.NET.Paragraph)">
+      <summary>Inserts the provided Paragraph in this Footer.</summary>
+      <param name="p">The Paragraph to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertParagraph(System.Int32,Xceed.Words.NET.Paragraph)">
+      <summary>Inserts the provided Paragraph at a specific location in this
+Footer.</summary>
+      <param name="index">The index of the Paragraph where the new Paragraph is to be inserted.</param>
+      <param name="p">The Paragraph to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertParagraph(System.Int32,System.String,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts a Paragraph at a specific location in this Footer,
+using the provided text and formatting, and optionally track this change.</summary>
+      <param name="index">The index of the Paragraph where the new Paragraph is to be inserted.</param>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="formatting">The format to apply to the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertParagraph(System.String)">
+      <summary>Inserts a Paragraph in this Footer, using the provided text.</summary>
+      <param name="text">The text for the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertParagraph(System.String,System.Boolean)">
+      <summary>Inserts a Paragraph in this Footer, using the provided text,
+and optionally track this change.</summary>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertParagraph(System.String,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts a Paragraph in this Footer, using the provided text
+and formatting, and optionally track this change.</summary>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="formatting">The format to apply to the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertTable(System.Int32,System.Int32)">
+      <summary>Inserts a Table of a specific size to this Footer.</summary>
+      <param name="rowCount">The row count for the new Table.</param>
+      <param name="columnCount">The column count for the new Table.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertTable(System.Int32,Xceed.Words.NET.Table)">
+      <summary>Inserts the provided Table at a specific location in this Footer.</summary>
+      <param name="index">The index of the Paragraph where the Table is to be inserted.</param>
+      <param name="t">The Table to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertTable(Xceed.Words.NET.Table)">
+      <summary>Inserts the provided Table to this Footer.</summary>
+      <param name="t">The Table to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Footer.InsertTable(System.Int32,System.Int32,System.Int32)">
+      <summary>Inserts a Table of a specific size and at a specific location, to
+this Footer.</summary>
+      <param name="index">The index of the Paragraph where the Table is to be inserted.</param>
+      <param name="rowCount">The row count for the new Table.</param>
+      <param name="columnCount">The column count for the new Table.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.Footer.Images">
+      <summary>Gets the list of Images in this Footer.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Footer.Paragraphs">
+      <summary>Gets the list of Paragraphs in this Footer.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Footer.Tables">
+      <summary>Gets the list of Tables in this Footer.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Footers.Even">
+      <summary>Gets or sets the Even Footer in this Footers instance.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Footers.First">
+      <summary>Gets or sets the First Footer in this Footers instance.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Footers.Odd">
+      <summary>Gets or sets the Odd Footer in this Footers instance.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.FormattedText.#ctor">
+      <summary>Initializes a new instance of the <strong>FormattedText</strong> class.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.FormattedText.CompareTo(System.Object)">
+      <summary>Compares this FormattedText to another object.</summary>
+      <param name="obj">The object with which the FormattedText is compared to.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Formatting.#ctor">
+      <summary>Initializes a new instance of the <strong>Formatting</strong> class.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Formatting.Clone">
+      <summary>Creates a clone of this Formatting instance.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Formatting.CompareTo(System.Object)">
+      <summary>Compares this Formatting to another object.</summary>
+      <returns>
+        <strong>0</strong> if both Formatting objects have the same property values, otherwise <strong>-1</strong>.</returns>
+      <param name="obj">The object with which the Formatting is compared to.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Formatting.Parse(System.Xml.Linq.XElement,Xceed.Words.NET.Formatting)">
+      <summary>Creates a Formatting object using the provided XElement, and base Formatting if any.</summary>
+      <returns>A Formatting object.</returns>
+      <param name="rPr">The XElement that contains the options to use for the Formatting object.</param>
+      <param name="formatting">
+        <span id="BugEvents">The base Formatting object to use, if any. By default, <strong>null</strong>.</span>
+      </param>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.Bold">
+      <summary>Gets or sets if the Bold format is applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.Border">
+      <summary>Gets or sets the Border applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.CapsStyle">
+      <summary>Gets or sets the CapsStyle applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.FontColor">
+      <summary>Gets or sets the Font Color applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.FontFamily">
+      <summary>Gets or sets the Font Family applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.Hidden">
+      <summary>Gets or sets if the text is Hidden in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.Highlight">
+      <summary>Gets or sets the Highlight Color applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.Italic">
+      <summary>Gets or sets if the Italic format is applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.Kerning">
+      <summary>Gets or sets the Kerning applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.Language">
+      <summary>Gets or sets the Language applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.Misc">
+      <summary>Gets or sets the Misc settings applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.PercentageScale">
+      <summary>Gets or sets the Percentage Scale applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.Position">
+      <summary>Gets or sets the Position applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.Script">
+      <summary>Gets or sets the Script format applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.Shading">
+      <summary>
+        <span id="BugEvents">Gets or sets the color for the shading of the text.</span>
+      </summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.Size">
+      <summary>Gets or sets the Size applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.Spacing">
+      <summary>Gets or sets the text Spacing applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.StrikeThrough">
+      <summary>Gets or sets the StrikeThrough format applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.StyleName">
+      <summary>
+        <span id="BugEvents">Gets or sets the name of the style to apply.</span>
+      </summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.UnderlineColor">
+      <summary>Gets or sets the Underline Color applied in this Formatting.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Formatting.UnderlineStyle">
+      <summary>Gets or sets the Underline Style applied in this Formatting.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertEquation(System.String)">
+      <summary>Inserts an equation to a Paragraph.</summary>
+      <returns>A Paragraph with the new equation inserted.</returns>
+      <param name="equation">The equation to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertParagraph">
+      <summary>Inserts a Paragraph in this Header.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertTable">
+      <summary>Inserts a Table to this Header.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertParagraph">
+      <summary>Inserts a blank Paragraph in this Header.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertParagraph(System.Int32,System.String,System.Boolean)">
+      <summary>Inserts a Paragraph at a specific location in this Header,
+using the provided text, and optionally track this change.</summary>
+      <param name="index">The index of the Paragraph where the new Paragraph is to be inserted.</param>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertParagraph(Xceed.Words.NET.Paragraph)">
+      <summary>Inserts the provided Paragraph in this Header.</summary>
+      <param name="p">The Paragraph to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertParagraph(System.Int32,Xceed.Words.NET.Paragraph)">
+      <summary>Inserts the provided Paragraph at a specific location in this
+Header.</summary>
+      <param name="index">The index of the Paragraph where the new Paragraph is to be inserted.</param>
+      <param name="p">The Paragraph to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertParagraph(System.Int32,System.String,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts a Paragraph at a specific location in this Header,
+using the provided text and formatting, and optionally track this change.</summary>
+      <param name="index">The index of the Paragraph where the new Paragraph is to be inserted.</param>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="formatting">The format to apply to the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertParagraph(System.String)">
+      <summary>Inserts a Paragraph in this Header, using the provided text.</summary>
+      <param name="text">The text for the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertParagraph(System.String,System.Boolean)">
+      <summary>Inserts a Paragraph in this Header, using the provided text,
+and optionally track this change.</summary>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertParagraph(System.String,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts a Paragraph in this Header, using the provided text
+and formatting, and optionally track this change.</summary>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="formatting">The format to apply to the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertTable(System.Int32,System.Int32)">
+      <summary>Inserts a Table of a specific size to this Header.</summary>
+      <param name="rowCount">The row count for the new Table.</param>
+      <param name="columnCount">The column count for the new Table.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertTable(System.Int32,Xceed.Words.NET.Table)">
+      <summary>Inserts the provided Table at a specific location in this Header.</summary>
+      <param name="index">The index of the Paragraph where the Table is to be inserted.</param>
+      <param name="t">The Table to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertTable(Xceed.Words.NET.Table)">
+      <summary>Inserts the provided Table to this Header.</summary>
+      <param name="t">The Table to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Header.InsertTable(System.Int32,System.Int32,System.Int32)">
+      <summary>Inserts a Table of a specific size and at a specific location, to
+this Header.</summary>
+      <param name="index">The index of the Paragraph where the Table is to be inserted.</param>
+      <param name="rowCount">The row count for the new Table.</param>
+      <param name="columnCount">The column count for the new Table.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.Header.Images">
+      <summary>Gets the list of Images in this Header.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Header.Paragraphs">
+      <summary>Gets the list of Paragraphs in this Header.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Header.Tables">
+      <summary>Gets the list of Tables in this Header.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Headers.Even">
+      <summary>Gets or sets the Even Header in this Headers instance.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Headers.First">
+      <summary>Gets or sets the First Header in this Headers instance.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Headers.Odd">
+      <summary>Gets or sets the Odd Header in this Headers instance.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Hyperlink.Remove">
+      <summary>Removes a Hyperlink.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Hyperlink.Text">
+      <summary>Gets or sets the Text for this Hyperlink.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Hyperlink.Uri">
+      <summary>Gets or sets the Uri for this Hyperlink.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Image.CreatePicture">
+      <summary>Add an image to a document, create a custom view of that image (picture) and then insert it into a Paragraph using append.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Image.CreatePicture(System.Int32,System.Int32)">
+      <summary>Add an image to a document with specific height and width, create a custom view of that image (picture) and then insert it into a Paragraph using append.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Image.FileName">
+      <summary>Gets the File Name of this Image.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Image.Id">
+      <summary>Gets the Id of this Image.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertPageBreakAfterSelf">
+      <summary>Inserts a page break after the current object.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertPageBreakBeforeSelf">
+      <summary>Inserts a page break before the current object.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertParagraphAfterSelf">
+      <summary>Inserts a Paragraph after the current object.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertParagraphBeforeSelf">
+      <summary>Inserts a Paragraph before the current object.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertTableAfterSelf">
+      <summary>Inserts a Table after the current object.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertTableBeforeSelf">
+      <summary>Inserts a Table before the current object.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertParagraphAfterSelf(Xceed.Words.NET.Paragraph)">
+      <summary>Inserts the provided Paragraph after the current object.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="p">The Paragraph to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertParagraphAfterSelf(System.String)">
+      <summary>Inserts a Paragraph after the current object, using the
+provided text.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertParagraphAfterSelf(System.String,System.Boolean)">
+      <summary>Inserts a Paragraph after the current object, using the
+provided text, and optionally track this change.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertParagraphAfterSelf(System.String,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts a Paragraph after the current object, using the
+provided text and formatting, and optionally track this change.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="formatting">The format to apply to the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertParagraphBeforeSelf(Xceed.Words.NET.Paragraph)">
+      <summary>Inserts the provided Paragraph before the current object.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="p">The Paragraph to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertParagraphBeforeSelf(System.String)">
+      <summary>Inserts a Paragraph before the current object, using the
+provided text.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertParagraphBeforeSelf(System.String,System.Boolean)">
+      <summary>Inserts a Paragraph before the current object, using the
+provided text, and optionally track this change.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertParagraphBeforeSelf(System.String,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts a Paragraph before the current object, using the
+provided text and formatting, and optionally track this change.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="formatting">The format to apply to the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertTableAfterSelf(System.Int32,System.Int32)">
+      <summary>Inserts a Table of a specific size after the current object.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="rowCount">The row count for the new Table.</param>
+      <param name="columnCount">The column count for the new Table.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertTableAfterSelf(Xceed.Words.NET.Table)">
+      <summary>Inserts the provided Table after the current object.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="t">The Table to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertTableBeforeSelf(System.Int32,System.Int32)">
+      <summary>Inserts a Table of a specific size before the current object.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="rowCount">The row count for the new Table.</param>
+      <param name="columnCount">The column count for the new Table.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.InsertBeforeOrAfter.InsertTableBeforeSelf(Xceed.Words.NET.Table)">
+      <summary>Inserts the provided Table before the current object.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="t">The Table to insert.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.Licenser.LicenseKey">
+      <summary>Gets or sets the license key used to license this product.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.LineChart.#ctor">
+      <summary>Initializes a new instance of the <strong>LineChart</strong> class.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.LineChart.CreateChartXml">
+      <summary>Creates the XML for this LineChart.</summary>
+      <returns>The XElement representing the XML for the LineChart.</returns>
+    </member>
+    <member name="P:Xceed.Words.NET.LineChart.Grouping">
+      <summary>Gets or sets the type of grouping used for this LineChart.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.List.AddItem(Xceed.Words.NET.Paragraph)">
+      <summary>Adds an item to this List.</summary>
+      <exception caption="" cref="T:System.InvalidOperationException">
+            Throws an InvalidOperationException if the item cannot be added to the list.
+            </exception>
+      <param name="paragraph">The item to add to the List.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.List.AddItemWithStartValue(Xceed.Words.NET.Paragraph,System.Int32)">
+      <summary>Adds an item with a specific start value to this List.</summary>
+      <param name="paragraph">The item to add to the List.</param>
+      <param name="start">The start value for the new item.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.List.CanAddListItem(Xceed.Words.NET.Paragraph)">
+      <summary>Determines if the provided item can be added to this List.</summary>
+      <returns>
+        <strong>true</strong> if the AddItem() method will succeed with the provided item, otherwise <strong>false</strong>.</returns>
+      <param name="paragraph">The item to validate.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.List.ContainsLevel(System.Int32)">
+      <summary>Determines if the provided level exists in this List.</summary>
+      <returns>
+        <strong>true</strong> if the level exists, otherwise <strong>false</strong>.</returns>
+      <param name="ilvl">The level to validate.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.List.Items">
+      <summary>Gets the collection of Paragraphs in this List.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.List.ListType">
+      <summary>Gets the List Type of this List.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.List.NumId">
+      <summary>Gets the NumId of this List.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.PackagePartStream.#ctor(System.IO.Stream)">
+      <summary>Initializes a new instance of the <strong>PackagePartStream</strong> class.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.PackagePartStream.Close">
+      <summary>Closes this PackagePartStream.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.PackagePartStream.Flush">
+      <summary>Flushes this PackagePartStream.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.PackagePartStream.Read(System.Byte[],System.Int32,System.Int32)">
+      <summary>Reads data in this PackagePartStream.</summary>
+      <param name="buffer">The buffer to store the received data in.</param>
+      <param name="offset">The position at which to start reading the data.</param>
+      <param name="count">The maximum number of bytes to read.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.PackagePartStream.Seek(System.Int64,System.IO.SeekOrigin)">
+      <summary>Sets the position within this PackagePartStream.</summary>
+      <returns>The new position within the PackagePartStream.</returns>
+      <param name="offset">The byte offset relative to the <strong>origin</strong> parameter.</param>
+      <param name="origin">The reference point used to obtain the new position.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.PackagePartStream.SetLength(System.Int64)">
+      <summary>Sets the Length of this PackagePartStream.</summary>
+      <param name="value">The new length of the PackagePartStream.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.PackagePartStream.Write(System.Byte[],System.Int32,System.Int32)">
+      <summary>Writes data to this PackagePartStream.</summary>
+      <param name="buffer">The array from which data will be copied to the PackagePartStream.</param>
+      <param name="offset">The offset in the buffer at which to begin copying data.</param>
+      <param name="count">The number of bytes to write.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.PackagePartStream.Dispose(System.Boolean)">
+      <summary>Releases the unmanaged resources used by the PackagePartStream and optionally releases the managed resources.</summary>
+      <param name="disposing">
+        <strong>true</strong> to release both managed and unmanaged resources; <strong>false</strong> to release only unmanaged resources.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.PackagePartStream.CanRead">
+      <summary>Gets if the Read method can be used on this PackagePartStream.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.PackagePartStream.CanSeek">
+      <summary>Gets if the Seek method can be used on this PackagePartStream.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.PackagePartStream.CanWrite">
+      <summary>Gets if the Write method can be used on this PackagePartStream.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.PackagePartStream.Length">
+      <summary>Gets the Length of this PackagePartStream.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.PackagePartStream.Position">
+      <summary>Gets or sets the Position of this PackagePartStream.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.PageLayout.Orientation">
+      <summary>Gets or sets the Orientation of this PageLayout.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Append">
+      <summary>Appends text to this Paragraph.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.AppendBookmark(System.String)">
+      <summary>Appends a Bookmark to this Paragraph.</summary>
+      <returns>This Paragraph with the new Bookmark appended.</returns>
+      <param name="bookmarkName">The name of the Bookmark to append.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.AppendDocProperty(Xceed.Words.NET.CustomProperty,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Appends a document property field at the end of this Paragraph.</summary>
+      <returns>This Paragraph with the document property field appended.</returns>
+      <param name="cp">The custom property to display.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="f">The formatting to use.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.AppendEquation(System.String)">
+      <summary>Appends an equation to this Paragraph.</summary>
+      <returns>This Paragraph with the new equation appended.</returns>
+      <param name="equation">The equation to append.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.AppendHyperlink(Xceed.Words.NET.Hyperlink)">
+      <summary>Appends a Hyperlink to this Paragraph.</summary>
+      <returns>This Paragraph with the new hyperlink appended.</returns>
+      <param name="h">The Hyperlink to append.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.AppendLine">
+      <summary>Appends a line to this Paragraph.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.AppendPageCount(Xceed.Words.NET.PageNumberFormat)">
+      <summary>Appends a page count placeholder at the end of this Paragraph.</summary>
+      <param name="pnf">The PageNumberFormat can be normal: (1, 2, ...) or Roman: (I, II, ...)</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.AppendPageNumber(Xceed.Words.NET.PageNumberFormat)">
+      <summary>Appends a page number placeholder at the end of this Paragraph.</summary>
+      <param name="pnf">The PageNumberFormat can be normal: (1, 2, ...) or Roman: (I, II, ...)</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.AppendPicture(Xceed.Words.NET.Picture)">
+      <summary>Appends a Picture to this Paragraph.</summary>
+      <returns>The Paragraph with the Picture now appended.</returns>
+      <param name="p">The Picture to append.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Bold">
+      <summary>Applies the Bold format to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text in bold format.</returns>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Border(Xceed.Words.NET.Border)">
+      <summary>Applies a Border to this Paragraph's text.</summary>
+      <returns>The modified Paragraph.</returns>
+      <param name="border">The Border to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.CapsStyle(Xceed.Words.NET.CapsStyle)">
+      <summary>Applies a CapsStyle format to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text's CapsStyle changed.</returns>
+      <param name="capsStyle">The CapsStyle to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Color(System.Drawing.Color)">
+      <summary>Applies the provided color to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text's color changed.</returns>
+      <param name="c">The Color to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Culture(System.Globalization.CultureInfo)">
+      <summary>Applies the provided culture to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text's culture changed.</returns>
+      <param name="culture">The culture to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.CurentCulture">
+      <summary>Applies the current culture to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text's culture changed.</returns>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.FindAll">
+      <summary>Retrieves all the indexes that match the provided search conditions.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.FindAllByPattern(System.String,System.Text.RegularExpressions.RegexOptions)">
+      <summary>Finds all unique instances of the provided Regex pattern.</summary>
+      <returns>A list of all the unique string values that were found.</returns>
+      <param name="str">The pattern to search for.</param>
+      <param name="options">The regular expression options to use.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Font">
+      <summary>Applies the provided font to the last appended text.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.FontSize(System.Double)">
+      <summary>Applies the provided font size to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text's font size changed.</returns>
+      <param name="fontSize">The font size to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.GetBookmarks">
+      <summary>Retrieves the list of Bookmarks found in this Paragraph.</summary>
+      <returns>The list of bookmarks found in the Paragraph.</returns>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Hide">
+      <summary>Hides the last appended text.</summary>
+      <returns>This Paragraph with the last appended text hidden.</returns>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Highlight(Xceed.Words.NET.Highlight)">
+      <summary>Applies a Highlight color to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text highlighted.</returns>
+      <param name="highlight">The Highlight color to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertAtBookmark(System.String,System.String)">
+      <summary>Inserts the provided text at a bookmark location in this Paragraph.</summary>
+      <param name="toInsert">The text to insert.</param>
+      <param name="bookmarkName">The name of the bookmark where the text is to be inserted.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertDocProperty(Xceed.Words.NET.CustomProperty,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts a document property field at the end of this Paragraph.</summary>
+      <returns>The DocProperty that was inserted.</returns>
+      <param name="cp">The custom property to display.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="f">The formatting to use.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertHorizontalLine(Xceed.Words.NET.HorizontalBorderPosition,System.String,System.Int32,System.Int32,System.String)">
+      <summary>Inserts a horizontal line to this Paragraph.</summary>
+      <param name="position">The position of the horizontal line within the Paragraph. By default, <strong>Bottom</strong>.</param>
+      <param name="lineType">The type of line. By default, <strong>"single"</strong>.</param>
+      <param name="size">The size of the line. By default, <strong>6</strong>.</param>
+      <param name="space">The space of the line. By default, <strong>1</strong>.</param>
+      <param name="color">The color of the line. By default, <strong>"auto"</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertHyperlink">
+      <summary>Inserts a Hyperlink in this Paragraph.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertPageBreakAfterSelf">
+      <summary>Inserts a page break after this Paragraph.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertPageBreakBeforeSelf">
+      <summary>Inserts a page break before this Paragraph.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertPageCount(Xceed.Words.NET.PageNumberFormat,System.Int32)">
+      <summary>Inserts a PageCount placeholder at a specific location in this Paragraph.</summary>
+      <param name="pnf">The PageNumberFormat to use.</param>
+      <param name="index">The index at which to insert the PageCount placeholder.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertPageNumber(Xceed.Words.NET.PageNumberFormat,System.Int32)">
+      <summary>Inserts a PageNumber placeholder at a specific location in this Paragraph.</summary>
+      <param name="pnf">The PageNumberFormat to use.</param>
+      <param name="index">The index at which to insert the PageNumber placeholder.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertParagraphAfterSelf">
+      <summary>Inserts a Paragraph after this Paragraph.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertParagraphBeforeSelf">
+      <summary>Inserts a Paragraph before this Paragraph.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertPicture(Xceed.Words.NET.Picture,System.Int32)">
+      <summary>Inserts a Picture at a specific location in this Paragraph.</summary>
+      <returns>This Paragraph with the Picture inserted.</returns>
+      <param name="p">The Picture to insert.</param>
+      <param name="index">The index at which to insert the picture. By default, 0.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertTableAfterSelf">
+      <summary>Inserts a Table after this Paragraph.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertTableBeforeSelf">
+      <summary>Inserts a Table before this Paragraph.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertTabStopPosition(Xceed.Words.NET.Alignment,System.Single,Xceed.Words.NET.TabStopPositionLeader)">
+      <summary>Inserts a tab stop in this paragraph.</summary>
+      <returns>The modified Paragraph.</returns>
+      <param name="alignment">The alignment of the tab stop.</param>
+      <param name="position">The horizontal position of the tab stop.</param>
+      <param name="leader">A TabStopPositionLeader value indicating the character used to fill in the space
+created by a tab.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertText">
+      <summary>Inserts text in this Paragraph.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Italic">
+      <summary>Applies the Italic format to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text in italic format.</returns>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.KeepLinesTogether(System.Boolean)">
+      <summary>Indicates if this Paragraph's lines must stay together on the same page or if they can be split over more than one page.</summary>
+      <returns>The modified Paragraph.</returns>
+      <param name="keepLinesTogether">
+        <strong>true</strong> if this Paragraph's lines must stay together on the same page, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.KeepWithNextParagraph(System.Boolean)">
+      <summary>Indicates if this Paragraph must stay on the same page as the next Paragraph.</summary>
+      <returns>The modified Paragraph.</returns>
+      <param name="keepWithNextParagraph">
+        <strong>true</strong> if this Paragraph must stay on the same page as the next Paragraph, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Kerning(System.Int32)">
+      <summary>Applies the provided kerning value to this Paragraph.</summary>
+      <returns>The modified Paragraph.</returns>
+      <param name="kerning">The kerning value to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Misc(Xceed.Words.NET.Misc)">
+      <summary>Applies the provided Misc property to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text updated by a Misc property.</returns>
+      <param name="misc">The Misc property to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.PercentageScale(System.Int32)">
+      <summary>Applies the provided percentage scale to this Paragraph.</summary>
+      <returns>The modified Paragraph.</returns>
+      <param name="percentageScale">The percentage scale to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Position(System.Double)">
+      <summary>Applies the provided position to this Paragraph.</summary>
+      <returns>The modified Paragraph.</returns>
+      <param name="position">The position value to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Remove(System.Boolean)">
+      <summary>Removes this Paragraph from the Document.</summary>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.RemoveHyperlink(System.Int32)">
+      <summary>Removes a specific Hyperlink from this Paragraph.</summary>
+      <param name="index">The index of the Hyperlink to remove.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.RemoveText">
+      <summary>Removes characters from this Paragraph.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.ReplaceAtBookmark(System.String,System.String)">
+      <summary>Replaces the text at the specified Bookmark in this Paragraph.</summary>
+      <param name="text">The text to insert.</param>
+      <param name="bookmarkName">The name of the Bookmark where the text is to be inserted.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.ReplacePicture(Xceed.Words.NET.Picture,Xceed.Words.NET.Picture)">
+      <summary>Replaces a Picture in this Paragraph with another Picture.</summary>
+      <returns>The Picture that was inserted.</returns>
+      <param name="toBeReplaced">The Picture to remove.</param>
+      <param name="replaceWith">The Picture to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.ReplaceText">
+      <summary>Replaces all instances of a string with another string.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Script(Xceed.Words.NET.Script)">
+      <summary>Applies the provided Script style to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text's script style changed.</returns>
+      <param name="script">The Script style to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.SetLineSpacing">
+      <summary>Sets the line spacing for this Paragraph.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Shading(System.Drawing.Color,Xceed.Words.NET.ShadingType)">
+      <summary>Adds a shading to this text or paragraph.</summary>
+      <returns>The Paragraph with the requested shading applied.</returns>
+      <param name="shading">The <strong>Color</strong> to use for the shading.</param>
+      <param name="shadingType">The type of shading. By default, <strong>Text</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Spacing(System.Double)">
+      <summary>Applies the provided spacing value to this Paragraph.</summary>
+      <returns>The modified Paragraph.</returns>
+      <param name="spacing">The spacing value to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.SpacingAfter(System.Double)">
+      <summary>Applies the provided spacing value after this Paragraph.</summary>
+      <returns>The modified Paragraph.</returns>
+      <param name="spacingAfter">The spacing value to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.SpacingBefore(System.Double)">
+      <summary>Applies the provided spacing value before this Paragraph.</summary>
+      <returns>The modified Paragraph.</returns>
+      <param name="spacingBefore">The spacing value to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.SpacingLine(System.Double)">
+      <summary>Modifies the spacing between the lines of this paragraph.</summary>
+      <returns>The Paragraph with the new line spacing applied.</returns>
+      <param name="lineSpacing">The spacing between the lines of the paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.StrikeThrough(Xceed.Words.NET.StrikeThrough)">
+      <summary>Applies the provided StrikeThrough style to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text's strikethrough style changed.</returns>
+      <param name="strikeThrough">The StrikeThrough style to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.UnderlineColor(System.Drawing.Color)">
+      <summary>Applies the provided underline color to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text's underline color changed.</returns>
+      <param name="underlineColor">The underline Color to apply. If no UnderlineStyle is set, a single line will be used.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.UnderlineStyle(Xceed.Words.NET.UnderlineStyle)">
+      <summary>Applies the provided UnderlineStyle to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text's underline style changed.</returns>
+      <param name="underlineStyle">The UnderlineStyle to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Append(System.String)">
+      <summary>Appends text to this Paragraph.</summary>
+      <returns>This Paragraph with the new text appended.</returns>
+      <param name="text">The text to append.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Append(System.String,Xceed.Words.NET.Formatting)">
+      <summary>Appends text to this Paragraph, and apply the provided format.</summary>
+      <returns>This Paragraph with the new text appended.</returns>
+      <param name="text">The text to append.</param>
+      <param name="format">The format to use.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.AppendLine(System.String)">
+      <summary>Append text on a new line to this Paragraph.</summary>
+      <returns>This Paragraph with the new text appened.</returns>
+      <param name="text">The text to append.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.AppendLine">
+      <summary>Append a new line to this Paragraph.</summary>
+      <returns>This Paragraph with a new line appeneded.</returns>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.FindAll(System.String)">
+      <summary>Retrieves all the indexes where the provided search value is found.</summary>
+      <returns>A list of indexes that match the search conditions.</returns>
+      <param name="str">The value to search for.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.FindAll(System.String,System.Text.RegularExpressions.RegexOptions)">
+      <summary>Retrieves all the indexes in this Container where the provided search value is found, using the provided RegexOptions.</summary>
+      <returns>A list of indexes that match the search conditions.</returns>
+      <param name="str">The value to search for.</param>
+      <param name="options">A value representing the regular expression options to use.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Font(System.String)">
+      <summary>Applies the provided font name to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text's font changed.</returns>
+      <param name="fontName">The font name to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.Font(Xceed.Words.NET.Font)">
+      <summary>Applies the provided Font to the last appended text.</summary>
+      <returns>This Paragraph with the last appended text's font changed.</returns>
+      <param name="fontFamily">The Font to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertHyperlink(Xceed.Words.NET.Hyperlink,System.Int32)">
+      <summary>Inserts a Hyperlink at a specific index in this Paragraph.</summary>
+      <returns>This Paragraph with the Hyperlink inserted.</returns>
+      <param name="h">The Hyperlink to insert.</param>
+      <param name="index">The index at which to insert the Hyperlink.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertParagraphAfterSelf(Xceed.Words.NET.Paragraph)">
+      <summary>Inserts the provided Paragraph after this Paragraph.</summary>
+      <returns>The Paragraph now associated with this document.</returns>
+      <param name="p">The Paragraph to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertParagraphAfterSelf(System.String,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts a Paragraph after this Paragraph, using the provided text and formatting, and optionally track this change.</summary>
+      <returns>A new Paragraph inserted after this Paragraph.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="formatting">The format to apply to the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertParagraphAfterSelf(System.String,System.Boolean)">
+      <summary>Inserts a Paragraph after this Paragraph, using the provided text, and optionally track this change.</summary>
+      <returns>A new Paragraph inserted after this Paragraph.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertParagraphAfterSelf(System.String)">
+      <summary>Inserts a Paragraph after this Paragraph, using the provided text.</summary>
+      <returns>A new Paragraph inserted after this Paragraph.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertParagraphBeforeSelf(Xceed.Words.NET.Paragraph)">
+      <summary>Inserts the provided Paragraph before this Paragraph.</summary>
+      <returns>The Paragraph now associated with this document.</returns>
+      <param name="p">The Paragraph to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertParagraphBeforeSelf(System.String)">
+      <summary>Inserts a Paragraph before this Paragraph, using the provided text.</summary>
+      <returns>A new Paragraph inserted before this Paragraph.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertParagraphBeforeSelf(System.String,System.Boolean)">
+      <summary>Inserts a Paragraph before this Paragraph, using the provided text, and optionally track this change.</summary>
+      <returns>A new Paragraph inserted before this Paragraph.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertParagraphBeforeSelf(System.String,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts a Paragraph before this Paragraph, using the provided text and formatting, and optionally track this change.</summary>
+      <returns>A new Paragraph inserted before this Paragraph.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="formatting">The format to apply to the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertTableAfterSelf(Xceed.Words.NET.Table)">
+      <summary>Inserts the provided Table after this Paragraph.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="t">The Table to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertTableAfterSelf(System.Int32,System.Int32)">
+      <summary>Inserts a Table of a specific size after this Paragraph.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="rowCount">The row count for the new Table.</param>
+      <param name="columnCount">The column count for the new Table.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertTableBeforeSelf(Xceed.Words.NET.Table)">
+      <summary>Inserts the provided Table before this Paragraph.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="t">The Table to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertTableBeforeSelf(System.Int32,System.Int32)">
+      <summary>Inserts a Table of a specific size before this Paragraph.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="rowCount">The row count for the new Table.</param>
+      <param name="columnCount">The column count for the new Table.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertText(System.String,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts the provided text in this Paragraph, using the provided formatting, and optionally track this change.</summary>
+      <param name="value">The text to insert.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="formatting">The formatting to use.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.InsertText(System.Int32,System.String,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts the provided text at a specific location in this Paragraph, using the provided formatting, and optionally track this change.</summary>
+      <param name="index">The index at which to insert the text.</param>
+      <param name="value">The text to insert.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="formatting">The formatting to use.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.RemoveText(System.Int32,System.Int32,System.Boolean,System.Boolean)">
+      <summary>Removes characters from this Paragraph.</summary>
+      <param name="index">The index at which to begin deleting characters.</param>
+      <param name="count">The amount of characters to delete.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="removeEmptyParagraph">
+        <strong>true</strong> if the paragraph should be removed if it is empty, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.RemoveText(System.Int32,System.Boolean)">
+      <summary>Removes characters from the end of this Paragraph.</summary>
+      <param name="index">The index at which to begin deleting characters.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.ReplaceText(System.String,System.String,System.Boolean,System.Text.RegularExpressions.RegexOptions,Xceed.Words.NET.Formatting,Xceed.Words.NET.Formatting,Xceed.Words.NET.MatchFormattingOptions,System.Boolean,System.Boolean,System.Boolean)">
+      <summary>Replaces all instances of a string with another string.</summary>
+      <param name="searchValue">The value to be replaced.</param>
+      <param name="newValue">The new value to replace with.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="options">The regular expression options to use.</param>
+      <param name="newFormatting">The formatting to apply to the new text.</param>
+      <param name="matchFormatting">The formatting that the text must match in order to be replaced.</param>
+      <param name="fo">A MatchFormattingOptions value indicating how the
+formatting should be matched.</param>
+      <param name="escapeRegEx">
+        <strong>true</strong> if if the searchValue needs to be escaped, otherwise <strong>false</strong>. If it represents a valid RegEx pattern, this should be
+false.</param>
+      <param name="useRegExSubstitutions">
+        <strong>true</strong> if a RegEx-like replace should be performed (i.e. if the newValue contains RegEx substitutions), otherwise <strong>false</strong>. Does
+not perform named-group substitutions (only numbered groups).</param>
+      <param name="removeEmptyParagraph">
+        <strong>true</strong> if the paragraph should be removed if it's empty, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.ReplaceText(System.String,System.Func{System.String,System.String},System.Boolean,System.Text.RegularExpressions.RegexOptions,Xceed.Words.NET.Formatting,Xceed.Words.NET.Formatting,Xceed.Words.NET.MatchFormattingOptions,System.Boolean)">
+      <summary>Replaces all instances of a string with another string, using the provided Func to match a regex search group value to its corresponding replacement string.</summary>
+      <param name="findPattern">The pattern to search for to determine which values to replace.</param>
+      <param name="regexMatchHandler">A Func that accepts the matching regex search group value and passes it to this to return the replacement string.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="options">The regular expression options to use.</param>
+      <param name="newFormatting">The formatting to apply to the new text.</param>
+      <param name="matchFormatting">The formatting that the text must match in order to be replaced.</param>
+      <param name="fo">A MatchFormattingOptions value indicating how the
+formatting should be matched.</param>
+      <param name="removeEmptyParagraph">
+        <strong>true</strong> if the paragraph should be removed if it's empty, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.SetLineSpacing(Xceed.Words.NET.LineSpacingType,System.Single)">
+      <summary>Sets the line spacing for this Paragraph, manually.</summary>
+      <param name="spacingType">The LineSpacingType to use.</param>
+      <param name="spacingFloat">The spacing value to use.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Paragraph.SetLineSpacing(Xceed.Words.NET.LineSpacingTypeAuto)">
+      <summary>Sets the line spacing for this Paragraph, automatically.</summary>
+      <param name="spacingTypeAuto">The LineSpacingTypeAuto to use.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.Alignment">
+      <summary>Gets or sets the Alignment of this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.Direction">
+      <summary>Gets or sets the Direction of this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.DocumentProperties">
+      <summary>Gets the collection of Document Properties of this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.FollowingTable">
+      <summary>Gets the Table following this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.Hyperlinks">
+      <summary>Gets the collection of Hyperlinks of this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.IndentationAfter">
+      <summary>Gets or sets the Indentation after this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.IndentationBefore">
+      <summary>Gets or sets the Indentation before this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.IndentationFirstLine">
+      <summary>Gets or sets the Indentation of the first line of this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.IndentationHanging">
+      <summary>Gets or sets the Indentation of all but the first line of this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.IndentLevel">
+      <summary>Gets the Indentation level of this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.IsKeepWithNext">
+      <summary>Gets if this Paragraph must stay with the next Paragraph (stay on the same page).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.IsListItem">
+      <summary>Gets if this Paragraph is a list element.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.LineSpacing">
+      <summary>Gets or sets the LineSpacing of this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.LineSpacingAfter">
+      <summary>Gets or sets the Line Spacing after this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.LineSpacingBefore">
+      <summary>Gets or sets the Line Spacing before this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.ListItemType">
+      <summary>Gets the List Item Type of this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.MagicText">
+      <summary>Gets the formatted text value of this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.ParagraphNumberProperties">
+      <summary>Gets the Number Properties of this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.ParentContainer">
+      <summary>Gets or sets the Parent Container of this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.Pictures">
+      <summary>Gets the collection of Pictures of this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.StyleName">
+      <summary>Gets or sets the name of the style of this Paragraph.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Paragraph.Text">
+      <summary>Gets the Text of this Paragraph.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Picture.Remove">
+      <summary>Removes this Picture from the Document.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Picture.SetPictureShape">
+      <summary>Sets the shape of this Picture.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Picture.SetPictureShape(Xceed.Words.NET.BasicShapes)">
+      <summary>Sets the shape of this Picture to one of the <see cref="Xceed.Words.NET~Xceed.Words.NET.BasicShapes.html">BasicShapes</see>.</summary>
+      <param name="shape">The shape to apply to the Picture.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Picture.SetPictureShape(Xceed.Words.NET.RectangleShapes)">
+      <summary>Sets the shape of this Picture to one of the <see cref="Xceed.Words.NET~Xceed.Words.NET.RectangleShapes.html">RectangleShapes</see>.</summary>
+      <param name="shape">The shape to apply to the Picture.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Picture.SetPictureShape(Xceed.Words.NET.BlockArrowShapes)">
+      <summary>Sets the shape of this Picture to one of the <see cref="Xceed.Words.NET~Xceed.Words.NET.BlockArrowShapes.html">BlockArrowShapes</see>.</summary>
+      <param name="shape">The shape to apply to the Picture.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Picture.SetPictureShape(Xceed.Words.NET.EquationShapes)">
+      <summary>Sets the shape of this Picture to one of the <see cref="Xceed.Words.NET~Xceed.Words.NET.EquationShapes.html">EquationShapes</see>.</summary>
+      <param name="shape">The shape to apply to the Picture.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Picture.SetPictureShape(Xceed.Words.NET.FlowchartShapes)">
+      <summary>Sets the shape of this Picture to one of the <see cref="Xceed.Words.NET~Xceed.Words.NET.FlowchartShapes.html">FlowchartShapes</see>.</summary>
+      <param name="shape">The shape to apply to the Picture.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Picture.SetPictureShape(Xceed.Words.NET.StarAndBannerShapes)">
+      <summary>Sets the shape of this Picture to one of the <see cref="Xceed.Words.NET~Xceed.Words.NET.StarAndBannerShapes.html">StarAndBannerShapes</see>.</summary>
+      <param name="shape">The shape to apply to the Picture.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Picture.SetPictureShape(Xceed.Words.NET.CalloutShapes)">
+      <summary>Sets the shape of this Picture to one of the CalloutShapes.</summary>
+      <param name="shape">The shape to apply to the Picture.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.Picture.Description">
+      <summary>Gets or sets the Description of this Picture.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Picture.FileName">
+      <summary>Gets the File Name of this Picture.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Picture.FlipHorizontal">
+      <summary>Gets or sets if this Picture is Flipped Horizontally.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Picture.FlipVertical">
+      <summary>Gets or sets if this Picture is Flipped Vertically.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Picture.Height">
+      <summary>Gets or sets the Height of this Picture.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Picture.HeightInches">
+      <summary>Gets or sets the Height of this Image (in Inches)</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Picture.Id">
+      <summary>Gets the Id of this Picture.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Picture.Name">
+      <summary>Gets or sets the Name of this Picture.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Picture.Rotation">
+      <summary>Gets or sets the Rotation of this Picture (in degrees).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Picture.Width">
+      <summary>Gets or sets the Width of this Picture.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Picture.WidthInches">
+      <summary>Gets or sets the Width of this Image (in Inches)</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.PieChart.#ctor">
+      <summary>Initializes a new instance of the <strong>PieChart</strong> class.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.PieChart.CreateChartXml">
+      <summary>Creates the XML for this PieChart.</summary>
+      <returns>A reference to the XElement representing the XML for the PieChart.</returns>
+    </member>
+    <member name="P:Xceed.Words.NET.PieChart.IsAxisExist">
+      <summary>Gets if the Axis exists in this PieChart.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.PieChart.MaxSeriesCount">
+      <summary>Gets the maximum number of series in this PieChart.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Row.MergeCells(System.Int32,System.Int32)">
+      <summary>Merges Cells in this Row.</summary>
+      <param name="startIndex">The index of the Cell where the merging starts.</param>
+      <param name="endIndex">The index of the Cell where the merging ends.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Row.Remove">
+      <summary>Removes this Row.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Row.BreakAcrossPages">
+      <summary>Gets or sets if the Row is allowed to Break Across Pages.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Row.Cells">
+      <summary>Gets the collection of Cells in this Row.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Row.ColumnCount">
+      <summary>Gets the Column Count of this Row, taking spanned Cells into account.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Row.GridAfter">
+      <summary>Returns the row.GridAfter =&gt; The number of deleted cells in a row.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Row.Height">
+      <summary>Gets or sets the Height of this Row (in pixels).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Row.MinHeight">
+      <summary>Gets or sets the Minimum Height of this Row (in pixels).</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Row.Paragraphs">
+      <summary>Gets the collection of Paragraphs in this Row.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Row.TableHeader">
+      <summary>Gets or sets if a Table Header is present in this Row.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Run.EndIndex">
+      <summary>Gets the End Index of this Run's text.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Run.StartIndex">
+      <summary>Gets the Start Index of this Run's text.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Section.SectionParagraphs">
+      <summary>Gets or sets the collection of Paragraphs in this Section.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Series.#ctor(System.String)">
+      <summary>Initializes a new instance of the <strong>Series</strong> class.</summary>
+      <param name="name">The Name of the Series.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Series.Bind">
+      <summary>Binds the data for this Series.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Series.Bind(System.Collections.ICollection,System.String,System.String)">
+      <summary>Binds the data for this Series, using the provided list, and the category and value property names.</summary>
+      <param name="list">The list of categories and values.</param>
+      <param name="categoryPropertyName">The property name for the category.</param>
+      <param name="valuePropertyName">The property name for the value.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Series.Bind(System.Collections.IList,System.Collections.IList)">
+      <summary>Binds the data for this Series, using the provided lists of categories and values.</summary>
+      <param name="categories">The list of categories.</param>
+      <param name="values">The list of values.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.Series.Color">
+      <summary>Gets or sets the Color for this Series</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.DeleteAndShiftCellsLeft(System.Int32,System.Int32)">
+      <summary>Deletes a Cell in a <see cref="Xceed.Words.NET~Xceed.Words.NET.Row.html">Row</see>, and shifts the other
+Cells to the left.</summary>
+      <param name="rowIndex">The index of the Row where a Cell will be removed..</param>
+      <param name="celIndex">The index of the Cell to remove.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.GetBorder(Xceed.Words.NET.TableBorderType)">
+      <summary>Gets a Border from this Table.</summary>
+      <returns>The Border of the Table.</returns>
+      <param name="borderType">The type of table border to get.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.GetColumnWidth(System.Int32)">
+      <summary>Gets the width of the specified column.</summary>
+      <returns>The width of the specified column.</returns>
+      <param name="columnIndex">The index of the column.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertColumn">
+      <summary>Inserts a Column in this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertPageBreakAfterSelf">
+      <summary>Inserts a page break after this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertPageBreakBeforeSelf">
+      <summary>Inserts a page break before this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertParagraphAfterSelf">
+      <summary>Inserts a Paragraph after this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertParagraphBeforeSelf">
+      <summary>Inserts a Paragraph before this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertRow">
+      <summary>Inserts a Row in this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertTableAfterSelf">
+      <summary>Inserts a Table after this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertTableBeforeSelf">
+      <summary>Inserts a Table before this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.MergeCellsInColumn(System.Int32,System.Int32,System.Int32)">
+      <summary>Merges cells in a given column, using the provided start and end row indexes.</summary>
+      <param name="columnIndex">The index of the column where cells are to be merged.</param>
+      <param name="startRow">The index of the row where the merge begins.</param>
+      <param name="endRow">The index of the row where the merge ends.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.Remove">
+      <summary>Removes this Table from this Document.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.RemoveColumn">
+      <summary>Removes a Column from this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.RemoveRow">
+      <summary>Removes a Row from this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.SetBorder(Xceed.Words.NET.TableBorderType,Xceed.Words.NET.Border)">
+      <summary>Sets a border on this Table.</summary>
+      <param name="borderType">A TableBorderType value indicating which border to set.</param>
+      <param name="border">The border object to set.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.SetColumnWidth(System.Int32,System.Double)">
+      <summary>Sets the width of the specified column.</summary>
+      <param name="columnIndex">The index of the column.</param>
+      <param name="width">The width to apply.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.SetDirection(Xceed.Words.NET.Direction)">
+      <summary>Sets the Direction of the content of this Table.</summary>
+      <param name="direction">The Direction of the content.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.SetTableCellMargin(Xceed.Words.NET.TableCellMarginType,System.Double)">
+      <summary>Sets a cell margin on this Table.</summary>
+      <param name="type">A TableCellMarginType value indicating which margin to set.</param>
+      <param name="margin">The margin value to set.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.SetWidths(System.Single[])">
+      <summary>Sets the widths of this Table's columns.</summary>
+      <param name="widths">The array of widths to set.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.SetWidthsPercentage(System.Single[],System.Nullable{System.Single})">
+      <summary>Sets the widths of this Table's columns, using the provided total width and a width percentage for each column.</summary>
+      <param name="widthsPercentage">The array of width percentages to use.</param>
+      <param name="totalWidth">The total width of the columns. If null, the maximum width available is used.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertColumn">
+      <summary>Inserts a Column at the right end of this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertColumn(System.Int32,System.Boolean)">
+      <summary>Inserts a Column at a specific location in this Table.</summary>
+      <param name="index">The index at which to insert the new Column.</param>
+      <param name="direction">
+        <strong>true</strong> to insert the Column on the right side of the indexed Column, <strong>false</strong> to insert on the left side.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertParagraphAfterSelf(Xceed.Words.NET.Paragraph)">
+      <summary>Inserts the provided Paragraph after this Table.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="p">The Paragraph to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertParagraphAfterSelf(System.String,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts a Paragraph after this Table, using the provided text
+and formatting, and optionally track this change.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="formatting">The format to apply to the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertParagraphAfterSelf(System.String,System.Boolean)">
+      <summary>Inserts a Paragraph after this Table, using the provided text,
+and optionally track this change.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertParagraphAfterSelf(System.String)">
+      <summary>Inserts a Paragraph after this Table, using the provided text.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertParagraphBeforeSelf(Xceed.Words.NET.Paragraph)">
+      <summary>Inserts the provided Paragraph before this Table.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="p">The Paragraph to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertParagraphBeforeSelf(System.String)">
+      <summary>Inserts a Paragraph before this Table, using the provided
+text.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertParagraphBeforeSelf(System.String,System.Boolean)">
+      <summary>Inserts a Paragraph before this Table, using the provided
+text, and optionally track this change.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertParagraphBeforeSelf(System.String,System.Boolean,Xceed.Words.NET.Formatting)">
+      <summary>Inserts a Paragraph before this Table, using the provided text
+and formatting, and optionally track this change.</summary>
+      <returns>The new Paragraph that was inserted.</returns>
+      <param name="text">The text for the new Paragraph.</param>
+      <param name="trackChanges">
+        <strong>true</strong> if this change should be tracked, otherwise <strong>false</strong>.</param>
+      <param name="formatting">The format to apply to the new Paragraph.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertRow">
+      <summary>Inserts a Row at the end of this Table.</summary>
+      <returns>The new Row that was inserted.</returns>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertRow(Xceed.Words.NET.Row,System.Boolean)">
+      <summary>Inserts a copy of the provided Row at the end of this Table, and
+optionally keep the same formatting as the original Row.</summary>
+      <returns>The new Row that was inserted.</returns>
+      <param name="row">The Row to copy.</param>
+      <param name="keepFormatting">
+        <strong>true</strong> if the format of the original Row is also copied, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertRow(System.Int32)">
+      <summary>Inserts a Row at a specific location in this Table.</summary>
+      <returns>The new Row that was inserted.</returns>
+      <param name="index">The index at which to insert the new Row.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertRow(Xceed.Words.NET.Row,System.Int32,System.Boolean)">
+      <summary>Inserts a copy of the provided Row at a specific location in this
+Table, and optionally keep the same formatting as the original Row.</summary>
+      <returns>The new Row that was inserted.</returns>
+      <param name="row">The Row to copy.</param>
+      <param name="index">The index at which to insert the new Row.</param>
+      <param name="keepFormatting">
+        <strong>true</strong> if the format of the original Row is also copied, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertTableAfterSelf(Xceed.Words.NET.Table)">
+      <summary>Inserts the provided Table after this Table.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="t">The Table to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertTableAfterSelf(System.Int32,System.Int32)">
+      <summary>Inserts a Table of a specific size after this Table.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="rowCount">The row count for the new Table.</param>
+      <param name="columnCount">The column count for the new Table.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertTableBeforeSelf(Xceed.Words.NET.Table)">
+      <summary>Inserts the provided Table before this Table.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="t">The Table to insert.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.InsertTableBeforeSelf(System.Int32,System.Int32)">
+      <summary>Inserts a Table of a specific size before this Table.</summary>
+      <returns>The new Table that was inserted.</returns>
+      <param name="rowCount">The row count for the new Table.</param>
+      <param name="columnCount">The column count for the new Table.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.RemoveColumn">
+      <summary>Removes the last column from this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.RemoveColumn(System.Int32)">
+      <summary>Removes a specific column from this Table.</summary>
+      <param name="index">The index of the column to remove.</param>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.RemoveRow">
+      <summary>Removes the last row from this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.Table.RemoveRow(System.Int32)">
+      <summary>Removes a specific column from this Table.</summary>
+      <param name="index">The index of the row to remove.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.Alignment">
+      <summary>Gets or sets the Alignment of this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.AutoFit">
+      <summary>Gets or sets the AutoFit of this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.ColumnCount">
+      <summary>Gets the Column Count of this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.ColumnWidths">
+      <summary>Gets the collection of Column Widths of this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.CustomTableDesignName">
+      <summary>Gets or sets the Custom Design Name of this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.Design">
+      <summary>Gets or sets the Table Design of this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.Hyperlinks">
+      <summary>Gets the collection of Hyperlinks in this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.Index">
+      <summary>Gets the Index of this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.Paragraphs">
+      <summary>Gets the collection of Paragraphs in this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.Pictures">
+      <summary>Gets the collection of Pictures in this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.RowCount">
+      <summary>Gets the Row Count of this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.Rows">
+      <summary>Gets the collection of Rows in this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.TableCaption">
+      <summary>Gets or sets the Caption of this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.TableDescription">
+      <summary>Gets or sets the Description of this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.Table.TableLook">
+      <summary>Gets or sets the TableLook of this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.TableLook.#ctor">
+      <summary>Initializes a new instance of the <strong>TableLook</strong> class.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.TableLook.#ctor">
+      <summary>Initializes a new instance of the <strong>TableLook</strong> class, using the default values.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.TableLook.#ctor(System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+      <summary>Initializes a new instance of the <strong>TableLook</strong> class, using the provided values for FirstRow, LastRow, FirstColumn, LastColumn, and specififying
+if no Horizontal or Vertical Banding is applied.</summary>
+      <param name="firstRow">
+        <strong>true</strong> if the First Row conditional formatting is applied to the Table, otherwise <strong>false</strong>.</param>
+      <param name="lastRow">
+        <strong>true</strong> if the Last Row conditional formatting is applied to the Table, otherwise <strong>false</strong>.</param>
+      <param name="firstColumn">
+        <strong>true</strong> if the First Column conditional formatting is applied to the Table, otherwise <strong>false</strong>.</param>
+      <param name="lastColumn">
+        <strong>true</strong> if the Last Column conditional formatting is applied to the Table, otherwise <strong>false</strong>.</param>
+      <param name="noHorizontalBanding">
+        <strong>true</strong> if the Horizontal Banding conditional formatting is <strong>NOT</strong> applied to the Table, otherwise <strong>false</strong>.</param>
+      <param name="noVerticalBanding">
+        <strong>true</strong> if the Vertical Banding conditional formatting is <strong>NOT</strong> applied to the Table, otherwise <strong>false</strong>.</param>
+    </member>
+    <member name="P:Xceed.Words.NET.TableLook.FirstColumn">
+      <summary>Gets or sets if the First Column conditional formatting is applied to this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.TableLook.FirstRow">
+      <summary>Gets or sets if the First Row conditional formatting is applied to this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.TableLook.LastColumn">
+      <summary>Gets or sets if the Last Column conditional formatting is applied to this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.TableLook.LastRow">
+      <summary>Gets or sets if the Last Row conditional formatting is applied to this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.TableLook.NoHorizontalBanding">
+      <summary>Gets or sets if the horizontal banding conditional formatting is not applied to this Table.</summary>
+    </member>
+    <member name="P:Xceed.Words.NET.TableLook.NoVerticalBanding">
+      <summary>Gets or sets if the vertical banding conditional formatting is not applied to this Table.</summary>
+    </member>
+    <member name="M:Xceed.Words.NET.ValueAxis.#ctor(System.String)">
+      <summary>Initializes a new instance of the <strong>ValueAxis</strong> class.</summary>
+      <param name="id">The Id of the Axis.</param>
+    </member>
+    <member name="F:Xceed.Words.NET.XmlTemplates.TableOfContentsElementStyleBase">
+      <summary>Represents an Xml Template for the Table of Contents (element's style base).</summary>
+    </member>
+    <member name="F:Xceed.Words.NET.XmlTemplates.TableOfContentsHeadingStyleBase">
+      <summary>Represents an Xml Template for the Table of Contents (heading's style base).</summary>
+    </member>
+    <member name="F:Xceed.Words.NET.XmlTemplates.TableOfContentsHyperLinkStyleBase">
+      <summary>Represents an Xml Template for the Table of Contents (hyperlink's style base).</summary>
+    </member>
+    <member name="F:Xceed.Words.NET.XmlTemplates.TableOfContentsXmlBase">
+      <summary>Represents an Xml Template for the Table of Contents' base.</summary>
+    </member>
+  </members>
+</doc>

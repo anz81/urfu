@@ -1,0 +1,304 @@
+﻿@using Urfu.Its.Web.DataContext
+@model Urfu.Its.Web.Controllers.PersonalInfoVM
+@{
+    ViewBag.Title = "ИТС студента";
+    bool wasFirstProgram = false;
+}
+
+    <h2   style="text-align:left;float:left">@ViewBag.Title</h2>
+  
+<div style="padding-top: 20px; padding-left: 220px;">
+    <button class="btn btn-default" onclick="publishAllModules(this,'@Model.Student.Id')">Отправить все выборы в ЛК</button>
+</div>
+
+
+<div>
+    <hr style="clear:both;"/>
+ 
+        <dl class="dl-horizontal">
+            <dt>
+                ФИО
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Student.Person.Surname)
+                @Html.DisplayFor(model => model.Student.Person.Name)
+                @Html.DisplayFor(model => model.Student.Person.PatronymicName)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Student.Rating)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Student.Rating)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Student.RatingType)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Student.RatingType)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Student.Status)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Student.Status)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Student.Group.Name)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Student.Group.Name)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Student.IsTarget)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Student.IsTarget)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Student.IsInternational)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Student.IsInternational)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Student.Compensation)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Student.Compensation)
+            </dd>
+          
+        </dl>
+</div>
+<div>
+    <table class="table table-striped table-bordered table-condensed">
+        <tr>
+            <th></th>
+            @foreach (var item in Model.SemesterTestUnitses)
+            {
+                <th>@item.Semester сем</th>
+            }
+            <th>Итого</th>
+        </tr>
+        <tr>
+            <td>Кол.з.е</td>
+            @foreach (var item in Model.SemesterTestUnitses)
+            {
+                <td>@item.TestUnits</td>
+            }
+            <td>@Model.SemesterTestUnitses.Sum(_=>_.TestUnits)</td>
+        </tr>
+    </table>
+</div>
+
+<div>
+    <table class="table table-striped table-hover table-bordered table-condensed">
+        <tr>
+            <th>Траектории</th>
+            <th>Приоритет</th>
+            <th>Статус</th>
+            <th></th>
+        </tr>
+
+        @for (int variantIndex = 0; variantIndex < Model.Selections.Count; variantIndex++)
+        {
+            var item = Model.Selections[variantIndex];
+            if (!item.IsBase)
+            {
+                if (wasFirstProgram)
+                {
+                    break;
+                }
+
+                <tr>
+                    <td><b style="color: darkblue">@item.Name</b></td>
+                    <td>@item.Priority</td>
+                    <td>
+                        @if (item.Admission != AdmissionStatus.Admitted)
+                        {
+                            @Html.EnumDropDownListFor(model => Model.Selections[variantIndex].Admission, htmlAttributes: new { @class = "form-control enumDropDown", onchange = "setVariantAdmissionStatus(this,'" + @Model.Student.Id + "'," + @item.VariantId + "); ", autocomplete = "off" })
+                        }
+                        else
+                        {
+                            <b>Зачислен</b>
+                        }
+                    </td>
+                    <td>
+                        @if (item.PublishPossible)
+                        {
+                            <input type="button" value="Отправить в ЛК" onclick="publishVariant(this, '@Model.Student.Id', @item.VariantId) " />
+                        }
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td>
+                        <b>Версия ОП</b>
+                        @if (!wasFirstProgram)
+                        {
+                            <b>(Актуальная)</b>
+                            wasFirstProgram = true;
+                        }
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td colspan="4">
+                    @if (item.Modules.Any() && (item.Admission == AdmissionStatus.Admitted || item.IsBase))
+                    {
+                        <table class="table table-striped table-hover table-bordered table-condensed">
+                            <tr>
+                                <th>@item.VariantId Модули @item.Name</th>
+                                <th>Приоритет</th>
+                                <th>Статус</th>
+                                <th></th>
+                            </tr>
+
+                            @for (int moduleIndex = 0; moduleIndex < item.Modules.Count; moduleIndex++)
+                            {
+                                var module = item.Modules[moduleIndex];
+                                <tr>
+                                    <td>@Html.ActionLink(module.Title, "PlansView", new {moduleId = module.ModuleUuid,variantId = item.VariantId,controller="Variant"})</td>
+                                    <td>@module.Proprity</td>
+                                    <td>
+                                        @if (module.ShouldHaveStatus)
+                                        {
+                                            @Html.EnumDropDownListFor(model => Model.Selections[variantIndex].Modules[moduleIndex].Admission, htmlAttributes: new {@class = "form-control enumDropDown", hack = DateTime.Now.Ticks, onchange = "setModuleAdmissionStatus(this,'" + @Model.Student.Id + "','" + @module.ModuleUuid + "'); ", autocomplete = "off"})
+                                        }
+                                        else
+                                        {
+                                            <i>Без выбора</i>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (module.ShouldHaveStatus)
+                                        {
+                                            <input type="button" value="Отправить в ЛК" onclick="publishModule(this, '@Model.Student.Id', '@module.ModuleUuid') " />
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4">
+                                        @if (module.Teachers.Any())
+                                        {
+                                        <table class="table table-striped table-hover table-bordered table-condensed">
+                                            <tr>
+                                                <th>Дисциплина</th>
+                                                <th>Нагрузка</th>
+                                                <th>Преподаватель</th>
+                                            </tr>
+                                            @foreach (var t in module.Teachers)
+                                                {
+                                                <tr>
+                                                    <td>
+                                                        @t.Title
+                                                    </td>
+                                                    <td>
+                                                        @t.Control
+                                                    </td>
+                                                    <td>
+                                                        @t.Teacher.initials
+                                                    </td>
+                                                </tr>
+                                                }
+                                        </table>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    }
+                </td>
+            </tr>
+        }
+
+        @if (Model.MinorSelections.Count > 0)
+        {
+            <tr>
+                <td>
+                    <b>Майноры</b>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <table class="table table-striped table-hover table-bordered table-condensed">
+                        <tr>
+                            <th>Модули</th>
+                            <th>Приоритет</th>
+                            <th>Год</th>
+                            <th>Семестер</th>
+                            <th>Статус</th>
+                            <th></th>
+                        </tr>
+                        @for (int minorIndex = 0; minorIndex < Model.MinorSelections.Count; minorIndex++)
+                        {
+                            var minor = Model.MinorSelections[minorIndex];
+                            <tr>
+                                <td>@minor.Name</td>
+                                <td>@minor.Priority</td>
+                                <td>@minor.Year</td>
+                                <td>@minor.Semester</td>
+                                <td>
+                                    @Html.DisplayFor(m=>minor.Admission)
+                                </td>
+                                <td>
+                                </td>
+                                </tr>
+                        }
+                    </table>
+                </td>
+            </tr>
+        }
+
+    </table>
+</div>
+<div class="modal fade" id="modulesPublished" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Сообщение</h4>
+            </div>
+            <div class="modal-body">
+                <p>Статусы отправлены в Личный кабинет студента</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+              
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        allSelectableModules =
+            @Html.Raw(Json.Encode(Model.Selections.Where(_=>_.Admission == AdmissionStatus.Admitted || _.IsBase).SelectMany(_=>_.Modules.Where(m=>m.ShouldHaveStatus).Select(m=>m.ModuleUuid))));
+
+        publishAllModules = function (button, studentId) {
+            $.post('@Url.Action("PublishModuleAdmission", "Admission")', { studentId: studentId, moduleId: allSelectableModules }, function () {
+                $('#modulesPublished').on('hidden.bs.modal',
+                    function(e) {
+                        location.reload();
+                    });
+                $('#modulesPublished').modal('show');
+            });
+        };
+
+        publishVariant = function (button, studentId, variantId) {
+            $.post('@Url.Action("PublishVariantAdmission","Admission")', { studentId: studentId, variantId: variantId }, function () { location.reload(); });
+        };
+
+        publishModule = function(button, studentId, moduleId) {
+            $.post('@Url.Action("PublishModuleAdmission", "Admission")', { studentId: studentId, moduleId: moduleId }, function () { location.reload(); });
+        };
+
+        setVariantAdmissionStatus = function(control, studentId, variantId) {
+            $.post('@Url.Action("SetVariantAdmissionStatus","Admission")', { studentId: studentId, variantId: variantId, status: control.value }, function () { location.reload(); });
+        };
+
+        setModuleAdmissionStatus = function (control, studentId, moduleId) {
+            $.post('@Url.Action("SetModuleAdmissionStatus", "Admission")', { studentId: studentId, moduleId: moduleId, status: control.value }, function () { location.reload(); });
+        }
+    </script>
+}

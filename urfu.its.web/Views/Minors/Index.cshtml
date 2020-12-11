@@ -1,0 +1,16 @@
+﻿@using Urfu.Its.Web.Models
+
+@{
+    ViewBag.Title = "Майноры";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+
+@section scripts
+{
+    @Html.Partial("_AdditionalModules", new AdditionalModulesView(
+            controllerName: "Minors",
+            reportActionName: "DownloadMinorsReport",
+            localStorageName: "MinorsFilters",
+            moduleType: ModuleTypes.Minor))
+}

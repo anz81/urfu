@@ -1,0 +1,301 @@
+﻿@using Urfu.Its.Web.DataContext
+@model Urfu.Its.Web.Models.EditVariantContentViewModel
+
+<h3>@ViewBag.Title</h3>
+
+<nav class="navbar navbar-default">
+    <ul class="nav navbar-nav">
+        <li>@Html.ActionLink("Лимиты", "Index", "EduProgramLimits", new {variantId = Model.VariantId}, null)</li>
+        <li>@Html.ActionLink("Управление группами выбора", "Index", "VariantSelectionGroup", new {variantId = Model.VariantId}, null)</li>
+        <li>@Html.ActionLink("Редактирование модулей", "Index", "VariantContents", new {variantId = Model.VariantId}, null)</li>
+        <li>@Html.ActionLink("Открыть в Excel", "Download", new {variantId = Model.VariantId})</li>
+    </ul>
+</nav>
+
+@*
+<p>
+    @Html.ActionLink("Управление зачётными единицами групп", "Index", "VariantGroups", new { variantId = Model.VariantId }, null)
+</p>
+*@
+
+<p id="state">
+    <b>Состояние:</b>
+    <button class="btn@(Model.State == VariantState.Development ? " btn-primary" : "")" data-val="@((int) VariantState.Development)">Формируется</button>
+    <button class="btn@(Model.State == VariantState.Review ? " btn-primary" : "")" data-val="@((int) VariantState.Review)">На согласовании</button>
+    <button class="btn@(Model.State == VariantState.Approved ? " btn-primary" : "")" data-val="@((int) VariantState.Approved)">Утверждена</button>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.EduProgram)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.qualification)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.familirizationType)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.familirizationCondition)
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>
+            @Html.DisplayFor(model => model.EduProgram)
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.qualification)
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.familirizationType)
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.familirizationCondition)
+        </td>
+    </tr>
+    </tbody>
+</table>
+@*
+    @using (Html.BeginForm("BasicContentEdit", "Variant", new {variantId = Model.VariantId}, FormMethod.Post, new {encType = "multipart/form-data", name = "myform"}))
+    {
+        @Html.AntiForgeryToken()
+        <p>@Html.ValidationSummary(true)</p>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>@Html.LabelFor(model => model.Name, new {@class = "control-label"})</th>
+                <th>@Html.LabelFor(model => model.Year, new {@class = "control-label"})</th>
+                <th>@Html.LabelFor(model => model.SelectionDeadline, new {@class = "control-label"})</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>@Html.EditorFor(model => model.Name)</td>
+                <td>@Html.EditorFor(model => model.Year)</td>
+                <td>@Html.EditorFor(model => model.SelectionDeadline, new {@class = "form-control datecontrol"})</td>
+            </tr>
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <tr>
+            <td>@Html.ValidationMessageFor(model => model.Name)</td>
+            <td>@Html.ValidationMessageFor(model => model.Year)</td>
+            <td>@Html.ValidationMessageFor(model => model.SelectionDeadline)</td>
+        </tr>
+    }
+            <tr><td colspan="3"><input type="submit" value="Сохранить" class="btn btn-default"/></td></tr>
+            </tbody>
+        </table>
+    }
+*@
+@using (Html.BeginForm("BasicContentEditold", "Variant", new { variantId = Model.VariantId }, FormMethod.Post, new { encType = "multipart/form-data", name = "myform" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        <table>
+            <tr>
+                <td style="width: 600px;">
+                    @Html.ValidationSummary(true)
+                    <div class="form-group">
+                        <div class="col-md-10">
+                            @Html.HiddenFor(model => model.VariantId)
+                            @Html.DisplayFor(modelItem => modelItem.Message)
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Name, new {@class = "control-label col-md-2"})
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.Name)
+                            @Html.ValidationMessageFor(model => model.Name)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.StudentsLimit, new {@class = "control-label col-md-2"})
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.StudentsLimit)
+                            @Html.ValidationMessageFor(model => model.StudentsLimit)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Year, new {@class = "control-label col-md-2"})
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.Year)
+                            @Html.ValidationMessageFor(model => model.Year)
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.SelectionDeadline, new {@class = "control-label col-md-2"})
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.SelectionDeadline, new {@class = "form-control datecontrol"})
+                            @Html.ValidationMessageFor(model => model.SelectionDeadline)
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <input type="submit" value="Сохранить" class="btn btn-default" />
+                </td>
+            </tr>
+        </table>
+        <p>
+            Группы
+        </p>
+
+        <p>
+            <table class="table table-striped table-hover table-bordered table-condensed">
+                <tr>
+                    <th>@{ int rowNum = 1;}</th>
+                    <th style="width:10%;">
+                        Группа
+                    </th>
+                    <th>
+                        Зачётные единицы в группе
+                    </th>
+                        @for (int term = 1; term <= 8; term++)
+                        {
+                            <th>
+                                Семестр @term
+                            </th>
+                        }
+                    <th>
+                        Сумма зачётных единиц по модулям
+                    </th>
+                </tr>
+                @for (int i = 0; i < Model.Groups.Count; i++)
+                {
+                    <tr>
+                        @Html.HiddenFor(model => model.Groups[i].Id)
+                        @Html.HiddenFor(model => model.Groups[i].GroupType)
+                        <td>@Html.Raw(rowNum++)</td>
+                        <td>
+                            @Html.DisplayFor(model => model.Groups[i].GroupType)
+                        </td>
+                        <td>
+                            @Html.EditorFor(model => model.Groups[i].TestUnits)
+                        </td>
+                        @for (int term = 1; term <= 8; term++)
+                        {
+                        <td>
+                             @(Model.Rows.Where(r => r.GroupType == Model.Groups[i].GroupType && (r.Selected || r.Base) && !r.SelectionGroupId.HasValue).SelectMany(r=>r.Plans.Where(p=>p.GetTermTestUnits(term)>0)/*.Take(1)*/).Sum(p => p.GetTermTestUnits(term))) <br />
+                        </td>
+
+                        }
+                        <td>
+                            Без групп выбора: @(Model.Rows.Where(r => r.GroupType == Model.Groups[i].GroupType && (r.Selected || r.Base) && !r.SelectionGroupId.HasValue).Sum(r => r.TestUnits)) <br/>
+                            По группам выбора: @(Model.AllSelectionGroups.Where(sg => Model.Rows.Any(r => r.SelectionGroupId == sg.Id && r.GroupType == Model.Groups[i].GroupType && (r.Selected || r.Base))).Sum(r => r.TestUnits))
+                        </td>
+                    </tr>
+                }
+                <tr>
+                    <td></td>
+                    <td>
+                        <b>Итого</b>
+                    </td>
+                    <td>
+                        @*@Html.EditorFor(model => model.Groups[i].TestUnits)*@
+                    </td>
+                    @for (int term = 1; term <= 8; term++)
+                    {
+                        <td>
+                            @(Model.Rows.Where(r => (r.Selected || r.Base) && !r.SelectionGroupId.HasValue).SelectMany(r => r.Plans.Where(p => p.GetTermTestUnits(term) > 0)/*.Take(1)*/).Sum(p => p.GetTermTestUnits(term))) <br />
+                        </td>
+
+                    }
+                    <td>
+                        Без групп выбора: @(Model.Rows.Where(r => (r.Selected || r.Base) && !r.SelectionGroupId.HasValue).Sum(r => r.TestUnits)) <br />
+                        По группам выбора: @(Model.AllSelectionGroups.Where(sg => Model.Rows.Any(r => r.SelectionGroupId == sg.Id && (r.Selected || r.Base))).Sum(r => r.TestUnits))
+                    </td>
+                </tr>
+
+            </table>
+
+        </p>
+
+        <p>
+            Модули
+        </p>
+
+        <table class="table table-striped table-hover table-bordered table-condensed" data-datatable="true" id="mainVariantTable">
+            <thead>
+                <tr>
+                    <th style="width: 2%;"></th>>
+                    <th style="width: 4%;">
+                        @(Model.IsBase?"Включить модуль в основную траекторию":"Включить модуль в траекторию")
+                    </th>
+                    <th style="width: 10%;">
+                        Название модуля
+                    </th>
+                    <th style="width: 5%;">
+                        Зачётные единицы
+                    </th>
+                    <th style="width: 7%;">
+                        Группа модуля
+                    </th>
+                    <th style="width: 28%;">
+                        Тип модуля
+                    </th>
+                    <th style="width: 4%;">
+                        Признак 'По выбору'
+                    </th>
+                    <th style="width: 6%;">
+                        Лимит
+                    </th>
+                    <th style="width: 6%;">
+                        Семестры
+                    </th>
+                    <th style="width: 20%;">
+                        Группа выбора
+                    </th>
+                    <th style="width: 10%;">
+                        Учебные планы
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @Html.EditorFor(model => model.Rows)
+            </tbody>
+        </table>
+        <br />
+        <hr />
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Сохранить" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts
+{
+    <script>
+        if (!Modernizr.inputtypes.date) {
+            $(function() {
+                $("input[type='date']")
+                    .datepicker({ dateFormat: 'yy-mm-dd' })//, $.datepicker.regional['ru'])
+                    .get(0)
+                    .setAttribute("type", "text");
+            });
+        }
+
+        $("#state button").not(".btn-primary").click(function () {
+            var button = $(this);
+            $.post("/Variant/ChangeState", { "variantId" : $.url("?variantId") || $.url("?VariantId"), "state": button.data("val") }, function (data, textStatus) {
+                if (data.result) {
+                    window.location.reload();
+                } else {
+                    alert("Не удалось сменить состояние документа, недостаточно прав" );
+                }
+            });
+            
+        });
+    </script>
+}

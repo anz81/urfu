@@ -1,0 +1,371 @@
+﻿@using Urfu.Its.Web.Model.Models
+@using Urfu.Its.Web.Models
+@{
+    ViewBag.Title = "Модули";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+
+    var canManageWorkingPrograms = User.IsInRole(ItsRoles.WorkingProgramManager);
+    var canViewWorkingPrograms = User.IsInRole(ItsRoles.WorkingProgramView);
+    var showWorkingPrograms = canViewWorkingPrograms || canManageWorkingPrograms;
+}
+
+@section scripts
+{
+    <script src="@Url.Content("~/Scripts/VersionedDocs/versionedDocs.js")"></script>
+
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            Ext.tip.QuickTipManager.init();
+            var store = Ext.create("Ext.data.BufferedStore",
+                {
+                    fields: [
+                        "id", "title", "shortTitle", "coordinator", "type", "competence", "testUnits", "priority", "state",
+                        "approvedDate", "comment", "file", "specialities"
+                    ],
+                    autoLoad: true,
+                    pageSize: 300,
+                    remoteSort: true,
+                    remoteFilter: true,
+                    proxy: {
+                        type: 'ajax',
+                        url: '/Modules/Index',
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        }
+                    }
+                });
+
+            Ext.define('comboModel',
+                {
+                    extend: 'Ext.data.Model',
+                    fields:
+                    [
+                        "Id", "Name"
+                    ]
+                });
+
+
+            var specialitiesStore = Ext.create('Ext.data.Store',
+                {
+                    model: 'comboModel',
+                    data: []
+                    //proxy:
+                    //{
+                    //    type: 'ajax',
+                    //    url: '/Minors/Semesters',
+                    //    reader: { type: 'json', root: 'data' }
+                    //},
+
+                });
+
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("ModulesFilters") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+            }
+            var filtersWnd = null;
+
+            //Название модуля, Координатор, Тип
+            var setFilters = function () {
+                var settings = [
+                    { property: 'title', value: filtersWnd.getComponent("title").getValue() },
+                    { property: 'coordinator', value: filtersWnd.getComponent("coordinator").getValue() },
+                    { property: 'specialities', value: filtersWnd.getComponent("specialities").getValue() },
+                    { property: 'type', value: filtersWnd.getComponent("type").getValue() }
+                ];
+                store.setFilters(settings);
+                localStorage.setItem("ModulesFilters", JSON.stringify(settings));
+            };
+
+            filtersWnd = Ext.create('Ext.window.Window',
+                {
+                    title: "Фильтры",
+                    closeAction: 'hide',
+                    resizable: false,
+                    autoHeight: false,
+                    bodyPadding: 6,
+                    defaults: {
+                        xtype: 'textfield',
+                        width: 500
+                    },
+                    items: [
+                        { fieldLabel: "Название модуля", itemId: "title", value: prevSettings["title"] },
+                        { fieldLabel: "Координатор", itemId: "coordinator", value: prevSettings["coordinator"] },
+                        { fieldLabel: "Направления", itemId: "specialities", value: prevSettings["specialities"] },
+                        { fieldLabel: "Тип", itemId: "type", value: prevSettings["type"] }
+                        //{
+                        //    fieldLabel: "Семестр",
+                        //    itemId: "semester",
+                        //    value: prevSettings["semester"],
+                        //    xtype: "combobox",
+                        //    store: store,
+                        //    valueField: 'Id',
+                        //    displayField: 'Name',
+                        //    queryMode: 'remote'
+                        //}
+                    ],
+                    buttons: [
+                        {
+                            text: "OK",
+                            handler: function () {
+                                setFilters();
+                                filtersWnd.hide();
+                            }
+                        },
+                        {
+                            text: "Отмена",
+                            handler: function () { filtersWnd.hide(); }
+                        }
+                    ]
+                });
+
+            setFilters();
+
+            var tpl =
+                '<a href="{file}">Файл</a> | <a href="/Modules/Edit?id={id}">Изменить</a> | <a href="/Modules/Details?id={id}">Просмотреть</a>\
+                | <a href="/Modules/Delete?id={id}">Удалить</a> | <a href="/Modules/DisciplinesByModule?moduleId={id}">Дисциплины</a>';
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: store,
+                    tbar: [
+                        {
+                            xtype: 'button',
+                            text: 'Фильтры...',
+                            handler: function () { filtersWnd.show(); }
+                        },
+                        {
+                            xtype: 'button',
+                            text: "Отменить фильтры",
+                            handler: function () {
+                                store.clearFilter();
+                                localStorage.setItem("ModulesFilters", JSON.stringify([]));
+                            }
+                        }
+                    ],
+                    loadMask: true,
+                    columnLines: true,
+                    plugins: [
+                        {
+                            ptype: "rowexpander",
+                            rowBodyTpl: new Ext.XTemplate(
+                                '<p><b>Компетенции: </b>{competence}</p>',
+                                '<p><b>Зачётные единицы: </b>{testUnits}</p>',
+                                '<p><b>Приоритет: </b>{priority}</p>',
+                                '<p><b>Состояние: </b>{state}</p>',
+                                '<p><b>Дата утверждения: </b>{approvedDate}</p>',
+                                '<p><b>Комментарий: </b>{comment}</p>',
+                                '<p><b>Номер: </b>{number}</p>',
+                                '<p><b>Аннотация: </b>{annotation}</p>',
+                            )
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        {
+                            header: 'Направления',
+                            align: 'left',
+                            dataIndex: 'specialities',
+                            sortable: false,
+                            width: 150,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Название модуля',
+                            dataIndex: 'title',
+                            width: 400,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Короткое название модуля',
+                            dataIndex: 'shortTitle',
+                            width: 400,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Координатор',
+                            align: 'left',
+                            dataIndex: 'coordinator',
+                            width: 400,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Тип',
+                            align: 'center',
+                            dataIndex: 'type',
+                            width: 150,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                @if (canViewWorkingPrograms)
+                {
+                    <text>
+                        {
+                            xtype: 'actioncolumn',
+                            header: 'Рабочая программа',
+                            region: 'center',
+                            width: 200,
+                            defaults: {
+                                metadata: {
+                                    attr: 'style="padding-left:10px;width:auto;"'
+                                }
+                            },
+                            items: [{
+                                icon: '@Url.Content("~/Content/Images/document-go.png")',
+                                iconCls: 'icon-padding',
+                                text: 'Изменить',
+                                tooltip: 'Изменить',
+                                // TODO что-то не работает. Нужно скрыть иконку, если РП для типа документа не формируется, пока алерт в обработчике
+                                /*getClass: function (grid, metadata, r, rowIndex, colIndex, store) {
+                                    var rec = grid.getStore().getAt(rowIndex);
+                                    if (!rec.get('documentKind')) {
+                                        return "x-hide-display";
+                                    }
+                                    return "x-grid-center-icon";;
+                                },*/
+                                handler: function(grid, rowIndex, colIndex) {
+                                    var rec = grid.getStore().getAt(rowIndex);
+                                    if (!rec.get('documentKind'))
+                                        alert('Для данного типа модуля РП не формируется');
+                                    var formPanel = Ext.create('VersionedDocs.Selector', {
+                                        documentKind: rec.get('documentKind'),
+                                        linkedEntityId: rec.get('id'),
+                                        canView: @(canViewWorkingPrograms ? "true" : "false"),
+                                        canEdit: @(canManageWorkingPrograms ? "true" : "false")
+                                    });
+                                    formPanel.show();
+                                }
+                            }]
+                        },</text>
+                }
+                    {
+                        xtype: 'templatecolumn',
+                        sortable: false,
+                        tpl: tpl,
+                        width: 420
+                    }
+                ]
+            });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+    </script>
+}
+@*
+    @using Urfu.Its.Common
+    @using Urfu.Its.Web.Controllers
+    @model IEnumerable<Urfu.Its.Web.DataContext.Module>
+
+    @{
+        ViewBag.Title = "Список модулей";
+    }
+
+    <h2>@ViewBag.Title</h2>
+
+    <p>
+        @Html.ActionLink("Создать новый модуль", "Create")
+    </p>
+    <table class="table table-striped table-hover table-bordered table-condensed">
+        <tr>
+            <th>@{ int rowNum = 1;}</th>
+            <th>
+                @Html.DisplayNameFor(model => model.title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.shortTitle)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.coordinator)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.type)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.competence)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.testUnits)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.priority)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.state)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.approvedDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.comment)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.file)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.specialities)
+            </th>
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.Raw(rowNum++)</td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.shortTitle)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.coordinator)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.type)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.competence)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.testUnits)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.priority)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.state)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.approvedDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.comment)
+                </td>
+                <td>
+                    <a href="@Html.DisplayFor(modelItem => item.file)">@Html.DisplayFor(modelItem => item.file)</a>
+                </td>
+                <td>
+                    <p>@item.specialities.TrimFrontIfLongerThan(40, 50)</p>
+                </td>
+                <td>
+                    @Html.ActionLink("Редактировать", "Edit", new { id = item.uuid }) |
+                    @Html.ActionLink("Просмотреть", "Details", new { id = item.uuid }) |
+                    @Html.ActionLink("Удалить", "Delete", new { id = item.uuid }) |
+                    @Html.ActionLink("Дисциплины", "DisciplinesByModule", new { moduleId = item.uuid })
+
+                </td>
+            </tr>
+        }
+
+    </table>
+*@

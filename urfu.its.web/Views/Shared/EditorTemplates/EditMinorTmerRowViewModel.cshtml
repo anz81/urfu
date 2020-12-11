@@ -1,0 +1,39 @@
+﻿@model  List<Urfu.Its.Web.Models.MinorTmersRowViewModel>
+
+<table class="table table-striped table-hover table-bordered table-condensed">
+    <tr>
+        <th>
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Title)
+        </th>
+    </tr>
+@foreach (var item in Model)
+{
+    <tr>
+        <td>
+            @Html.CheckBoxFor(m => item.Checked)
+        </td>
+        <td>
+            @Html.DisplayFor(m => item.Title)
+        </td>
+    </tr>
+}
+    @*@foreach (var i = 0; i < Model.Tmers1.Count; i++)
+            {
+        @Html.HiddenFor(model => model.Tmers1[i].TmerId)
+        <tr>
+            <td style="text-align: center">
+                @Html.CheckBoxFor(model => model.Tmers1[i].Checked)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Tmers1[i].Title)
+            </td>
+        </tr>
+    }*@
+</table>
+
+
+
+
+

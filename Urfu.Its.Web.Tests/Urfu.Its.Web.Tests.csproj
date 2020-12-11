@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="FakesAssemblies\**" />
+	  <EmbeddedResource Remove="FakesAssemblies\**" />
+	  <None Remove="FakesAssemblies\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.QualityTools.Testing.Fakes" Version="16.7.4-beta.20330.2" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Urfu.Its.Integration\Urfu.Its.Integration.csproj">
+			<Project>{14109828-D1B0-49C4-9910-56050DE04FDC}</Project>
+			<Name>Urfu.Its.Integration</Name>
+		</ProjectReference>
+		<ProjectReference Include="..\Urfu.Its.VersionedDocs\Urfu.Its.VersionedDocs.csproj">
+			<Project>{7D058025-E8AC-45B0-B634-2E69D6F1C22D}</Project>
+			<Name>Urfu.Its.VersionedDocs</Name>
+		</ProjectReference>
+		<ProjectReference Include="..\Urfu.Its.Web.Model\Urfu.Its.Web.Model.csproj">
+			<Project>{0A35D37B-9127-4258-AAA6-88D9D3826D1F}</Project>
+			<Name>Urfu.Its.Web.Model</Name>
+		</ProjectReference>
+		<ProjectReference Include="..\Urfu.Its.Web\Urfu.Its.Web.csproj">
+			<Project>{D680A824-EE86-4E2B-852F-F1E31FCF276A}</Project>
+			<Name>Urfu.Its.Web</Name>
+		</ProjectReference>
+	</ItemGroup>
+	<ItemGroup>
+	  <AdditionalDesignTimeBuildInput Remove="FakesAssemblies\**" />
+	</ItemGroup>
+</Project>

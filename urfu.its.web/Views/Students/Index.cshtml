@@ -1,0 +1,253 @@
+﻿@using Urfu.Its.Web.Models
+@{
+    ViewBag.Title = "Студенты";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+@section scripts
+{
+<script type="text/javascript">
+
+        Ext.onReady(function() {
+            Ext.tip.QuickTipManager.init();
+
+            var store = Ext.create("Ext.data.BufferedStore",
+            {
+                fields: ["id", "name", "status", "groupName", "rating", "Sportsman"],
+                autoLoad: true,
+                pageSize: 300,
+                remoteSort: true,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '@Url.Action("Index", "Students")',
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    }
+                }
+            });
+
+
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("StudentsFilters") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+
+            }
+
+            var filtersWnd = null;
+            var setFilters = function() {
+                var settings = [
+                    { property: 'name', value: filtersWnd.getComponent("name").getValue() },
+                    { property: 'status', value: filtersWnd.getComponent("status").getValue() },
+                    { property: 'groupName', value: filtersWnd.getComponent("groupName").getValue() }
+                ];
+                store.setFilters(settings);
+                localStorage.setItem("StudentsFilters", JSON.stringify(settings));
+            };
+
+            var postCmbx = Ext.create('Ext.form.ComboBox',
+            {
+
+            });
+
+            filtersWnd = Ext.create('Ext.window.Window',
+            {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "ФИО", itemId: "name", value: prevSettings["name"] },
+                    { fieldLabel: "Группа", itemId: "groupName", value: prevSettings["groupName"] },
+                    {
+                        xtype: 'combobox',
+                        fieldLabel: "Статус",
+                        store: Ext.create('Ext.data.Store',
+                        {
+                            fields: ['status'],
+                            data: @Html.Raw(Json.Encode(ViewBag.statusTypes)),
+                        }),
+                        displayField: 'status',
+                        value: prevSettings["status"],
+                        valueField: 'status',
+                        itemId: 'status',
+                        mode: 'local',
+                        //editable: false,
+                        //disableKeyFilter: false
+                    }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function() {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function() { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+            setFilters();
+
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+            {
+                region: 'center',
+                store: store,
+                tbar: [
+                    {
+                        xtype: 'button',
+                        text: 'Фильтры...',
+                        handler: function() { filtersWnd.show(); }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Отменить фильтры",
+                        handler: function() {
+                            localStorage.setItem("StudentsFilters", []);
+                            store.clearFilter();
+                        }
+                    }
+                ],
+                loadMask: true,
+                columns: [
+                    { xtype: 'rownumberer', width: 50 },
+                    {
+                        header: 'ФИО',
+                        dataIndex: 'name',
+                        width: 400,
+                        renderer: function(value, metaData, record) {
+                            return '<a href="@Url.Action("Student", "PersonalInfo")?studentId=' +
+                                record.data.id +
+                                '">' +
+                                value +
+                                '</a>';
+                        }
+                    },
+                    {
+                        header: 'Статус',
+                        dataIndex: 'status',
+                        width: 200,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Название группы',
+                        dataIndex: 'groupName',
+                        width: 200,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Рейтинг',
+                        dataIndex: 'rating',
+                        width: 100,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Секции ФК',
+                        dataIndex: 'name',
+                        width: 150,
+                        renderer: function(value, metaData, record) {
+                            return '<a href="@Url.RouteUrl("frm", null, "https")\\fk?studentId=' +
+                                record.data.id +
+                                '">Секции ФК</a>';
+                        }
+                    }
+                    @if (User.IsInRole(ItsRoles.SportsmanSetting))
+                    {
+                        <text>
+                            , {
+                                header: 'Спортсмен',
+                                dataIndex: 'Sportsman',
+                                width: 130,
+                                xtype: 'checkcolumn',
+
+                                listeners: {
+                                    beforecheckchange: function(column, recordIndex, sportsman) {
+                                        var record = store.getAt(recordIndex);
+                                        var studentId = record.get('id');
+
+                                        Ext.Ajax.request({
+                                            url: '/Students/SetSportsman',
+                                            method: 'POST',
+                                            params: {
+                                                studentId: studentId,
+                                                Sportsman: sportsman
+                                            },
+                                            success: function(response) {
+                                                var data = Ext.decode(response.responseText);
+                                                record.set("Sportsman", sportsman);
+                                                store.load();
+                                                /*if (response.status === 200)
+                                                    record.commit();
+                                                else
+                                                    record.reject();*/
+                                                if (data.msg && data.msg.length > 0) {
+                                                    Ext.MessageBox.show({
+                                                        title: 'Информационное сообщение',
+                                                        msg: data.msg,
+                                                        buttons: Ext.MessageBox.OK,
+                                                        icon: Ext.MessageBox.INFO
+// иконка мб {ERROR,INFO,QUESTION,WARNING}
+                                                        //width:300,                       // есть еще minWidth
+                                                        //closable:false,                  // признак наличия икнки закрытия окна
+                                                    });
+                                                }
+
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        </text>
+                    },
+                    {
+                         header: 'Практики',
+                         dataIndex: 'name',
+                         width: 150,
+                         renderer: function(value, metaData, record) {
+                             return '<a href="@Url.RouteUrl("frm", null, "https")\\practice\\student?Id=' +
+                             //return '<a href="http://localhost:60087/practice/student?Id=' +
+                                record.data.id +
+                                '">Практики</a>';
+                         }
+                    },
+                    {
+                         header: 'Проектное обучение',
+                         dataIndex: 'name',
+                         width: 200,
+                         renderer: function(value, metaData, record) {
+                             return '<a href="@Url.RouteUrl("frm", null, "https")\\project\\student?Id=' +
+                                record.data.id +
+                                '">Проектное обучение</a>';
+                         }
+                    }
+                ]
+            });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+</script>
+}
+
+
+
+

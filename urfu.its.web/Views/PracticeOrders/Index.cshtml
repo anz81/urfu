@@ -1,0 +1,1283 @@
+﻿
+@{
+    ViewBag.Title = "Приказы по практикам";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+<style>
+    .its-medium {
+        width: 24px;
+        height: 24px;
+        margin-left: 5px;
+    }
+    .marginRight5px {
+        margin-right: 5px;
+    }
+
+    .colorBlue {
+        color: #3a93d5;
+    }
+
+     .colorBlue:hover {
+            color: #56a8e4;
+        }
+   
+    .x-mask {       
+        background-color: rgba(255, 255, 255, 0.1)
+    }
+</style>
+
+@{
+    <div class="container-fluid">
+        <script type="text/javascript">
+            Ext.onReady(function () {
+
+                Ext.tip.QuickTipManager.init();
+
+                var localStorageName = "PracticeOrdersFilters";
+
+                var queryString = window.location.search;
+                var urlParams = new URLSearchParams(queryString);
+                if (queryString !=="") {                    
+                    var orderFilters = [
+                                            { property: 'Year', value: urlParams.get('Year')},
+                                            { property: 'Semester', value: urlParams.get('Semester')},
+                                            { property: 'Division', value: [urlParams.get('Division')] },
+                                            { property: 'Direction', value: [urlParams.get('Direction')] },
+                                            { property: 'Group', value: [urlParams.get('Group')]  },
+                                            { property: 'FamilirizationType', value: '' },
+                                            { property: 'Qualification', value: '' },
+                                            { property: 'PracticeName', value: urlParams.get('PracticeName') }
+                    ];
+                    localStorage.setItem(localStorageName, JSON.stringify(orderFilters));
+                }
+                
+                function checkEditRole(actions) {
+                    if ('@ViewBag.CanEdit' == 'True') {
+                        actions();
+                    }
+                    else {
+                        Ext.MessageBox.alert('Ошибка', "У вас нет прав вносить изменения");
+                    }
+                }
+
+                function setValuesToEditForm(rec) {
+                    var params = rec.data;
+                    editWnd.items.items.forEach(function (element, index, array) {
+                        //if (params[element.itemId] != undefined)
+                        element.setValue(params[element.itemId]);
+                    });
+                }
+
+                function parseJson(json) {
+                    var data = JSON.parse(json.replace(/&quot;/g, '"'));
+                    return data;
+                }
+
+                var yearData = parseJson('@ViewBag.Years');
+                var yearStore = Ext.create('Ext.data.Store', {
+                    data: yearData,
+                });
+
+                var semesterData = parseJson('@ViewBag.Semesters');
+                var semesterStore = Ext.create('Ext.data.Store', {
+                    data: semesterData
+                });
+
+                var divisionsData = parseJson('@ViewBag.Divisions');
+                var divisionStore = Ext.create('Ext.data.Store', {
+                   data: divisionsData
+                });
+                divisionStore.on("load", function (store) {
+                    store.insert(0, { Id: '', Name: 'Не указано' /*'&nbsp'*/ });
+                });
+                divisionStore.load();
+
+                var directionStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        proxy: {
+                            type: 'ajax',
+                            url: '@Url.Action("OksoList")?institute=' + null,
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        },
+                        listeners: {
+                            load: function (t, records, successful, eOpts) {
+                                t.insert(0, { Id: '', Name: 'Не указано' /*'&nbsp'*/ });
+
+                                if (prevSettings["Direction"] != "") {
+                                    var exist = [];
+                                    prevSettings["Direction"].forEach(function (item, index, array) {
+                                        var existDirection = t.data.items.some(function (element, index, array) {
+                                            return item == element.data.Id;
+                                        });
+                                        if (existDirection)
+                                            exist.push(item);
+                                    });
+                                    if (exist.length == 0)
+                                        exist.push(t.getAt(0));
+                                    prevSettings["Direction"] = exist;
+                                }
+                                directionCmbx.setValue(prevSettings["Direction"]);
+                                directionCmbx.setDisabled(false);
+
+                                reloadGroupStore(yearCmbx.getValue(), divisionCmbx.getValue(), directionCmbx.getValue());
+                            }
+                        }
+                    });
+
+                var groupStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        proxy: {
+                            type: 'ajax',
+                            url: '@Url.Action("GroupList")?year=' + 0 + '&institute=' + null,
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        },
+                        listeners: {
+                            load: function (t, records, successful, eOpts) {
+                                t.insert(0, { Id: '', Name: 'Не указано' /*'&nbsp'*/ });
+
+                                if (prevSettings["Group"] != "") {
+                                    var exist = [];
+                                    prevSettings["Group"].forEach(function (item, index, array) {
+                                        var existGroup = t.data.items.some(function (element, index, array) {
+                                            return item == element.data.Id;
+                                        });
+                                        if (existGroup)
+                                            exist.push(item);
+                                    });
+                                    if (exist.length == 0)
+                                        exist.push(t.getAt(0));
+                                    prevSettings["Group"] = exist;
+                                }
+
+                                groupCmbx.setValue(prevSettings["Group"]);
+                                groupCmbx.setDisabled(false);
+                            }
+                        }
+                    });
+
+                var familirizationTypeData = parseJson('@ViewBag.FamilirizationTypes');
+                var familirizationTypeStore = Ext.create('Ext.data.Store', {
+                    data: familirizationTypeData
+                });
+
+                var qualificationData = parseJson('@ViewBag.Qualifications');
+                var qualificationStore = Ext.create('Ext.data.Store', {
+                    data: qualificationData
+                });
+
+                var statusData = parseJson('@ViewBag.Statuses');
+                var statusStore = Ext.create('Ext.data.Store', {
+                    data: statusData
+                });
+
+                var prevSettings = {};
+                try {
+                    var prevSettingString = JSON.parse(localStorage.getItem(localStorageName) || "[]");
+
+                    for (var i = 0; i < prevSettingString.length; i++) {
+                        prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                    }
+
+                    if (prevSettings["Year"] == null) {
+                        prevSettings["Year"] = @(DateTime.Now.Month < 7? DateTime.Now.Year -1 : DateTime.Now.Year);
+                    }
+                    if (prevSettings["Division"] == null || prevSettings["Division"] == "[]") {
+                        prevSettings["Division"] = divisionStore.getAt(1);
+                    }
+                    else {
+                        var exist = [];
+                        prevSettings["Division"].forEach(function (item, index, array) {
+                            var existDivision = divisionStore.data.items.some(function (element, index, array) {
+                                return item == element.data.Id;
+                            });
+                            if (existDivision)
+                                exist.push(item);
+                        });
+                        if (exist.length == 0)
+                            exist.push(divisionStore.getAt(1));
+                        prevSettings["Division"] = exist;
+                    }
+
+
+                    if (prevSettings["Semester"] == null) {
+                        prevSettings["Semester"] = @(DateTime.Now.Month < 7?2:1);
+                    }
+
+                    if (prevSettings["Status"] == null) {
+                        prevSettings["Status"] = "";
+                    }
+                }
+                catch (err) {
+                };
+
+                var setFilters = function () {
+                    var settings = [
+                        { property: 'Year', value: yearCmbx.getValue() },
+                        { property: 'Semester', value: semesterCmbx.getValue() },
+                        { property: 'Division', value: divisionCmbx.getValue() },
+                        { property: 'Direction', value: directionCmbx.getValue() },
+                        { property: 'Group', value: groupCmbx.getValue() },
+                        { property: 'FamilirizationType', value: familirizationTypeCmbx.getValue() },
+                        { property: 'Qualification', value: qualificationCmbx.getValue() },
+                        { property: 'PracticeName', value: filtersWnd.getComponent("PracticeName").getValue() },
+                        { property: 'IsOldVersion', value: filtersWnd.getComponent('IsOldVersionField').getValue().IsOldVersionField },
+                        { property: 'Status', value: statusCmbx.getValue() }
+                    ];
+                    store.setFilters(settings);
+
+                    localStorage.setItem(localStorageName, JSON.stringify(settings));
+                };
+
+
+                function reloadOksoStore(institute) {
+                    if (directionCmbx != null) directionCmbx.setDisabled(true);
+                    directionStore.proxy.setUrl('@Url.Action("OksoList")?institute=' + institute);
+                    directionStore.reload();
+                }
+
+                function reloadGroupStore(year, institute, okso) {
+                    if (groupCmbx != null) groupCmbx.setDisabled(true);
+                    groupStore.proxy.setUrl('@Url.Action("GroupList")?year=' + year + '&institute=' + institute + '&okso=' + okso);
+                    groupStore.reload();
+                }
+
+                function reloadOkso() {
+                    var institute = divisionCmbx.getValue();
+                    reloadOksoStore(institute);
+                    prevSettings["Direction"] = '';
+                }
+
+                function reloadGroups() {
+                    var year = yearCmbx.getValue();
+                    var institute = divisionCmbx.getValue();
+                    var okso = directionCmbx.getValue();
+                    reloadGroupStore(year, institute, okso);
+                    prevSettings["Group"] = '';
+                }
+
+                var filterLabelWidth = 140;
+                var yearCmbx = Ext.create('Ext.form.ComboBox',
+                    {
+                        xtype: 'combobox',
+                        fieldLabel: 'Учебный год*',
+                        store: yearStore,
+                        queryMode: 'remote',
+                        valueField: 'Year',
+                        displayField: 'Year',
+                        labelWidth: filterLabelWidth,
+                        width: 300,
+                        value: prevSettings['Year'],
+                        listeners: {
+                            'select': function (combo, records, eOpts) {
+                                reloadGroups();
+
+                                semesterCmbx.setDisabled(false);
+                                divisionCmbx.setDisabled(false);
+                                directionCmbx.setDisabled(false);
+                                groupCmbx.setValue('');
+                                groupCmbx.setDisabled(false);
+                            },
+                            'blur': function (combo, event, eOpts) {
+                                if (combo.getValue() == null) {
+                                    // учебный год не выбран -> остальные фильтры неактивны
+                                    semesterCmbx.setValue('');
+                                    semesterCmbx.setDisabled(true);
+                                    divisionCmbx.setValue('');
+                                    divisionCmbx.setDisabled(true);
+                                    directionCmbx.setValue('');
+                                    directionCmbx.setDisabled(true);
+                                    groupCmbx.setValue('');
+                                    groupCmbx.setDisabled(true);
+                                }
+                                else {
+                                    semesterCmbx.setDisabled(false);
+                                    divisionCmbx.setDisabled(false);
+                                    directionCmbx.setDisabled(false);
+                                    groupCmbx.setValue('');
+                                    groupCmbx.setDisabled(false);
+                                }
+                            }
+                        }
+                    });
+
+                yearStore.load();
+
+                var semesterCmbx = Ext.create('Ext.form.ComboBox', {
+                        xtype: 'combobox',
+                        fieldLabel: 'Семестр*',
+                        store: semesterStore,
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'local',
+                        labelWidth: filterLabelWidth,
+                        width: 400,
+                        value: prevSettings['Semester']
+                });
+
+                function selectEvent(combo, records, funcIfNotEmpty, funcIfEmpty) {
+                    var ids = [];
+                    var checkEmpty = records[records.length - 1].data.Id == '';
+
+                    if (!checkEmpty) {
+                        records.forEach(function (t) {
+                            if (t.data.Id != '')
+                                ids.push(t.data.Id);
+                        });
+                        funcIfNotEmpty(ids);
+                        combo.setValue(ids);
+                    }
+                    else {
+                        // выбран вариант "Не указано"
+                        combo.setValue('');
+                        ids.push('');
+                        funcIfEmpty();
+                    }
+
+                    // отметить галки в checkbox
+                    var node;
+                    Ext.each(records, function (rec) {
+                        var checked = ids.includes(rec.data.Id);
+                        node = combo.getPicker().getNode(rec);
+                        Ext.get(node).down('input').dom.checked = checked;
+                    });
+                }
+
+                function expandEvent(combo) {
+                    combo.value.forEach(function (item, value, index, values) {
+                        var rec = combo.findRecord('Id', item);
+                        var node = combo.getPicker().getNode(rec);
+                        var extNode = Ext.get(node);
+                        if (extNode != null)
+                            extNode.down('input').dom.checked = true;
+                    });
+                }
+
+                function blurEvent(combo) {
+                    if (combo.value.length == 0)
+                        combo.setValue('');
+                }
+
+                function beforedeselect(combo, rec) {
+                    // снять галки в checkbox
+                    var node = combo.getPicker().getNode(rec);
+                    var extNode = Ext.get(node);
+                    if (extNode != null)
+                        extNode.down('input').dom.checked = false;
+                }
+
+                var divisionCmbx = Ext.create('Ext.form.ComboBox', {
+                    xtype: 'combobox',
+                    fieldLabel: 'Институт*',
+                    store: divisionStore,
+                    valueField: 'Id',
+                    displayField: 'Name',
+                    queryMode: 'local',
+                    multiSelect: true,
+                    labelWidth: filterLabelWidth,
+                    width: 600,
+                    value: prevSettings['Division'],
+                    tpl: new Ext.XTemplate('<tpl for=".">', '<div class="x-boundlist-item">', '<input type="checkbox" />', '   ' + '{Name}', '</div>', '</tpl>'),
+                    listeners: {
+                        select: function (combo, records, eOpts) {
+                            selectEvent(combo, records,
+                                function (ids) { // выбран институт
+                                    reloadOkso();
+                                    directionCmbx.setDisabled(false);
+
+                                    var year = yearCmbx.getValue();
+                                    reloadGroupStore(year, ids, '');
+                                    prevSettings["Group"] = '';
+                                    groupCmbx.setDisabled(false);
+                                },
+                                function () { // выбрано "Не указано"
+                                    directionCmbx.getStore().removeAll();
+                                    directionCmbx.getStore().insert(0, { Id: '', Name: 'Не указано' /*'&nbsp'*/ });
+                                    directionCmbx.setValue('');
+                                    directionCmbx.setDisabled(true);
+
+                                    groupCmbx.getStore().removeAll();
+                                    groupCmbx.getStore().insert(0, { Id: '', Name: 'Не указано' /*'&nbsp'*/ });
+                                    groupCmbx.setValue('');
+                                    groupCmbx.setDisabled(true);
+                                }
+                            );
+                        },
+                        blur: function (combo, event, eOpts) {
+                            blurEvent(combo);
+                        },
+                        beforedeselect: function (combo, rec) {
+                            beforedeselect(combo, rec);
+                        },
+                        expand: function (field, eOpts) {
+                            expandEvent(divisionCmbx);
+                        }
+                    }
+                });
+
+                var directionCmbx = Ext.create('Ext.form.ComboBox', {
+                    xtype: 'combobox',
+                    fieldLabel: 'Направление обучения',
+                    store: directionStore,
+                    valueField: 'Id',
+                    displayField: 'Name',
+                    queryMode: 'local',
+                    labelWidth: filterLabelWidth,
+                    width: 600,
+                    multiSelect: true,
+                    value: prevSettings['Direction'],
+                    tpl: new Ext.XTemplate('<tpl for=".">', '<div class="x-boundlist-item">', '<input type="checkbox" />', '   ' + '{Name}', '</div>', '</tpl>'),
+                    listeners: {
+                        select: function (combo, records, eOpts) {
+                            selectEvent(combo, records,
+                                function (ids) { // выбран элемент
+                                    reloadGroups();
+                                    groupCmbx.setDisabled(false);
+                                },
+                                function () { // выбрано "Не указано"
+                                    var year = yearCmbx.getValue();
+                                    var institute = divisionCmbx.getValue();
+                                    reloadGroupStore(year, institute, '');
+                                    prevSettings["Group"] = '';
+                                    groupCmbx.setDisabled(false);
+                                }
+                            );
+                        },
+                        blur: function (combo, event, eOpts) {
+                            blurEvent(combo);
+                        },
+                        beforedeselect: function (combo, rec) {
+                            beforedeselect(combo, rec);
+                        },
+                        expand: function (field, eOpts) {
+                            expandEvent(directionCmbx);
+                        }
+                    }
+                });
+
+                reloadOksoStore(divisionCmbx.getValue());
+               // reloadGroupStore(yearCmbx.getValue(), divisionCmbx.getValue(), directionCmbx.getValue());
+
+                var groupCmbx = Ext.create('Ext.form.ComboBox',
+                    {
+                        xtype: 'combobox',
+                        fieldLabel: 'Группа',
+                        store: groupStore,
+                        labelWidth: filterLabelWidth,
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'local',
+                        multiSelect: true,
+                        anyMatch: true,
+                        width: 600,
+                        value: prevSettings["Group"],
+                        tpl: new Ext.XTemplate('<tpl for=".">', '<div class="x-boundlist-item">', '<input type="checkbox" />', '   ' + '{Name}', '</div>', '</tpl>'),
+                        listeners: {
+                            select: function (combo, records, eOpts) {
+                                selectEvent(combo, records,
+                                    function (ids) {
+                                    },
+                                    function () {
+                                    }
+                                );
+                            },
+                            blur: function (combo, event, eOpts) {
+                                blurEvent(combo);
+                            },
+                            beforedeselect: function (combo, rec) {
+                                beforedeselect(combo, rec);
+                            },
+                            expand: function (field, eOpts) {
+                                expandEvent(groupCmbx);
+                            }
+                        }
+                    });
+
+                var familirizationTypeCmbx = Ext.create('Ext.form.ComboBox' , {
+                    //xtype: 'combobox',
+                    fieldLabel: 'Форма обучения',
+                    store: familirizationTypeStore,
+                    valueField: 'Name',
+                    displayField: 'Name',
+                    queryMode: 'local',
+                    labelWidth: filterLabelWidth,
+                    width: 350,
+                    value: prevSettings['FamilirizationType']
+                });
+
+                var qualificationCmbx = Ext.create('Ext.form.ComboBox', {
+                    //xtype: 'combobox',
+                    fieldLabel: 'Уровень обучения',
+                    store: qualificationStore,
+                    valueField: 'Name',
+                    displayField: 'Name',
+                    queryMode: 'local',
+                    labelWidth: filterLabelWidth,
+                    width: 440,
+                    value: prevSettings['Qualification']
+                });
+
+                var statusCmbx = Ext.create('Ext.form.ComboBox', {
+                    //xtype: 'combobox',
+                    fieldLabel: 'Статус',
+                    store: statusStore,
+                    valueField: 'Value',
+                    displayField: 'Name',
+                    queryMode: 'local',
+                    labelWidth: filterLabelWidth,
+                    width: 350,
+                    value: prevSettings['Status']
+                });
+
+                var filtersWnd = Ext.create('Ext.window.Window', {
+                    x: 100,
+                    y: 100,
+                    title: "Фильтры",
+                    closeAction: 'hide',
+                    resizable: false,
+                    autoHeight: true,
+                    bodyPadding: 6,
+                    defaults: {
+                        xtype: 'textfield',
+                        width: 500
+                    },
+                    items: [
+                        yearCmbx,
+                        semesterCmbx,
+                        divisionCmbx,
+                        directionCmbx,
+                        groupCmbx,
+                        //familirizationTypeCmbx,
+                        //qualificationCmbx
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'Название практики',
+                            value: prevSettings["PracticeName"],
+                            labelWidth: filterLabelWidth,
+                            itemId: 'PracticeName',
+                            margin: '0 0 10 0',
+                            width: 500
+                        },
+                        {
+                            xtype: 'radiogroup',
+                            fieldLabel: 'Версия учебного плана',
+                            labelWidth: filterLabelWidth,
+                            itemId: "IsOldVersionField",
+                            value: prevSettings["IsOldVersion"],
+                            items: [
+                                {
+                                    boxLabel: 'Все',
+                                    name: 'IsOldVersionField',
+                                    inputValue: '',
+                                    checked: true
+                                },
+                                {
+                                    boxLabel: 'Актуальная',
+                                    name: 'IsOldVersionField',
+                                    inputValue: 'false',
+                                    margin: '0 50 0 0'
+                                },
+                                {
+                                    boxLabel: 'Старая',
+                                    name: 'IsOldVersionField',
+                                    inputValue: 'true'
+                                }
+                            ]
+                        },
+                        statusCmbx
+                    ],
+                    buttons: [{
+                        text: "ОК",
+                        handler: function () {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    }, {
+                        text: "Отмена",
+                        handler: function () { filtersWnd.hide(); }
+                    }]
+                });
+
+
+                var store = Ext.create("Ext.data.Store", {
+                    autoLoad: true,
+                    remoteSort: true,
+                    remoteFilter: true,
+                    autoSync: false,
+                    filters: [
+                        { property: 'Year', value: yearCmbx.getValue() },
+                        { property: 'Semester', value: semesterCmbx.getValue() },
+                        { property: 'Division', value: divisionCmbx.getValue() },
+                        { property: 'Direction', value: directionCmbx.getValue() },
+                        { property: 'Group', value: groupCmbx.getValue() },
+                        { property: 'FamilirizationType', value: familirizationTypeCmbx.getValue() },
+                        { property: 'Qualification', value: qualificationCmbx.getValue() },
+                        { property: 'PracticeName', value: filtersWnd.getComponent("PracticeName").getValue() },
+                        { property: 'IsOldVersion', value: filtersWnd.getComponent('IsOldVersionField').getValue().IsOldVersionField },
+                        { property: 'Status', value: statusCmbx.getValue() }
+                    ],
+                    proxy: {
+                        type: 'ajax',
+                        url: '@Url.Action("GetGroups")',
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        },
+                        timeout: 1200000
+                    }
+                });
+
+                updateStore = function (groupId, status, number) {
+
+                    store.data.each(function (record) {
+                        if (record.get('GroupId') == groupId) {
+                            record.set('Status', status);
+                            record.set('OrderNumber', number)
+
+                        }
+                    });
+
+                };
+
+                function required(value) {
+                    return (value != undefined && value.length > 0) ? true : "Поле не может быть пустым";
+                }
+
+                var editWnd = Ext.create('Ext.window.Window',
+                {
+                    title: "Информация для приказа",
+                    closeAction: 'hide',
+                    resizable: false,
+                    autoHeight: true,
+                    bodyPadding: 6,
+                    X: 100,
+                    Y:100,
+                    defaults: {
+                        xtype: 'textfield',
+                        width: 500
+                    },
+                    items: [
+                        {
+                            xtype: 'hidden',
+                            itemId: 'DisciplineUUID',
+                        },
+                        {
+                            xtype: 'hidden',
+                            itemId: 'GroupId',
+                        },
+                        {
+                            xtype: 'hidden',
+                            itemId: 'SemesterId',
+                        },
+                        {
+                            xtype: 'hidden',
+                            itemId: 'RowId',
+                        },
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'ФИО исполнителя*',
+                            labelWidth: 125,
+                            itemId: 'ExecutorName',
+                            width: 500,
+                            validator: required
+                        },
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'Телефон*',
+                            labelWidth: 125,
+                            itemId: 'ExecutorPhone',
+                            width: 300,
+                            validator: required
+                        },
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'E-mail',
+                            labelWidth: 125,
+                            itemId: 'ExecutorEmail',
+                            vtype: 'email',
+                            width: 400
+                        },
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'Инициалы РОПа (пр.: И.И. Иванов)',
+                            labelWidth: 125,
+                            itemId: 'ROPInitials',
+                            width: 400
+                        }
+                    ],
+                    buttons: [
+                        {
+                            text: "Сохранить",
+                            handler: function () {
+                                var isValid = true;
+                                editWnd.items.items.forEach(function (element, index, array) {
+                                    if (!element.isValid()) isValid = false;
+                                });
+                                if (!isValid) return false;
+
+                                Ext.Ajax.request({
+                                    method: 'POST',
+                                    dataType: 'json',
+                                    url: '@Url.Action("EditExecutorInfo")',
+                                    params: {
+                                        disciplineUUID: editWnd.getComponent("DisciplineUUID").getValue(),
+                                        groupId: editWnd.getComponent("GroupId").getValue(),
+                                        semesterId: editWnd.getComponent("SemesterId").getValue(),
+                                        name: editWnd.getComponent("ExecutorName").getValue(),
+                                        phone: editWnd.getComponent("ExecutorPhone").getValue(),
+                                        email: editWnd.getComponent("ExecutorEmail").getValue(),
+                                        ropInitials: editWnd.getComponent("ROPInitials").getValue()
+                                    },
+                                    success: function (response) {
+                                        store.getById(editWnd.getComponent('RowId').getValue()).set({
+                                            ExecutorName: editWnd.getComponent("ExecutorName").getValue(),
+                                            ExecutorPhone: editWnd.getComponent("ExecutorPhone").getValue(),
+                                            ExecutorEmail: editWnd.getComponent("ExecutorEmail").getValue(),
+                                            ROPInitials: editWnd.getComponent("ROPInitials").getValue()
+                                        });
+                                        Ext.getCmp('MainGrid').getView().refresh();
+                                    },
+                                    failure: function (response) {
+                                        Ext.MessageBox.show({
+                                            title: 'Ошибка',
+                                            msg: 'Неизвестная ошибка',
+                                            buttons: Ext.MessageBox.OK
+                                        });
+                                    }
+                                });
+                                editWnd.hide();
+                            }
+                        },
+                        {
+                            text: "Отмена",
+                            handler: function () { editWnd.hide(); }
+                        }
+                    ]
+                });
+
+
+                //var createOrder = function (v, m, r) {
+                var  createOrder = function (groupId, disciplineUID, semesterID, term, number, r) {
+                    Ext.Ajax.request({
+                            //method: 'POST',
+                            url: '@Url.Action("CreateOrder")',
+                            params: {
+                                //groupId: r.get('GroupId'),
+                                groupId: groupId,
+                                disciplineUID: disciplineUID,
+                                semesterID: semesterID,
+                                term: term,
+                                number: number
+                            },
+                            success: function (a) {
+                                //store.reload();
+                                var result = JSON.parse(a.responseText);
+                                if(result.success)
+                                {
+                                    Ext.Msg.alert('Ok', 'Приказ сформирован.');
+                                    r.set('Status', result.statusName);
+                                    r.set('OrderNumber', result.number)
+                                    r.set('PracticeDecreeID', result.practiceDecreeID)
+                                    r.set('SedOp', result.sedOp);
+                                    //updateStore(groupId, 'Сформирован', result.number);
+                                }
+                                else
+                                    Ext.Msg.alert('Ошибка', result.message);
+                            },
+                            failure: function (a) {
+                                var result = JSON.parse(a.responseText);
+                                Ext.Msg.alert('Ошибка', 'Приказ не сформирован.');
+                            }
+                    });
+                };
+
+                var sendToSed = function (decreeId, r) {
+                    Ext.Ajax.request({
+                            //method: 'POST',
+                            url: '@Url.Action("SendToSed")',
+                            params: {
+                                //groupId: r.get('GroupId'),
+                                id: decreeId,
+                            },
+                            success: function (a) {
+                                var result = JSON.parse(a.responseText);
+                                if(result.success)
+                                {
+                                    Ext.Msg.alert('Ok', 'Приказ отправлен в СЭД.');
+                                    //todo взять из ответа
+                                    r.set('Status', result.statusName);
+                                    r.set('SedOp', result.sedOp);
+                                    r.set('DateExportToSed', result.DateExportToSed);
+                                    //updateStore(groupId, 'Сформирован', result.number);
+                                }
+                                else
+                                    Ext.Msg.alert('Ошибка', result.message);
+                            },
+                            failure: function (a) {
+                                var result = JSON.parse(a.responseText);
+                                Ext.Msg.alert('Ошибка', 'Приказ не отправлен.');
+                            }
+                    });
+                };
+
+                var getStatus = function (decreeId, r) {
+                    Ext.Ajax.request({
+                            //method: 'POST',
+                            url: '@Url.Action("GetSedStatus")',
+                            params: {
+                                //groupId: r.get('GroupId'),
+                                id: decreeId,
+                            },
+                            success: function (a) {
+                                //store.reload();
+                                var result = JSON.parse(a.responseText);
+                                if(result.success)
+                                {
+                                    Ext.Msg.alert('Ok', 'Статус в СЭД: ' + result.statusName);
+
+                                    r.set('Status', result.statusName);
+                                    r.set('SedOp', result.sedOp);
+                                    r.set('Comment', result.comment)
+                                }
+                                else
+                                    Ext.Msg.alert('Ошибка', result.message);
+                            },
+                            failure: function (a) {
+                                var result = JSON.parse(a.responseText);
+                                Ext.Msg.alert('Ошибка', 'Ошибка при получении статуса');
+                            }
+                    });
+                };
+
+                var createOrderWnd = Ext.create('Ext.window.Window', {
+                    title: "Формирование приказа",
+                    closeAction: 'hide',
+                    resizable: false,
+                    autoHeight: true,
+                    bodyPadding: 6,
+
+                    conf: {
+                        groupId: null
+                    },
+
+                    items: [{
+                        xtype: 'displayfield',
+                        fieldLabel: 'Группа',
+                        labelWidth: 115,
+                        width: 700,
+                        itemId: 'Name',
+                    }, {
+                        xtype: 'displayfield',
+                        fieldLabel: 'Год',
+                        labelWidth: 115,
+                        width: 700,
+                        itemId: 'Year',
+                    }, {
+                        xtype: 'textfield',
+                        fieldLabel: 'Номер приказа',
+                        labelWidth: 115,
+                        width: 700,
+                        itemId: 'Number',
+                    }],
+
+                    buttons: [{
+                        text: "Сформировать",
+                        handler: function () {
+
+                            var number = createOrderWnd.items.get('Number').getValue();
+                            var groupId = createOrderWnd.groupId;
+
+                            createOrder(groupId, number);
+                            createOrderWnd.hide();
+                        }
+                    }, {
+                        text: "Отмена",
+                        handler: function () { createOrderWnd.hide(); }
+                    }]
+                });
+
+                var tpl = '<a href="@Url.Action("GetOrder")?id={PracticeDecreeID}">Скачать</a>';
+
+                var hideButtons = function (value, meta, record) {
+                    if (record.data.PracticeDecreeID == null)
+                        return "x-hidden";
+                    else
+                        return 'its-medium';
+                };
+
+
+                var focusonRowDecreeStoreName = 'focusonRowDecree';
+                var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: store,
+                    loadMask: true,
+                    columnLines: true,
+                    id: 'MainGrid',
+                    selModel: {
+                        selType: 'checkboxmodel',
+                        headerWidth: 30
+                    },
+                    tbar: [
+                        {
+                            xtype: 'button',
+                            text: "Фильтры",
+                            handler: function () {
+                                filtersWnd.show();
+                            }
+                        },
+                        {
+                            xtype: 'button',
+                            text: "Отменить фильтры",
+                            handler: function () {
+                                settings = [];
+
+                                yearCmbx.setValue(@(DateTime.Now.Month < 7? DateTime.Now.Year -1 : DateTime.Now.Year));
+                                semesterCmbx.setValue(@(DateTime.Now.Month < 7?2:1));
+                                divisionCmbx.setValue(divisionStore.getAt(1));
+                                directionStore.removeAll();
+                                directionCmbx.setValue('');
+                                groupStore.removeAll();
+                                groupCmbx.setValue('');
+                                familirizationTypeCmbx.setValue('');
+                                qualificationCmbx.setValue('');
+                                filtersWnd.getComponent("PracticeName").setValue('');
+                                statusCmbx.setValue('');
+                                setFilters();
+
+                                reloadOksoStore(divisionCmbx.getValue());
+                                reloadGroupStore(yearCmbx.getValue(), divisionCmbx.getValue(), '');
+                                directionCmbx.setDisabled(false);
+                                groupCmbx.setDisabled(false);
+                            }
+                        }, {
+                            xtype: 'button',
+                            text:"Копировать исполнителя",
+                            handler: function () {
+                                checkEditRole(function () {
+                                    if (gridPanel.getView().getSelection().length < 2) {
+                                        Ext.MessageBox.alert('Ошибка', "Выберите минимум 2 приказа для копирования информации об исполнителе ");
+                                        return;
+                                    }
+                                    var countExecutor = 0;
+                                    var sourse = null;
+                                    var decrees = [];
+                                    var IndexInstore = [];
+                                    for (var i = 0; i < gridPanel.getView().getSelection().length; i++) {
+                                        if (gridPanel.getView().getSelection()[i].data.ExecutorName) {
+                                            countExecutor++;
+                                            sourse = gridPanel.getView().getSelection()[i].data;
+                                        }
+                                        else {
+                                            decrees.push(gridPanel.getView().getSelection()[i].data);
+                                            IndexInstore.push(store.data.indexOf(gridPanel.getView().getSelection()[i].data));
+                                        }
+
+                                    }
+                                    if (countExecutor == 0) {
+                                        Ext.MessageBox.alert('Ошибка', "Информация об исполнителе не задана");
+                                        return;
+                                    }
+                                    // Нет проверки на то, что исполнители разные
+                                    if (countExecutor > 1) {
+                                        Ext.MessageBox.alert('Ошибка', "Задана информация о нескольких исполнителях");
+                                        return;
+                                    }
+                                    else {
+                                        decrees.unshift(sourse),
+                                            Ext.Ajax.request({
+                                                url: '@Url.Action("CopyExecutorInfo")',
+                                                jsonData: JSON.stringify(decrees),
+                                                success: function (response) {
+                                                    Ext.MessageBox.show({
+                                                        title: 'Информационное сообщение',
+                                                        msg: "Данные скопированы",
+                                                        buttons: Ext.MessageBox.OK
+                                                    });
+                                                    for (var r = 0; r < IndexInstore.length; r++) {
+                                                        store.data.items[IndexInstore[r]].data.ExecutorName = sourse.ExecutorName;
+                                                        store.data.items[IndexInstore[r]].data.ExecutorPhone = sourse.ExecutorPhone;
+                                                        store.data.items[IndexInstore[r]].data.ExecutorEmail = sourse.ExecutorEmail;
+                                                        store.data.items[IndexInstore[r]].data.ROPInitials = sourse.ROPInitials;
+                                                    }
+
+                                                    Ext.getCmp('MainGrid').getView().refresh();
+                                                },
+                                                failure: function (response) {
+                                                    Ext.MessageBox.show({
+                                                        title: 'Информационное сообщение',
+                                                        msg: "Неизвестная ошибка",
+                                                        buttons: Ext.MessageBox.OK
+                                                    });
+                                                }
+                                            });
+                                    }
+                                });
+                            }                          
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        { header: 'Группа',            dataIndex: 'Group',        width: 150, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        //{ header: 'Тип практики',      dataIndex: 'PracticeType', width: 250, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Семестр', dataIndex: 'Semester', width: 100, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Название практики', dataIndex: 'Description', width: 400, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Номер УП, версия УП', dataIndex: 'PlanNumberAndVersion', width: 120, align: 'left', cellWrap: true, sortable: false, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Номер приказа', dataIndex: 'OrderNumber', width: 130, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Дата экспорта приказа в СЭД', dataIndex: 'DateExportToSed', width: 145, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Статус', dataIndex: 'Status', width: 130, align: 'center', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        {
+                            xtype: 'actioncolumn',
+                            region: 'center',
+                            sortable: false,
+                            width: 52,
+                            componentCls: "actionColumn-buttons",
+
+                            items: [
+                                {
+                                    iconCls: '',
+                                    tooltip: 'Заполнить данные об исполнителе',
+                                    getClass: function (v, metadata, r) {
+                                        return 'glyphicon glyphicon-edit colorBlue marginRight5px';
+                                    },
+                                    handler: function (grid, rowIndex, colIndex, item, e, record) {
+                                        checkEditRole(function () {
+                                            setValuesToEditForm(record);
+                                            editWnd.getComponent('DisciplineUUID').setValue(record.get('DisciplineUID'));
+                                            editWnd.getComponent('SemesterId').setValue(record.get('SemesterID'));
+                                            editWnd.getComponent('GroupId').setValue(record.get('GroupId'));
+                                            editWnd.getComponent('RowId').setValue(record.getId());
+                                            editWnd.show();
+                                        });
+                                    }
+                                    
+                                }, {
+                                    getTip: function (v, metadata, r) {
+                                        return r.get('ExecutorName')
+                                            ? 'Исполнитель заполнен'
+                                            : 'Исполнитель не указан';
+                                    },
+                                    getClass: function (v, metadata, r) {
+                                        return r.get('ExecutorName')
+                                            ? 'glyphicon glyphicon-check'
+                                            : 'glyphicon glyphicon-unchecked';
+                                    },
+                                },                               
+
+                            ]
+                        },
+                        {
+                            xtype: 'actioncolumn',
+                            region: 'center',
+                            sortable: false,
+                            width: 40,
+                            componentCls: "actionColumn-buttons",                            
+                            items: [{
+                                icon: '@Url.Content("~/Content/Images/comment_Sed.png")',
+                                iconCls: 'icon-padding',
+                                tooltip: 'Комменатрий из СЭД',
+                                handler: function (grid, rowIndex, colIndex) {
+                                    var rec = grid.getStore().getAt(rowIndex);                                   
+                                    Ext.Msg.show({
+                                        title: 'Комментарий из СЭД',
+                                        message: rec.data.Comment,
+                                        width: 500,
+                                        height: 300
+                                    })
+                                    grid.getSelectionModel().select(rec);                                    
+                                }
+                            }
+
+                            ]
+
+                        },
+
+                        //{
+                        //    xtype: 'widgetcolumn',
+                        //    sortable: false,
+                        //    stopSelection: true,
+                        //    align: 'center',
+                        //    hideable: false,
+                        //    menuDisabled: true,
+                        //    //tdCls: 'no-padding',
+                        //    widget: {
+                        //        xtype: 'button',
+                        //        text: 'Сформитровать приказ',
+                        //        defaultBindProperty: null,
+                        //        listeners: { click: 'createOrder' }
+                        //    },
+                        //    width: 150
+                        //},
+                        {
+                            sortable: false,
+                            hideable: false,
+                            menuDisabled: true,
+                            width: 230,
+                            renderer: function (v, m, r) {
+                                var id = Ext.id();
+
+                                Ext.defer(function () {
+                                    Ext.widget('button', {
+                                        renderTo: id,
+                                        //text: 'Сформировать приказ ' + r.get('Group'),
+                                        text: 'Сформировать приказ',
+                                        width: 210,
+                                        handler: function () {
+                                            if (r.get("IsOldPlanVersion") || r.get("IsRemovedDiscipline")) {
+                                                Ext.MessageBox.alert('Ошибка', "Приказ не сформирован. Практика является удаленной дисциплиной или находится на старой версии плана ");
+                                                return;
+                                            }
+                                            var groupId = r.get('GroupId');
+                                            var disciplineUID = r.get('DisciplineUID');
+                                            var semesterID = r.get('SemesterID');
+                                            var term = r.get('Term');
+                                            var group = r.get('GroupUuid');
+                                            Ext.Ajax.request({
+                                                url: '@Url.Action("CheckAdmissions")',
+                                                params: {
+                                                    groupuuid: group,
+                                                    disciplineId: disciplineUID,
+                                                    year: r.get("GroupYear"),
+                                                    semester: semesterID
+                                                },
+                                                success: function (response) {
+                                                    var data = Ext.decode(response.responseText);
+                                                    if (data.studentslist.length !== 0) {
+                                                        Ext.MessageBox.show({
+                                                            title: 'Предупреждение',
+                                                            msg: "Нет ни одной согласованной заявки по студентам:" +'<br/>'+ data.studentslist.join('<br/>'),
+                                                            buttons: Ext.MessageBox.YESCANCEL,
+                                                            buttonText: {
+                                                                cancel: "Отмена",
+                                                                yes: "Сформировать"
+                                                            },
+                                                            icon: Ext.MessageBox.WARNING,
+                                                            fn: function (btn) {
+                                                                if (btn === 'yes') {
+                                                                    createOrder(groupId, disciplineUID, semesterID, term, 'Auto', r);
+                                                                } else return;
+                                                            }
+                                                        });
+                                                    }
+                                                     else createOrder(groupId, disciplineUID, semesterID, term,'Auto', r);
+                                                },
+                                                failure: function (response) {
+                                                    
+                                                }
+                                            });
+                                        }
+                                    });
+                                }, 150);
+
+                                return Ext.String.format('<div id="{0}"></div>', id);
+                            }
+                        }, {
+                            sortable: false,
+                            hideable: false,
+                            menuDisabled: true,
+                            width: 230,
+                            renderer: function (v, m, r) {
+                                var id = Ext.id();
+                                var sedOp = r.get("SedOp");
+                                var text = sedOp == 1 ? 'Отправить в СЭД' : 'Получить статус СЭД'
+                                if (sedOp > 0) {
+                                    Ext.defer(function () {
+                                        Ext.widget('button', {
+                                            renderTo: id,
+                                            text: text,
+                                            width: 210,
+                                            handler: function () {
+                                                var decreeID = r.get("PracticeDecreeID");
+                                                if (sedOp == 1)
+                                                    sendToSed(decreeID, r);
+                                                else
+                                                    getStatus(decreeID, r);
+                                            }
+                                        });
+                                    }, 150);
+                                }
+                                return Ext.String.format('<div id="{0}"></div>', id);
+                            }
+                        }, {
+                            width: 100,
+                            header: "Приказы",
+                            xtype: 'actioncolumn',
+                            align: 'center',
+                            items: [{
+                                    icon: '/Content/Images/document_out.png',
+                                    //iconCls: 'wordIcon',
+                                    tooltip: 'Скачать',
+                                    handler: function (grid, rowIndex, colIndex) {
+                                        var rec = grid.getStore().getAt(rowIndex);
+                                        Ext.DomHelper.append(Ext.getBody(), {
+                                            tag: 'iframe',
+                                            frameBorder: 0,
+                                            width: 0,
+                                            height: 0,
+                                            css: 'display:none;visibility:hidden;height:0px;',
+                                            src: '@Url.Action("GetOrder")?id=' + (rec.get("PracticeDecreeID"))
+                                        })
+                                    },
+                                    getClass: hideButtons
+                            }, {
+                                icon: '/Content/Images/document-add2.png',
+                                tooltip: 'Приказы во изменение',
+                                handler: function (grid, rowIndex, colIndex) {
+                                        var rec = grid.getStore().getAt(rowIndex);
+                                        if (rec.get("StatusId") != 5) {
+                                            Ext.MessageBox.alert('Ошибка', "Приказ должен быть согласован в СЭД");
+                                            return;
+                                    }
+                                        window.location = "@Url.Action("Index", "PracticeOrdersChanges")?id=" + rec.get('PracticeDecreeID');
+                                        sessionStorage.setItem(focusonRowDecreeStoreName, rec.get('PracticeDecreeID'));
+                                    },
+                                    getClass: hideButtons
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'templatecolumn',
+                            sortable: false,
+                            width: 200,
+                            tpl: '<a href="@Url.Action("Index", "Practice")?Year={GroupYear}&Semester={SemesterID}&Institute={InstituteId}&Direction={DirectionId}&Group={GroupId}&PracticeName={Name}">Руководители, темы</a>'                           
+                        }
+                    ],
+                    });
+
+                gridPanel.view.markDirty = false;
+
+                var items = [
+                    gridPanel
+                ];
+
+                Urfu.createViewport('border', items);
+
+                gridPanel.getStore()
+                .on('load',
+                    function (store, records, options) {
+                        var focus = sessionStorage.getItem(focusonRowDecreeStoreName) || false;
+                        if (focus) {
+                            var focusRow = store.findExact('PracticeDecreeID', parseInt(focus));
+                            var rowData = store.getAt(focusRow);
+                            gridPanel.getView().focusRow(rowData);
+                            gridPanel.getSelectionModel().select(rowData);
+                            sessionStorage.removeItem(focusonRowDecreeStoreName);
+                        }
+                        
+                    });
+
+
+            });
+        </script>
+    </div>
+}
+

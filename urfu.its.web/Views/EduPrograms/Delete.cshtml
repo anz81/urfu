@@ -1,0 +1,66 @@
+﻿@using Urfu.Its.Web.DataContext
+@model Urfu.Its.Web.DataContext.EduProgram
+
+@{
+    ViewBag.Title = "Delete";
+    
+}
+
+<h2>Удаление</h2>
+
+<h3>Вы точно хотите удалить версию ОП?</h3>
+<h4 class="label label-danger ">@ViewBag.msg</h4>
+@if (@ViewBag.msg != null)
+{
+    <h4 class="info ">@ViewBag.msg</h4>
+    <div>
+
+        <hr />
+        <table class="table table-striped">
+            <tr>
+                <th>Название траектории</th>
+                <th></th>
+            </tr>
+            @foreach (var variant in (IList<Variant>)ViewBag.otherVariants)
+            {
+                <tr>
+                    <td>@variant.Name</td>
+                    <td>@Html.ActionLink("Удалить","Delete","Variant",new {id=variant.Id},new {})</td>
+                    
+                </tr>
+            }
+        </table>
+     
+    </div>
+}
+<div>
+    
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Direction.okso)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Direction.okso)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("id",Model.Id)
+        <div class="form-actions no-color">
+            <input type="submit" value="Удалить" class="btn btn-default" /> |
+            @Html.ActionLink("Вернуться к списку", "Index")
+        </div>
+    }
+</div>

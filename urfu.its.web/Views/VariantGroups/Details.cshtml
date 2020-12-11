@@ -1,0 +1,42 @@
+﻿@model Urfu.Its.Web.DataContext.VariantGroup
+
+@{
+    ViewBag.Title = "Свойства группы в варианте";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<div>
+    <h4>VariantGroup</h4>
+	<hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Variant.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Variant.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.GroupType)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.GroupType)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TestUnits)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TestUnits)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @*@Html.ActionLink("Back to List", "Index")*@
+</p>

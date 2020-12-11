@@ -1,0 +1,581 @@
+﻿@model Urfu.Its.Web.Model.Models.Practice.ChangedDecreesViewModel
+@{
+    ViewBag.Title = "Приказы во изменение";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+<style>
+    .its-medium {
+        width: 24px;
+        height: 24px;
+        margin-left: 5px;
+    }
+</style>
+
+@{
+    <div class="container-fluid">
+        <script type="text/javascript">
+            Ext.onReady(function () {
+
+                Ext.tip.QuickTipManager.init();
+
+                function checkEditRole(actions) {
+                    if ('@ViewBag.CanEdit' == 'True') {
+                        actions();
+                    }
+                    else {
+                        Ext.MessageBox.alert('Ошибка', "У вас нет прав вносить изменения");
+                    }
+                }
+
+                function setValuesToEditForm(rec) {
+                    var params = rec.data;
+                    studentsWnd.items.items.forEach(function (element, index, array) {
+                        //if (params[element.itemId] != undefined)
+                        element.setValue(params[element.itemId]);
+                    });
+                }
+
+                var dateTest = /^(0?[1-9]|[12][0-9]|3[01])[\.\-](0?[1-9]|1[012])[\.\-]\d{4}$/;
+                Ext.apply(Ext.form.field.VTypes, {
+                    date: function (val, field) {
+                        return dateTest.test(val);
+                    },
+                    dateText: 'Дата должна быть в формате dd.mm.yyyy'
+                });
+
+                var store = Ext.create("Ext.data.Store", {
+                    autoLoad: true,
+                    remoteSort: true,
+                    remoteFilter: true,
+                    autoSync: false,
+                    proxy: {
+                        type: 'ajax',
+                        url: '@Url.Action("Index")?id=@Model.MainDecreeId',
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        }
+                    }
+                });
+
+                function required(value) {
+                    return (value != undefined && value.length > 0) ? true : "Поле не может быть пустым";
+                }
+                
+                var studentsStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: false,
+                        remoteSort: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/PracticeOrdersChanges/Students',
+                            extraParams: {
+                                decreeId: '',
+                                groupId: ''
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                totalProperty: 'total'
+                            }
+                        },
+                        listeners: {
+                            load: function (t, records, successful, operation, eOpts) {
+
+                                var _records = records;
+                                _records.forEach(function (item, index, array) {
+                                    if (item.data.IsChecked && item.data.RecoveryDate != "") {
+                                        var dateArr = item.data.RecoveryDate.split('.');
+                                        var correctDate = dateArr[1] + '/' + dateArr[0] + '/' + dateArr[2];
+                                        records[index].data.RecoveryDate = correctDate;
+                                    }
+                                });
+
+                                studentsWnd.getComponent('studentsGridId').getSelectionModel().select(records.filter(r => r.data.IsChecked));
+                                studentsWnd.getComponent('studentsGridId').getStore().data.items = records;
+                                studentsWnd.show();
+                            }
+                        }
+                    });
+
+                var reasonsStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/PracticeOrdersChanges/Reasons',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        }
+                    });
+
+                var studentsGrid = Ext.create('Ext.grid.Panel',
+                    {
+                        region: 'center',
+                        store: studentsStore,
+                        loadMask: true,
+                        //columnLines: true,
+                        id: 'studentsGridId',
+                        viewConfig:{
+                            markDirty:false
+                        },
+                        height: 450,
+                        width: 870,
+                        plugins: [{
+                            ptype: 'cellediting',
+                            clicksToEdit: 1
+                        }],
+                        columns: [
+                            {
+                                xtype: 'rownumberer',
+                                width: 50,
+                                sortable: false
+                            }, {
+                                header: 'Студент',
+                                dataIndex: 'Name',
+                                width: 250,
+                                sortable: false,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            }, {
+                                header: 'Статус',
+                                dataIndex: 'Status',
+                                width: 110,
+                                sortable: false,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Причина*',
+                                dataIndex: 'Reason',
+                                width: 250,
+                                sortable: false,
+                                editor: {
+                                    xtype: 'combobox',
+                                    editable: false,
+                                    store: reasonsStore,
+                                    allowBlank: true,
+                                    valueField: 'Id',
+                                    displayField: 'Reason',
+                                    listeners: {
+                                        'select': function (combo, records, eOpts) {
+                                            combo.value = records.data.Reason;
+                                        }
+                                    }
+                                },
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                xtype: 'datecolumn',
+                                dataIndex: 'RecoveryDate',
+                                header: 'Дата восстановления',
+                                sortable: false,
+                                width: 160,
+                                format: 'd/m/Y',
+                                editor: {
+                                    xtype: 'datefield',
+                                    startDay: 1,
+                                    format: 'd/m/Y'
+                                }
+                            },
+                            //{
+                            //    header: 'Дата восстановления*',
+                            //    dataIndex: 'RecoveryDate',
+                            //    width: 160,
+                            //    sortable: false,
+                            //    renderer: Urfu.renders.htmlEncodeWithToolTip,
+                            //    editor: {
+                            //        xtype: 'textfield',
+                            //        //allowBlank: false,
+                            //        vtype: 'date'
+                            //    }
+                            //},
+                        ],
+                        selModel: {
+                            selType: 'checkboxmodel',
+                            mode: 'MULTI',
+                            headerWidth: 30,
+                            checkOnly: 'true',
+                            allowDeselect: true
+                        }
+                    });
+
+                var studentsWnd = Ext.create('Ext.window.Window',
+                {
+                    title: "Студенты",
+                    x: 100,
+                    y: 100,
+                    closeAction: 'hide',
+                    resizable: true,
+                    autoHeight: true,
+                    bodyPadding: 6,
+                    defaults: {
+                        xtype: 'textfield',
+                        width: 500
+                    },
+                    items: [
+                        {
+                            xtype: 'hidden',
+                            itemId: 'DecreeId',
+                        },
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'ФИО исполнителя*',
+                            labelWidth: 125,
+                            itemId: 'ExecutorName',
+                            width: 500,
+                            validator: required
+                        },
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'Телефон*',
+                            labelWidth: 125,
+                            itemId: 'ExecutorPhone',
+                            width: 300,
+                            validator: required
+                        },
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'E-mail',
+                            labelWidth: 125,
+                            itemId: 'ExecutorEmail',
+                            vtype: 'email',
+                            width: 400
+                        },
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'Инициалы РОПа (пр.: И.И. Иванов)',
+                            labelWidth: 125,
+                            itemId: 'ROPInitials',
+                            width: 400
+                        },
+                        studentsGrid
+                    ],
+                    buttons: [
+                        {
+                            text: "Сформировать приказ",
+                            handler: function () {
+
+                                var st = studentsStore;
+
+                                var isValid = studentsWnd.getComponent('ExecutorName').isValid()
+                                    && studentsWnd.getComponent('ExecutorPhone').isValid();
+
+                                if (!isValid) {
+                                    Ext.MessageBox.alert('Ошибка', "Укажите информацию об исполнителе");
+                                    return false;
+                                }
+                                
+                                var objects = studentsWnd.getComponent('studentsGridId').getSelectionModel().getSelection();
+                                if (objects.length == 0) {
+                                    Ext.MessageBox.alert('Ошибка', "Выберите хотя бы одного студента для занесения в приказ");
+                                    return;
+                                }
+
+                                // проверка отмеченных студентов на наличие даты и причины
+                                var students = [];
+                                objects.forEach(function (item, index, array) {
+                                    var reasonId = -1;
+                                   
+                                    reasonsStore.data.items.forEach(function (it, i, arr) {
+                                        if (it.data.Reason == item.data.Reason)
+                                            reasonId = it.data.Id;
+                                    });
+                                    students.push({ Id: item.data.Id, RecoveryDate: item.data.RecoveryDate, ReasonId: reasonId });
+                                });
+
+                                var isCorrect = true;
+                                students.forEach(function (item, index, array) {
+                                    if ((item.ReasonId == 2 && (item.RecoveryDate == null || item.RecoveryDate == ""))
+                                        || item.ReasonId == -1) {
+                                        isCorrect = false;
+                                    }
+                                });
+                                
+                                if (!isCorrect) {
+                                    Ext.MessageBox.alert('Ошибка', "Для выбранных студентов должны быть указаны дата восстановления и причина. Для студентов с причиной 'Восстановлен' должна быть указана дата восстановления.");
+                                    return;
+                                }
+
+                                //var _students = [];
+                                //students.forEach(function (item, index, array) {
+                                //    var dateArr = item.RecoveryDate.split('.');
+                                //    var correctDate = dateArr[1] + '/' + dateArr[0] + '/' + dateArr[2];
+                                //    _students.push({ Id: item.Id, RecoveryDate: correctDate, ReasonId: item.ReasonId });
+                                //});
+
+                                Ext.Ajax.request({
+                                    method: 'POST',
+                                    url: '@Url.Action("CreateOrder")',
+                                    params: {
+                                        id: studentsWnd.getComponent('DecreeId').getValue(),
+                                        decreeId: @Model.MainDecreeId,
+                                        students: Ext.JSON.encode(students),
+                                        name: studentsWnd.getComponent('ExecutorName').getValue(),
+                                        phone: studentsWnd.getComponent('ExecutorPhone').getValue(),
+                                        email: studentsWnd.getComponent('ExecutorEmail').getValue(),
+                                        initials: studentsWnd.getComponent('ROPInitials').getValue()
+                                    },
+                                    success: function (a) {
+                                        var result = JSON.parse(a.responseText);
+                                        if(result.success)
+                                        {
+                                            store.reload();
+                                        }
+                                        else
+                                            Ext.Msg.alert('Ошибка', result.message);
+                                    },
+                                    failure: function (a) {
+                                        Ext.Msg.alert('Ошибка', 'Приказ не сформирован.');
+                                    }
+                                });
+
+                                studentsWnd.hide();
+                            }
+                        },
+                        {
+                            text: "Отмена",
+                            handler: function () { studentsWnd.hide(); }
+                        }
+                    ]
+                });
+
+                var sendToSed = function (decreeId, r) {
+                    Ext.Ajax.request({
+                            //method: 'POST',
+                            url: '@Url.Action("SendToSed")',
+                            params: {
+                                //groupId: r.get('GroupId'),
+                                id: decreeId,
+                            },
+                            success: function (a) {
+                                var result = JSON.parse(a.responseText);
+                                if(result.success)
+                                {
+                                    Ext.Msg.alert('Ok', 'Приказ отправлен в СЭД.');
+                                    //todo взять из ответа
+                                    r.set('Status', result.statusName);
+                                    r.set('SedOp', result.sedOp);
+                                    r.set('DateExportToSed', result.DateExportToSed);
+                                    //updateStore(groupId, 'Сформирован', result.number);
+                                }
+                                else
+                                    Ext.Msg.alert('Ошибка', result.message);
+                            },
+                            failure: function (a) {
+                                var result = JSON.parse(a.responseText);
+                                Ext.Msg.alert('Ошибка', 'Приказ не отправлен.');
+                            }
+                    });
+                };
+
+                var getStatus = function (decreeId, r) {
+                    Ext.Ajax.request({
+                            //method: 'POST',
+                            url: '@Url.Action("GetSedStatus")',
+                            params: {
+                                //groupId: r.get('GroupId'),
+                                id: decreeId,
+                            },
+                            success: function (a) {
+                                //store.reload();
+                                var result = JSON.parse(a.responseText);
+                                if(result.success)
+                                {
+                                    Ext.Msg.alert('Ok', 'Статус в СЭД: ' + result.statusName);
+
+                                    r.set('Status', result.statusName);
+                                    r.set('SedOp', result.sedOp);
+                                    r.set('Comment', result.comment)
+                                }
+                                else
+                                    Ext.Msg.alert('Ошибка', result.message);
+                            },
+                            failure: function (a) {
+                                var result = JSON.parse(a.responseText);
+                                Ext.Msg.alert('Ошибка', 'Ошибка при получении статуса');
+                            }
+                    });
+                };
+                
+
+                var tpl = '<a href="@Url.Action("GetOrder")?id={PracticeDecreeID}">Скачать</a>';
+
+                var hideButtons = function (value, meta, record) {
+                    if (record.data.Id == -1)
+                        return "x-hidden";
+                    else
+                        return 'its-medium';
+                };
+
+                var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: store,
+                    loadMask: true,
+                    columnLines: true,
+                    id: 'MainGrid',
+
+                    tbar: [
+                        {
+                            xtype: 'fieldcontainer',
+                            defaultType: 'textfield',
+                            layout: {
+                                type: 'vbox'
+                            },
+                            items: [
+                                {
+                                    xtype: 'fieldcontainer',
+                                    defaultType: 'textfield',
+                                    layout: {
+                                        type: 'hbox'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'button',
+                                            text: "Приказы",
+                                            handler: function () {
+                                                window.location = "/PracticeOrders/Index";
+                                            }
+                                        }, //'-',
+                                        {
+                                            xtype: 'button',
+                                            text: "Добавить приказ во изменение",
+                                            margin: '0 0 0 10',
+                                            handler: function () {
+                                                store.add({
+                                                    Id: '-1',
+                                                    ExecutorName: '@Model.ExecutorName',
+                                                    ExecutorPhone: '@Model.ExecutorPhone',
+                                                    ExecutorEmail: '@Model.ExecutorEmail',
+                                                    ROPInitials: '@Model.ROPInitials'
+                                                });
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'fieldcontainer',
+                                    defaultType: 'textfield',
+                                    layout: {
+                                        type: 'vbox'
+                                    },
+                                    items: [
+                                        { xtype: 'label', text: '@Model.Name' },
+                                        { xtype: 'label', text: 'Номер и версия УП: @Model.PlanNumberAndVersion' },
+                                        { xtype: 'label', text: 'Группа: @Model.Group' },
+                                        { xtype: 'label', text: 'Учебный год: @Model.GroupYear' },
+                                        { xtype: 'label', text: 'Семестр: @Model.Semester' },
+                                        { xtype: 'label', text: 'Дата приказа во изменение: @Model.DecreeDateStr' }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        { header: 'Номер приказа во изменение', dataIndex: 'Number', width: 130, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Дата экспорта приказа в СЭД', dataIndex: 'DateExportToSed', width: 145, align: 'left', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        { header: 'Статус', dataIndex: 'Status', width: 130, align: 'center', cellWrap: true, sortable: true, renderer: Urfu.renders.htmlEncodeWithToolTip },
+                        {
+                            sortable: false,
+                            hideable: false,
+                            menuDisabled: true,
+                            width: 230,
+                            renderer: function (v, m, r) {
+                                var id = Ext.id();
+                                var sedOp = r.get("SedOp");
+                                var hidden = sedOp == 2 ? true : false;
+                                Ext.defer(function () {
+                                    Ext.widget('button', {
+                                        renderTo: id,
+                                        text: 'Сформировать приказ',
+                                        hidden: hidden,
+                                        width: 210,
+                                        handler: function () {
+                                            checkEditRole(function () {
+                                                studentsWnd.getComponent('ExecutorName').setValue(r.data.ExecutorName);
+                                                studentsWnd.getComponent('ExecutorPhone').setValue(r.data.ExecutorPhone);
+                                                studentsWnd.getComponent('ExecutorEmail').setValue(r.data.ExecutorEmail);
+                                                studentsWnd.getComponent('ROPInitials').setValue(r.data.ROPInitials);
+                                                studentsStore.getProxy().setExtraParam('decreeId', r.get("Id"));
+                                                studentsStore.getProxy().setExtraParam('groupId', '@Model.GroupId');
+                                                studentsStore.reload();
+                                                studentsWnd.getComponent('DecreeId').setValue(r.get("Id"));
+                                                //studentsWnd.show();
+                                            });
+                                        }
+                                    });
+                                }, 150);
+
+                                return Ext.String.format('<div id="{0}"></div>', id);
+                            }
+                        }, {
+                            sortable: false,
+                            hideable: false,
+                            menuDisabled: true,
+                            width: 230,
+                            renderer: function (v, m, r) {
+                                var id = Ext.id();
+                                var sedOp = r.get("SedOp");
+                                var text = sedOp == 1 ? 'Отправить в СЭД' : 'Получить статус СЭД'
+                                if (sedOp > 0) {
+                                    Ext.defer(function () {
+                                        Ext.widget('button', {
+                                            renderTo: id,
+                                            text: text,
+                                            width: 210,
+                                            handler: function () {
+                                                var decreeID = r.get("Id");
+                                                if (sedOp == 1)
+                                                    sendToSed(decreeID, r);
+                                                else
+                                                    getStatus(decreeID, r);
+                                            }
+                                        });
+                                    }, 150);
+                                }
+                                return Ext.String.format('<div id="{0}"></div>', id);
+                            }
+                        }, {
+                            width: 100,
+                            header: "Приказы",
+                            xtype: 'actioncolumn',
+                            align: 'center',
+                            items: [{
+                                icon: '@Url.Content("/Content/Images/document_out.png")',
+                                iconCls: 'icon-padding',
+                                tooltip: 'Скачать',
+                                handler: function (grid, rowIndex, colIndex) {
+                                    var rec = grid.getStore().getAt(rowIndex);
+                                    Ext.DomHelper.append(Ext.getBody(), {
+                                        tag: 'iframe',
+                                        frameBorder: 0,
+                                        width: 0,
+                                        height: 0,
+                                        css: 'display:none;visibility:hidden;height:0px;',
+                                        src: '@Url.Action("GetOrder")?id=' + (rec.get("Id"))
+                                    })
+                                },
+                                getClass: hideButtons
+                            }]
+                        }
+                    ],
+                    });
+
+                gridPanel.view.markDirty = false;
+
+                var items = [
+                    gridPanel
+                ];
+
+                Urfu.createViewport('border', items);
+
+            });
+        </script>
+    </div>
+}
+

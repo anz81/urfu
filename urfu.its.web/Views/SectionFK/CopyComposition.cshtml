@@ -1,0 +1,43 @@
+﻿@model Urfu.Its.Web.Model.Models.SectionFKCompositionCVM
+@{
+    ViewBag.Title = "Копирование зачислений конкурсных групп";
+}
+<h2>@ViewBag.Title</h2>
+<div style="border: 1px;">
+    Копировать из
+
+    <div class="alert-info">
+        @Model.SrcCompetitionGroup.Name (@Model.SrcCompetitionGroup.Year @Model.SrcCompetitionGroup.Semester.Name)
+    </div>
+    в
+    <div class="alert-info">
+        @Model.DstCompetitionGroup.Name (@Model.DstCompetitionGroup.Year @Model.DstCompetitionGroup.Semester.Name)
+    </div>
+</div>
+<br />
+<div>
+    Не скопированы подгруппы на следующие секции и нагрузки:
+    <table class="table">
+        <thead>
+        <tr>
+            <th>
+                Секция
+            </th>
+               
+        </tr>
+        </thead>
+        @foreach (var s in Model.ExceptedSubgroupCounts)
+        {
+            <tr>
+                <td>
+                    @s
+                </td>
+                
+            </tr>
+        }
+      
+    </table>
+</div>
+
+<br />
+@Html.ActionLink("Отчёт о результате", "DownloadAutoAdmissionReport", "SectionFK")

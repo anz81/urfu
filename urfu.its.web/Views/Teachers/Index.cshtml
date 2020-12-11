@@ -1,0 +1,158 @@
+﻿@{
+    ViewBag.Title = "Преподаватели";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+@section scripts
+{
+    <script type="text/javascript">
+
+        Ext.onReady(function () {
+            Ext.tip.QuickTipManager.init();
+
+            var store = Ext.create("Ext.data.BufferedStore",
+            {
+                fields: ["name", "post", "workPlace"],
+                autoLoad: true,
+                pageSize: 300,
+                remoteSort: true,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '/Teachers/Index',
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    }
+                }
+            });
+
+
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("TeachersFilters") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+
+            }
+
+            var filtersWnd = null;
+            var setFilters = function () {
+                var settings = [
+                    { property: 'name', value: filtersWnd.getComponent("name").getValue() },
+                    { property: 'post', value: filtersWnd.getComponent("post").getValue() },
+                ];
+                store.setFilters(settings);
+                localStorage.setItem("TeachersFilters", JSON.stringify(settings));
+            };
+
+            var postCmbx = Ext.create('Ext.form.ComboBox',
+            {
+
+            });
+
+            filtersWnd = Ext.create('Ext.window.Window', {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "ФИО", itemId: "name", value: prevSettings["name"] },
+                    { 
+                        xtype: 'combobox',
+                        fieldLabel: "Должность",
+                        store: Ext.create('Ext.data.Store',
+                        {
+                            fields: ['post'],
+                            data: @Html.Raw(Json.Encode(ViewBag.post)),
+                        }),
+                        displayField: 'post',
+                        value: prevSettings["post"],
+                        valueField: 'post',
+                        itemId: 'post',
+                        mode: 'local',
+                        //editable: false,
+                        //disableKeyFilter: false
+                    }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function () {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+            setFilters();
+
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+            {
+                region: 'center',
+                store: store,
+                tbar: [
+                    {
+                        xtype: 'button',
+                        text: 'Фильтры...',
+                        handler: function () { filtersWnd.show(); }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Отменить фильтры",
+                        handler: function () {
+                            localStorage.setItem("TeachersFilters", []);
+                            store.clearFilter();
+                        }
+                    }
+                ],
+                loadMask: true,
+                columns: [
+                    { xtype: 'rownumberer', width: 50 },
+                    {
+                        header: 'ФИО',
+                        dataIndex: 'name',
+                        width: 400,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Должность',
+                        dataIndex: 'post',
+                        width: 200,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Подразделение',
+                        dataIndex: 'workPlace',
+                        width: 400,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    }
+                ]
+            });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+    </script>
+}
+
+
+
+

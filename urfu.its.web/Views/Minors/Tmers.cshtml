@@ -1,0 +1,46 @@
+﻿@model Urfu.Its.Web.DataContext.MinorDiscipline
+
+@{
+    ViewBag.Title = "Нагрузка";
+}
+
+<h3>Майнор: @Model.Minor.Module.title</h3>
+<h3>Дисциплина: @Model.Discipline.title </h3>
+
+@if (ViewBag.Message != null)
+{
+    <h2 class="alert-danger">@ViewBag.Message</h2>
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <h4>Aудиторная нагрузка</h4>
+        @Html.DisplayFor(m => ViewData["Tmers1"], "MinorDisciplineTmer")
+
+        <h4>Контрольные мероприятия</h4>
+        @Html.DisplayFor(m => ViewData["Tmers2"], "MinorDisciplineTmer")
+
+        <h4>Формы контроля</h4>
+        @Html.DisplayFor(m => ViewData["Tmers3"], "MinorDisciplineTmer")
+
+    </div>
+}
+
+@if (ViewBag.CanEdit)
+{
+    <p>
+        @Html.ActionLink("Редактировать нагрузку", "EditTmers", new { minorId = Model.MinorId, disciplineId = Model.Discipline.uid }) |
+        @Html.ActionLink("Редактировать периоды", "EditPeriods", new { minorId = Model.MinorId, disciplineId = Model.Discipline.uid })
+    </p>
+}
+<hr />
+
+<div>
+    @Html.ActionLink("Вернуться к списку", "Disciplines", new { moduleId = Model.MinorId })
+</div>

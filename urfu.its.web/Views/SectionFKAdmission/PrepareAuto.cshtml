@@ -1,0 +1,98 @@
+﻿@model Urfu.Its.Web.Models.MinorAutoVM
+
+@{
+    ViewBag.Title = "Расчёт зачислений в конкурсную группу";
+}
+
+
+<h2>@ViewBag.Title</h2>
+
+<table class="table" id="tablePrograms">
+    <thead>
+
+    <tr>
+        <th>
+            Год
+        </th>
+        <th>
+            Конкурсная группа
+        </th>
+        <th>
+            Семестр
+        </th>
+        <th>Всего студентов с выбором секций</th>
+        <th>Всего студентов уже зачислено в секции</th>
+        <th>Всего секций</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>
+            @Model.Year
+        </td>
+        <td>
+            @Model.CompetitionGroup
+        </td>
+        <td>
+            @Model.Semester
+        </td>
+        <th>
+            @Model.StudentCount
+        </th>
+        <th>
+            @Model.AdmittedCount
+        </th>
+        <th>
+            @Model.MinorCount
+        </th>
+    </tr>
+    </tbody>
+</table>
+
+
+@if (ViewBag.AnyPrepared)
+{
+    <div class="alert alert">
+        Существуют решения по студентам в этой группе.
+    </div>
+}
+@if (ViewBag.AnyPublished)
+{
+    <div class="alert alert-warning">
+        Существуют решения, отправленные в ЛКС
+    </div>
+}
+@if (ViewBag.AnyWithoutRating)
+{
+    <div class="alert alert-warning">
+        Существуют студенты без рейтинга
+    </div>
+}
+
+<div>
+    <hr />
+    @using (Html.BeginForm("CalculateAutoAdmissions", "SectionFKAdmission", new { competitionGroupId = Model.SemesterId}, FormMethod.Post,new {id="execform"}))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Рассчитать" class="btn btn-default" />
+            </div>
+        </div>
+    }
+</div>
+<script>
+    $("#execform").submit(function (event) {
+
+
+        if (confirm("Сейчас будет выполнен автоматический расчёт зачислений."))
+            return true;
+        else {
+            event.preventDefault();
+            return false;
+        }
+    });
+</script>
+

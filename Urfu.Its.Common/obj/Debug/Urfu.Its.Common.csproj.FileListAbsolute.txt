@@ -1,0 +1,14 @@
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\Urfu.Its.Common.dll.config
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\Urfu.Its.Common.dll
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\Urfu.Its.Common.pdb
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\EntityFramework.dll
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\EntityFramework.SqlServer.dll
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\log4net.dll
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\EntityFramework.xml
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\EntityFramework.SqlServer.xml
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\bin\Debug\log4net.xml
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\obj\Debug\Urfu.Its.Common.csprojAssemblyReference.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\obj\Debug\Urfu.Its.Common.csproj.CoreCompileInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\obj\Debug\Urfu.Its.Common.csproj.CopyComplete
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\obj\Debug\Urfu.Its.Common.dll
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Common\obj\Debug\Urfu.Its.Common.pdb

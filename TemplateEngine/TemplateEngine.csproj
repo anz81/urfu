@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="DocXCore" Version="1.0.9" />
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="Newtonsoft.Json.Schema">
+			<Version>3.0.13</Version>
+		</PackageReference>
+		<PackageReference Include="System.IO.Packaging" Version="5.0.0" />
+		<PackageReference Include="System.Linq.Dynamic.Core">
+			<Version>1.0.7.13</Version>
+		</PackageReference>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Properties\" />
+	</ItemGroup>	
+</Project>

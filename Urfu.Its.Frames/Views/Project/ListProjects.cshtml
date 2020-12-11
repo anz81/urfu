@@ -1,0 +1,159 @@
+﻿@model Urfu.Its.Frames.Controllers.ProjectMainList
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Список проектов</title>
+    @Styles.Render("~/Content/css")
+    <style>
+        input, select, textarea {
+            max-width: initial;
+        }
+
+        .btn-pdf {
+            color: #ffffff;
+            background-color: #ffffff;
+            border-color: #ffffff;
+        }
+
+        ul.hr {
+            margin: 0; /* Обнуляем значение отступов */
+            padding: 0px; /* Значение полей */
+        }
+
+            ul.hr li {
+                display: inline; /* Отображать как строчный элемент */
+                margin-right: 0px; /* Отступ слева */
+                margin-right: 0px; /* Отступ справа */
+                /*border: 1px solid #000; /* Рамка вокруг текста */
+                padding: 0px; /* Поля вокруг текста */
+                color: #428bca;
+            }
+
+
+        .fill-div {
+            padding-top: 0px !important;
+            padding-bottom: 0px !important;
+        }
+
+        .fill-href {
+            display: block;
+            padding-left: 15px;
+            height: 45px;
+            width: 100%;
+        }
+
+        .middle {
+            display: table-cell;
+            vertical-align: middle;
+            height: 45px;
+            width: 1500px;
+        }
+
+        label {
+            padding-top: 20px;
+            padding-left: 20px;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    @Styles.Render("~/Content/css")
+
+</head>
+<body>
+
+    @{var first = "in"; }
+
+    <div class="container-fluid">
+
+        <h5 style="padding-left:20px ">@Model.StudentFIO</h5>
+
+        <a href="@Url.Content("~/Content/Инструкция по проектному обучению для студентов.pdf")" style="display: inline-block;padding-left: 20px; padding-bottom: 20px;padding-top: 10px; font-size: 12pt"><span class="pdfIcon"></span> Инструкция </a>
+
+        @if (!Model.ProjectLists.SelectMany(p => p.Groups).Any(g => g.HaveProject))
+        {
+            <label>На текущий момент проектное обучение в учебном плане отсутствует</label>
+        }
+
+        else
+        {
+
+            <div class="panel-group" id="accordion">
+                @foreach (var projectList in Model.ProjectLists)
+                {
+                    foreach (var group in projectList.Groups.OrderByDescending(g => g.Year))
+                    {
+                        if (group.HaveProject)
+                        {
+                            <div class="panel panel-default container-fluid">
+                                <div class="panel-heading row fill-div">
+                                    <a class="fill-href" data-toggle="collapse" data-parent="#accordion" href="#gr_@group.ID">
+                                        <div class="middle">
+                                            <div class="col-sm-2"><h5 class="panel-title" style="color: black;">@group.YearInfo</h5></div>
+                                            <div class="col-sm-4"><h5 class="panel-title" style="color: black;">Группа @group.Name</h5></div>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <div class="panel-collapse collapse @first" id="gr_@group.ID">
+                                    @{ first = ""; }
+                                    <div class="panel-body">
+                                        @foreach (var p in group.Projects)
+                                        {
+                                            <div class="panel panel-default container-fluid">
+                                                <div class="panel-body">
+                                                    <div class="row">
+                                                        @Html.ActionLink(p.Name, "Project", new
+                                                   {
+                                                       studentID = projectList.StudentId,
+                                                       groupHistoryID = group.ID,
+                                                       year = group.Year,
+                                                       semesterID = p.SemesterID,
+                                                       disciplineUUID = p.DisciplineUID,
+                                                       level = p.Level
+                                                   }
+                                                                 , new { @class = "col-sm-4", @style = "color:#144182;" })
+
+                                                        <div class="@p.PairedModuleClass">
+                                                            <ul class="hr">
+                                                                <li>+</li>
+                                                                <li>
+                                                                    <a href="@p.PairedModuleDocument">
+                                                                        <button type="button" class="btn btn-pdf btn-xs">
+                                                                            <img src="~/img_pdf.png" />
+                                                                        </button>
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="@p.PairedModuleDocument">@p.PairedModuleName</a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+
+                                                        <div class="@p.PairedModuleClassEmpty"></div>
+
+                                                        <div class="col-sm-2">@p.Semester</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+
+            </div>
+        }
+    </div>
+
+</body>
+</html>
+
+

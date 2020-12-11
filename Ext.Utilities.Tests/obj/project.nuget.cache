@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "De4Yv/FHZlSgZoZoSpVK6CzpzrnejnHQakMxstjusL9VfaEQr6ALRL0qCktcSrGl5m1kwniOLL3ecMg+Vx+hxQ==",
+  "success": true,
+  "projectFilePath": "D:\\-urfu\\its\\Urfu.Its.Web\\Ext.Utilities.Tests\\Ext.Utilities.Tests.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\lara\\.nuget\\packages\\mstest.testframework\\2.1.2\\mstest.testframework.2.1.2.nupkg.sha512",
+    "C:\\Users\\lara\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

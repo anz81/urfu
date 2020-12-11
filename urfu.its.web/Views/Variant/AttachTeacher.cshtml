@@ -1,0 +1,107 @@
+﻿@model IEnumerable<Urfu.Its.Web.DataContext.Teacher>
+
+<h2>@ViewBag.Title</h2>
+
+<p>
+    @Html.ActionLink("Редактирование варианта", "BasicContentEdit", "Variant", new { variantId = ViewBag.VariantId }, null) |
+    @Html.ActionLink("Учебные планы", "Plans", "Variant", new { variantId = ViewBag.VariantId, moduleId = ViewBag.ModuleId }, null) |
+    @Html.ActionLink("Список преподавателей плана", "Teachers", new { moduleId = ViewBag.ModuleId, ViewBag.eduplanUUID, ViewBag.VariantId, ViewBag.catalogDisciplineUUID})
+</p>
+
+<div>
+    @Html.Label("Вид нагрузки")
+    @{bool isChecked = true;}
+    @foreach (string key in ViewBag.loadKeys)
+    {
+        <div>
+            @Html.RadioButton("loadsRadioGroup", key, isChecked)
+            @Html.Raw(key)
+            @{ isChecked = false; }
+        </div>
+
+    }
+</div>
+<div>
+    @Html.Label("Поиск преподавателя")
+</div>
+<div>
+    <p>
+                @Html.TextBox("queryBox", "", new { style = "width:800px" })
+        <button class="btn btn-default" onclick=" doSearch() " id="searchButton">
+            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+            Искать
+        </button>
+    </p>
+</div>
+
+<div id="searchResult">
+
+
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.initials)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.post)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.workPlace)
+            </th>
+            <th></th>
+        </tr>
+
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                @Html.HiddenFor(modelItem => item.pkey)
+                <td>
+                    @Html.DisplayFor(modelItem => item.initials)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.post)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.workPlace)
+                </td>
+                <td>
+                    @Html.ActionLink("Выбрать", "AttachTeacherExecute", new { item.pkey, moduleId = ViewBag.ModuleId, ViewBag.eduplanUUID, ViewBag.VariantId, ViewBag.catalogDisciplineUUID }, new { onclick = "this.href+='&load='+document.querySelector('input[name=\"loadsRadioGroup\"]:checked').value" })
+
+                </td>
+            </tr>
+        }
+
+
+    </table>
+
+
+</div>
+@section scripts
+{
+    <script>
+        doSearch = function() {
+            var searchstring = document.getElementById("queryBox").value;
+            $.ajax({
+                url: "TeacherSearch",
+                data: {
+                    query: searchstring,
+                    moduleId : "@ViewBag.ModuleId" ,
+                    eduplanUUID: "@ViewBag.eduplanUUID" , 
+                    VariantId:@ViewBag.VariantId , 
+                    catalogDisciplineUUID:"@ViewBag.catalogDisciplineUUID"
+                },
+                dataType: "html",
+                success: function(data) {
+                    $("#searchResult").html(data);
+                }
+            });
+        };
+
+        $("#queryBox").keyup(function(event){
+            if(event.keyCode == 13){
+                $("#searchButton").click();
+            }
+        });
+    </script>
+}

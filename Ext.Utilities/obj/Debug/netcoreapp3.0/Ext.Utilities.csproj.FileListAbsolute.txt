@@ -1,0 +1,4 @@
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Debug\netcoreapp3.0\Ext.Utilities.csprojAssemblyReference.cache
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Debug\netcoreapp3.0\Ext.Utilities.AssemblyInfoInputs.cache
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Debug\netcoreapp3.0\Ext.Utilities.AssemblyInfo.cs
+D:\-urfu\its\Urfu.Its.Web\Ext.Utilities\obj\Debug\netcoreapp3.0\Ext.Utilities.csproj.CoreCompileInputs.cache

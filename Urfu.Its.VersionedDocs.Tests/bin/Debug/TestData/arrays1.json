@@ -1,0 +1,51 @@
+{
+  "StringArray1": [
+    "s1",
+    "s2"
+  ],
+  "BooleanArray1": [
+    true,
+    false,
+    true
+  ],
+  "IntegerArray1": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "NumberArray1": [
+    1.2
+  ],
+  "StringArrayWithNulls1": [
+    null,
+    "s1",
+    null,
+    "s2"
+  ],
+  "EmptyStringArray1": [],
+  "ObjectArray1": [
+    {
+      "StringProp1": "string value",
+      "BooleanProp1": true,
+      "IntegerProp1": 1,
+      "NumberProp1": 1.2
+    },
+    {
+      "StringProp1": "string value",
+      "BooleanProp1": true,
+      "IntegerProp1": 1,
+      "NumberProp1": 1.2
+    }
+  ],
+  "ArrayOfIntArrays1": [
+    [
+      11,
+      12
+    ],
+    [
+      21,
+      22
+    ]
+  ]
+}

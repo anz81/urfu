@@ -1,0 +1,101 @@
+﻿[
+  {
+    "uuid": "pstcim18ggl5g0000kcqpb8o0otmieds",
+    "title": "Техносферная безопасность",
+    "number": 1104347,
+    "shortTitle": "Техносферная безопасность",
+    "coordinator": "Институт «Фундаментального образования»",
+    "type": "Безопасность жизнедеятельности",
+    "competence": "",
+    "testUnits": 2,
+    "priority": 5,
+    "state": "Согласовано",
+    "approvedDate": null,
+    "comment": "",
+    "file": "http://study.urfu.ru/view/aid/1104347/1104347.pdf",
+    "specialities": [
+      "43.03.03",
+      "39.03.03",
+      "43.03.01"
+    ],
+    "disciplines": [
+      {
+        "uid": "epmsdepstcim18ggl5g0000kcqpqidtublb70s;pstcim18hc2jg0000l84p4r2vq7p4c9c;",
+        "discipline": "pstcim18ggl5g0000kcqpqidtublb70s",
+        "title": "Техносферная безопасность",
+        "number": null,
+        "section": "Контроль (Базовая часть)",
+        "testUnits": 0,
+        "file": ""
+      },
+      {
+        "uid": "epmsdepstcim18ggl5g0000kcqppt162bqa7i0;pstcim18ggl5g0000kb68kv7qmm8k154;",
+        "discipline": "pstcim18ggl5g0000kcqppt162bqa7i0",
+        "title": "Безопасность жизнедеятельности",
+        "number": 1104356,
+        "section": "Базовая часть",
+        "testUnits": 2,
+        "file": "http://study.urfu.ru/view/aid/1104356/1104356.pdf"
+      }
+    ]
+  },
+  {
+    "uuid": "pstcim18ggl5g0000kd2d6el1vso4hko",
+    "title": "Математические, статистические и информационные основы профессиональной деятельности",
+    "number": 1104690,
+    "shortTitle": "Математические, статистические и информационные основы профессиональной деятельности",
+    "coordinator": "Институт «Уральский энергетический»",
+    "type": "Стандартный",
+    "competence": "",
+    "testUnits": 9,
+    "priority": 90,
+    "state": "Согласовано",
+    "approvedDate": null,
+    "comment": "",
+    "file": "http://study.urfu.ru/view/aid/1104690/1104690.pdf",
+    "specialities": [
+      "49.03.01",
+      "43.03.03",
+      "39.03.03",
+      "43.03.01"
+    ],
+    "disciplines": [
+      {
+        "uid": "epmsdepstcim18ggl5g0000kd2d9pk2v9bc8lc;pstcim18ggl5g0000kb68kv7qmm8k154;",
+        "discipline": "pstcim18ggl5g0000kd2d9pk2v9bc8lc",
+        "title": "Математика",
+        "number": 1104691,
+        "section": "Базовая часть",
+        "testUnits": 4,
+        "file": "http://study.urfu.ru/view/aid/1104691/1104691.pdf"
+      },
+      {
+        "uid": "epmsdepstcim18ggl5g0000kd2dac3te8kaees;pstcim18ggl5g0000kb68kv7qmm8k154;",
+        "discipline": "pstcim18ggl5g0000kd2dac3te8kaees",
+        "title": "Статистика",
+        "number": 1104693,
+        "section": "Базовая часть",
+        "testUnits": 3,
+        "file": "http://study.urfu.ru/view/aid/1104693/1104693.pdf"
+      },
+      {
+        "uid": "epmsdepstcim18ggl5g0000kd2d8qj8ceaq608;pstcim18hc2jg0000l84p4r2vq7p4c9c;",
+        "discipline": "pstcim18ggl5g0000kd2d8qj8ceaq608",
+        "title": "Математические, статистические и информационные основы профессиональной деятельности",
+        "number": null,
+        "section": "Контроль (Базовая часть)",
+        "testUnits": 0,
+        "file": ""
+      },
+      {
+        "uid": "epmsdepstcim18ggl5g0000kd2dat74ehjkki0;pstcim18ggl5g0000kb68kv7qmm8k154;",
+        "discipline": "pstcim18ggl5g0000kd2dat74ehjkki0",
+        "title": "Информатика",
+        "number": 1104694,
+        "section": "Базовая часть",
+        "testUnits": 2,
+        "file": "http://study.urfu.ru/view/aid/1104694/1104694.pdf"
+      }
+    ]
+  }
+]

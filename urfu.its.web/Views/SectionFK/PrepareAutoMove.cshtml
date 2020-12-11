@@ -1,0 +1,110 @@
+﻿@model Urfu.Its.Web.Controllers.AutoMoveData
+@{
+    ViewBag.Title = "Автоматический перевод студентов";
+}
+
+<h2>@ViewBag.Title</h2>
+
+@foreach (var cg in Model.CompetitionGroups)
+{
+    <h3>        
+        @cg.Description
+    </h3>
+    foreach (var s in cg.Sections.Where(s=>s.Display))
+     {
+         <h4>Секция: @s.Prop.SectionFk.Module.shortTitle</h4>
+         <table  class="table table-condensed">
+             <thead><tr>
+                 <td></td>
+                 <td>Фамилия</td>
+                 <td>Имя</td>
+                 <td>Отчество</td>
+                 <td>Группа</td>
+                 <td></td>
+             </tr>
+             </thead>
+             @foreach (var student in s.Removed)
+             {
+                <tr>
+                    <td>Отчиcлить</td>
+                    <td>@student.Person.Surname</td>
+                    <td>@student.Person.Name</td>
+                    <td>@student.Person.PatronymicName</td>
+                    <td>@student.Group.Name</td>
+                    <td>в @cg.LookupTo(student)</td>
+                </tr>
+             }
+             @foreach (var student in s.Appended)
+             {
+                <tr>
+                    <td>Зачислить</td>
+                    <td>@student.Person.Surname</td>
+                    <td>@student.Person.Name</td>
+                    <td>@student.Person.PatronymicName</td>
+                    <td>@student.Group.Name</td>
+                    <td>из @cg.LookupFrom(student)</td>
+                </tr>
+             }
+         </table>
+     }
+    <h4>
+        Не переведённые
+    </h4>
+
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <td>Фамилия</td>
+                <td>Имя</td>
+                <td>Отчество</td>
+                <td>Группа</td>
+                <td>Секция</td>
+                <td>Пожелание</td>
+            </tr>
+        </thead>
+        @foreach (var s in cg.Ungranted)
+        {
+            <tr>
+                <td>@s.Student.Person.Surname</td>
+                <td>@s.Student.Person.Name</td>
+                <td>@s.Student.Person.PatronymicName</td>
+                <td>@s.Student.Group.Name</td>
+                <td>из @cg.LookupFrom(s.Student)</td>
+                <td>@s.Section.Module.shortTitle</td>
+            </tr>
+        }
+    </table>
+}
+
+<div>
+    <hr />
+    @Html.ActionLink("Посмотреть в Excel", "PrepareAutoMoveDownload", new { year = (int)ViewBag.year, semester = (int)ViewBag.semester,course = (int?)ViewBag.course, modules = (string)ViewBag.modules })
+</div>
+
+<div>
+    <hr />
+    @using (Html.BeginForm("ExecuteAutoMove", "SectionFK", new { year = (int)ViewBag.year, semester = (int)ViewBag.semester,course = (int?)ViewBag.course, modules = (string)ViewBag.modules }, FormMethod.Post, new { id = "execform" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Выполнить переводы" class="btn btn-default" />
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    $("#execform").submit(function (event) {
+
+
+        if (confirm("Сейчас будет выполнен автоматический перевод."))
+            return true;
+        else {
+            event.preventDefault();
+            return false;
+        }
+    });
+</script>

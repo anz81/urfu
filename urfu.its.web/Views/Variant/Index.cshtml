@@ -1,0 +1,271 @@
+﻿
+@{
+    ViewBag.Title = "Список траекторий ОП";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            Ext.tip.QuickTipManager.init();
+            var store = Ext.create("Ext.data.BufferedStore",
+                {
+                    fields: ["Id", "DirectionOkso", "DirectionTitle", "ProgramName", "Name","DocumentName", "State", "ProgramYear", { name: "CreateDate", type: 'date' }],
+                    autoLoad: true,
+                    pageSize: 300,
+                    remoteSort: true,
+                    remoteFilter: true,
+                    proxy: {
+                        type: 'ajax',
+                        url: '/Variant/Index',
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        }
+                    }
+                });
+
+
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("VariantIndexFilters") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+
+            }
+
+            var VariantStateStore = [["", "(Не выбрано)"]];
+            VariantStateStore = VariantStateStore.concat(Object.keys(Urfu.VariantState).map(function (key) { return [key, Urfu.VariantState[key]]; }));
+
+
+            var filtersWnd = null;
+            var setFilters = function () {
+                var settings = [
+                                { property: 'DirectionOkso', value: filtersWnd.getComponent("DirectionOksoField").getValue() },
+                                { property: 'DirectionTitle', value: filtersWnd.getComponent("DirectionTitleField").getValue() },
+                                { property: 'Name', value: filtersWnd.getComponent("NameField").getValue() },
+                                { property: 'ProgramName', value: filtersWnd.getComponent("ProgramNameField").getValue() },
+                                { property: 'State', value: filtersWnd.getComponent("StateField").getValue() },
+                                { property: 'ProgramYear', value: filtersWnd.getComponent("ProgramYearField").getValue() }
+                ];
+                store.setFilters(settings);
+                localStorage.setItem("VariantIndexFilters", JSON.stringify(settings));
+            };
+
+            filtersWnd = Ext.create('Ext.window.Window', {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "ОКСО", itemId: "DirectionOksoField", value: prevSettings["DirectionOkso"] },
+                    { fieldLabel: "Направление", itemId: "DirectionTitleField", value: prevSettings["DirectionTitle"] },
+                    { fieldLabel: "Название версии ОП", itemId: "ProgramNameField", value: prevSettings["ProgramName"] },
+                    { fieldLabel: "Название траектории", itemId: "NameField", value: prevSettings["Name"] },
+                    { fieldLabel: "Состояние", itemId: "StateField", xtype: "combobox", store: VariantStateStore, value: prevSettings["State"] },
+                    { fieldLabel: "Год", itemId: "ProgramYearField", value: prevSettings["ProgramYear"] }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function () {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+            setFilters();
+            var gridPanel = {};
+            var tpl = '<a href="/Variant/BasicContentEdit?variantId={Id}">Редактировать траекторию</a> | <a href="/Variant/Copy?variantId={Id}">Копировать</a> | <a href="/Variant/Delete?id={Id}">Удалить</a>';
+            formPanel = Ext.create('Ext.window.Window',
+                {
+                    title: "",
+                    closeAction: 'hide',
+                    bodyPadding: 6,
+                    defaults: {
+                        xtype: 'textarea',
+                        width: 700,
+                        labelWidth: 150,
+
+
+                    },
+                    resizable: false,
+                    autoHeight: true,
+                    items: [
+                        {
+                            xtype: 'hidden',
+                            itemId: 'Id',
+                        },
+                        {
+                            fieldLabel: "Название траектории", itemId: "Name", editable:false
+                        },
+                        {
+                            fieldLabel: "Название траектории для документов", itemId: "DocumentName"
+                        }
+
+                    ],
+                    buttons: [
+                        {
+                            id: 'btnOk',
+                            text: "OK",
+                            handler: function () {
+                                gridPanel.mask('Сохранение..');
+                                formPanel.hide();
+                                
+                                Ext.Ajax.request({
+                                method: 'POST',
+                                dataType: 'json',
+                                url: '@Url.Action("SetDocumentName")?variantId=' + formPanel.getComponent("Id").getValue(),
+                                params: { documentName: formPanel.getComponent('DocumentName').getValue()},
+                                traditional: true,
+                                success: function (response) {
+                                    gridPanel.unmask();
+                                    store.reload();
+                                },
+                                failure: function (response) {
+                                    gridPanel.unmask();
+
+                                }
+                            });
+                            }
+                        },
+                        {
+                            text: "Отмена",
+                            handler: function () { formPanel.hide(); }
+                        }
+                    ]
+                });
+            gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: store,
+                    loadMask: true,
+                    tbar: [
+                        {
+                            xtype: 'box',
+                            autoEl: { tag: 'a', href: '/Variant/Create', html: 'Создать новую траекторию' }
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Фильтры...',
+                            handler: function () { filtersWnd.show(); }
+                        },
+                        {
+                            xtype: 'button',
+                            text: "Отменить фильтры",
+                            handler: function () { store.clearFilter(); }
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        {
+                            header: 'ОКСО',
+                            dataIndex: 'DirectionOkso',
+                            width: 90,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Направление',
+                            dataIndex: 'DirectionTitle',
+                            width: 260,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Название версии ОП',
+                            dataIndex: 'ProgramName',
+                            width: 190,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Название траектории',
+                            dataIndex: 'Name',
+                            width: 500,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Состояние',
+                            align: 'center',
+                            dataIndex: 'State',
+                            width: 130,
+                            renderer: function (value) { return Urfu.VariantState[value]; }
+                        },
+                        {
+                            header: 'Год',
+                            align: 'center',
+                            dataIndex: 'ProgramYear',
+                            width: 70
+                        },
+                        {
+                            header: 'Дата создания',
+                            align: 'center',
+                            dataIndex: 'CreateDate',
+                            renderer:  Ext.util.Format.dateRenderer('d.m.Y H:i'),
+                            width: 150
+                        },
+                         {
+                        xtype: 'actioncolumn',
+                        header: '',
+                        region: 'center',
+                        width: 50,
+                        defaults: {
+                            metadata: {
+                                attr: 'style="padding-left:10px;width:auto;"'
+                            }
+                        },
+                        renderer: function (value, meta,record) {
+                            if (record.data.DocumentName == null || record.data.DocumentName.length == 0) 
+                                meta.style = "background-color:#bcdedb;";
+                            return value;
+                        },
+                        items: [
+                            {
+                                icon: '@Url.Content("~/Content/Images/document-go.png")',
+                                // Use a URL in the icon config
+                                iconCls: 'icon-padding',
+                                text: 'Название для документов',
+                                tooltip: 'Название для документов',
+                                handler: function (grid, rowIndex, colIndex) {
+                                    var rec = grid.getStore().getAt(rowIndex);
+                                    formPanel.getComponent('Id').setValue(rec.get('Id'));
+                                    formPanel.getComponent('Name').setValue(rec.get('Name'));
+                                    formPanel.getComponent('DocumentName').setValue(rec.get('DocumentName'));
+                                    formPanel.show();
+
+
+                                }
+                            },
+                        ]
+                        },
+                        {
+                            xtype: 'templatecolumn',
+                            tpl: tpl,
+                            sortable: false,
+                            width: 390
+                        }
+                    ]
+                });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+    </script>
+}

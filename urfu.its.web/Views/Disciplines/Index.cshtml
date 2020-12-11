@@ -1,0 +1,113 @@
+﻿@{
+    ViewBag.Title = "Дисциплины";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            Ext.tip.QuickTipManager.init();
+            var disciplinesStore = Ext.create("Ext.data.BufferedStore",
+                {
+                    fields: ["id", "title", "section", "testUnits", "file"],
+                    autoLoad: true,
+                    pageSize: 300,
+                    remoteSort: true,
+                    remoteFilter: true,
+                    proxy: {
+                        type: 'ajax',
+                        url: '/Disciplines/Index',
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        }
+                    }
+                });
+
+            window.disciplinesStore = disciplinesStore;
+
+            var tpl = '<a href="{file}">Файл</a> | <a href="/Disciplines/Edit?id={id}">Изменить</a> \
+                | <a href="/Disciplines/Delete?id={id}">Удалить</a>';
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: disciplinesStore,
+                    loadMask: true,
+                    tbar: [
+                        {
+                            xtype: 'box',
+                            autoEl: { tag: 'a', href: '/Disciplines/Create', html: 'Создать новую дисциплину' }
+                        },
+                        '-',
+                        {
+                            xtype: 'label',
+                            text: 'Название дисциплины'
+                        },
+                        {
+                            id: 'txtTitle',
+                            xtype: 'textfield',
+                        },
+                        {
+                            xtype: 'label',
+                            text: 'Тип'
+                        },
+                        {
+                            id: 'txtSection',
+                            xtype: 'textfield',
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Применить',
+                            handler: function () {
+                                disciplinesStore.filter([
+                                    { property: 'title', value: Ext.getCmp('txtTitle').getValue() },
+                                    { property: 'section', value: Ext.getCmp('txtSection').getValue() },
+                                    ]);
+                            }
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Отменить',
+                            handler: function () { disciplinesStore.clearFilter(); }
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        {
+                            header: 'Название дисциплины',
+                            dataIndex: 'title',
+                            width: 500,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Тип',
+                            dataIndex: 'section',
+                            width: 210,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Зачётные единицы',
+                            align: 'center',
+                            dataIndex: 'testUnits',
+                            width: 180,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            xtype: 'templatecolumn',
+                            tpl: tpl,
+                            width: 220
+                        }
+                    ]
+                });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+    </script>
+}

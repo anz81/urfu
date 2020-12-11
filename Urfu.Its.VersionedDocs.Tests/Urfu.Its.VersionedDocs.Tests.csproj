@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="Properties\AssemblyInfo.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="Castle.Core" Version="4.0.0" />
+	  <PackageReference Include="DocXCore" Version="1.0.9" />
+	  <PackageReference Include="FluentAssertions" Version="4.19.4" />
+	  <PackageReference Include="Moq" Version="4.7.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\TemplateEngine\TemplateEngine.csproj">
+			<Project>{F663A930-A496-4C5C-B123-F97831417AD8}</Project>
+			<Name>TemplateEngine</Name>
+		</ProjectReference>
+		<ProjectReference Include="..\Urfu.Its.VersionedDocs\Urfu.Its.VersionedDocs.csproj">
+			<Project>{7D058025-E8AC-45B0-B634-2E69D6F1C22D}</Project>
+			<Name>Urfu.Its.VersionedDocs</Name>
+		</ProjectReference>
+		<ProjectReference Include="..\Urfu.Its.Web.Model\Urfu.Its.Web.Model.csproj">
+			<Project>{0A35D37B-9127-4258-AAA6-88D9D3826D1F}</Project>
+			<Name>Urfu.Its.Web.Model</Name>
+		</ProjectReference>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Properties\" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,1 @@
+vdocs --command UpdateTemplate --documentType DisciplineWorkingProgram -t "..\..\..\..\Urfu.Its.VersionedDocs\Templates\DWP.docx" -f %*

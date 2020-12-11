@@ -1,0 +1,444 @@
+﻿
+@{
+    ViewBag.Title = "Города";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@{
+    <div class="form-horizontal">
+        <script type="text/javascript">
+            var lastFilter = [];
+            Ext.onReady(function () {
+                Ext.tip.QuickTipManager.init();
+
+                var localStorageName = "CityFilters";
+
+                var store = Ext.create("Ext.data.BufferedStore",
+                    {
+                        idProperty: 'Id',
+                        fields: [
+                            "Id", "Name"
+                        ],
+                        autoLoad: true,
+                        pageSize: 25,
+                        remoteSort: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/Locations/Cities',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                totalProperty: 'total'
+                            }
+                        }
+                    });
+
+                function setFilters() {
+                    settings = [
+                        { property: 'Name', value: filtersWnd.getComponent("Name").getValue() },
+                        { property: 'Region', value: filtersWnd.getComponent("Region").getValue() },
+                        { property: 'Country', value: filtersWnd.getComponent("Country").getValue() }
+                    ];
+                    store.setFilters(settings);
+                    localStorage.setItem(localStorageName, JSON.stringify(settings));
+                }
+
+                var prevSettings = {};
+                try {
+                    var prevSettingString = JSON.parse(localStorage.getItem(localStorageName) || "[]");
+
+                    for (var i = 0; i < prevSettingString.length; i++) {
+                        prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                    }
+                }
+                catch (err) {
+                }
+
+                function checkEditRole(actions) {
+                    if ('@ViewBag.CanEdit' == 'True') {
+                        actions();
+                    }
+                    else {
+                        Ext.MessageBox.alert('Ошибка', "У вас нет прав вносить изменения в справочник");
+                    }
+                }
+
+                var filtersWnd = Ext.create('Ext.window.Window',
+                    {
+                        title: "Фильтры",
+                        closeAction: 'hide',
+                        resizable: false,
+                        autoHeight: true,
+                        bodyPadding: 6,
+                        defaults: {
+                            xtype: 'textfield',
+                            width: 400
+                        },
+                        items: [
+                            {
+                                xtype: 'hidden',
+                                itemId: 'Id',
+                            },
+                            {
+                                xtype: 'textfield',
+                                fieldLabel: 'Название страны',
+                                labelWidth: 140,
+                                itemId: 'Country',
+                                width: 500,
+                                value: prevSettings["Country"],
+                            },
+                            {
+                                xtype: 'textfield',
+                                fieldLabel: 'Название региона',
+                                labelWidth: 140,
+                                itemId: 'Region',
+                                width: 500,
+                                value: prevSettings["Region"],
+                            },
+                            {
+                                xtype: 'textfield',
+                                fieldLabel: 'Название города',
+                                labelWidth: 140,
+                                itemId: 'Name',
+                                width: 500,
+                                value: prevSettings["Name"],
+                            }
+                        ],
+                        buttons: [
+                            {
+                                text: "ОК",
+                                handler: function () {
+                                    setFilters();
+                                    filtersWnd.hide();
+                                }
+                            },
+                            {
+                                text: "Отмена",
+                                handler: function () { filtersWnd.hide(); }
+                            }
+                        ]
+                    });
+
+                setFilters();
+
+                function required(value) {
+                    return (value != undefined && value.length > 0) ? true : "Поле не может быть пустым";
+                }
+
+
+                function selectCountry(id) {
+                    regionCmbx.setValue('');
+                    regionStore.proxy.setUrl('@Url.Action("RegionsList")?id=' + id);
+                    regionStore.reload();
+                    regionCmbx.setDisabled(false);
+                }
+
+                var countryStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/Locations/CountriesList',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        }
+                    });
+
+                var countryCmbx = Ext.create('Ext.form.ComboBox',
+                    {
+                        xtype: 'combobox',
+                        fieldLabel: 'Страна*',
+                        labelWidth: 60,
+                        width: 250,
+                        store: countryStore,
+                        valueField: 'CountryId',
+                        displayField: 'Country',
+                        queryMode: 'remote',
+                        validator: required,
+                        listeners: {
+                            'select': function (combo, records, eOpts) {
+                                selectCountry(records.data.CountryId);
+                            }
+                        }
+                    });
+
+                var regionStore = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/Locations/RegionsList',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        }
+                    });
+
+                var regionCmbx = Ext.create('Ext.form.ComboBox',
+                    {
+                        xtype: 'combobox',
+                        fieldLabel: 'Регион*',
+                        labelWidth: 60,
+                        width: 400,
+                        store: regionStore,
+                        valueField: 'RegionId',
+                        displayField: 'Region',
+                        queryMode: 'remote',
+                        validator: required
+                    });
+
+                var editWnd = Ext.create('Ext.window.Window',
+                    {
+                        title: "Регион",
+                        closeAction: 'hide',
+                        resizable: false,
+                        autoHeight: true,
+                        bodyPadding: 6,
+                        rowHeight: 100,
+                        defaults: {
+                            xtype: 'textfield',
+                            width: 400
+                        },
+                        items: [
+                            {
+                                xtype: 'hidden',
+                                itemId: 'Id',
+                            },
+                            {
+                                xtype: 'hidden',
+                                itemId: 'RegionId',
+                            },
+                            countryCmbx,
+                            regionCmbx,
+                            {
+                                xtype: 'textfield',
+                                fieldLabel: 'Город*',
+                                labelWidth: 60,
+                                itemId: 'Name',
+                                width: 400,
+                                validator: required
+                            }
+                        ],
+                        buttons: [
+                            {
+                                id: 'btnSaveCountry',
+                                text: "Сохранить",
+                                handler: function () {
+                                    var isValid = true;
+                                    editWnd.items.items.forEach(function (element, index, array) {
+                                        if (!element.isValid()) isValid = false;
+                                    });
+                                    if (!isValid) return false;
+
+                                    Ext.Ajax.request({
+                                            url: '@Url.Action("EditCity")',
+                                            params: {
+                                                id: editWnd.getComponent("Id").getValue() ? editWnd.getComponent("Id").getValue() : 0,
+                                                parentId: regionCmbx.getValue(),
+                                                name: editWnd.getComponent("Name").getValue()
+                                            },
+                                            success: function (response) {
+                                                if (response.responseText != "") {
+                                                    var data = Ext.decode(response.responseText);
+                                                    if (data.success) {
+                                                        editWnd.hide();
+                                                        store.reload();
+                                                    }
+                                                    else
+                                                    {
+                                                        Ext.MessageBox.alert('Ошибка', data.message);
+                                                    }
+                                                }
+                                            },
+                                            failure: function (response) {
+                                                Ext.MessageBox.alert('Ошибка', 'Неизвестная ошибка');
+                                            }
+                                        });
+                                }
+                            },
+                            {
+                                text: "Отмена",
+                                handler: function () { editWnd.hide(); }
+                            }
+                        ]
+                    });
+
+                var gridPanel = Ext.create('Ext.grid.Panel',
+                    {
+                        region: 'center',
+                        store: store,
+                        loadMask: true,
+                        columnLines: true,
+                        tbar: [
+                            {
+                                xtype: 'button',
+                                text: "Регионы",
+                                handler: function () {
+                                    window.location = "/Locations/Regions";
+                                }
+                            }, '-',
+                            {
+                                xtype: 'button',
+                                text: "Фильтры",
+                                handler: function () {
+                                    filtersWnd.show();
+                                }
+                            },
+                            {
+                                xtype: 'button',
+                                text: "Отменить фильтры",
+                                handler: function () {
+                                    store.clearFilter();
+                                    settings = [];
+                                    localStorage.setItem(localStorageName, JSON.stringify([]));
+                                }
+                            }, '-',
+                            {
+                                xtype: 'button',
+                                text: "Добавить город",
+                                handler: function () {
+                                    checkEditRole(function () {
+                                        editWnd.items.items.forEach(function (element, index, array) {
+                                            element.setValue("");
+                                            element.clearInvalid();
+                                        });
+                                        countryCmbx.setDisabled(false);
+                                        regionCmbx.setDisabled(true);
+                                        editWnd.show();
+                                    });
+                                }
+                            }
+                        ],
+                        columns: [
+                            { xtype: 'rownumberer', width: 50 },
+                            {
+                                header: 'Страна',
+                                align: 'left',
+                                dataIndex: 'Country',
+                                width: 200,
+                                cellWrap: true,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Регион',
+                                align: 'left',
+                                dataIndex: 'Region',
+                                width: 300,
+                                cellWrap: true,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Город',
+                                align: 'left',
+                                dataIndex: 'Name',
+                                width: 250,
+                                cellWrap: true,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                xtype: 'actioncolumn',
+                                region: 'center',
+                                sortable: false,
+                                width: 70,
+                                items: [
+                                    {
+                                        icon: '@Url.Content("~/Content/Images/edit.png")',
+                                        iconCls: 'icon-padding',
+                                        text: 'Редактировать',
+                                        tooltip: 'Редактировать',
+                                        handler: function (grid, rowIndex, colIndex) {
+                                            checkEditRole(function () {
+                                                var rec = grid.getStore().getAt(rowIndex);
+                                                editWnd.items.items.forEach(function (element, index, array) {
+                                                    if (rec.data[element.itemId] != undefined)
+                                                        element.setValue(rec.data[element.itemId]);
+                                                });
+                                                countryCmbx.setValue(rec);
+                                                countryCmbx.setDisabled(true);
+                                                regionCmbx.setValue(rec);
+                                                regionCmbx.setDisabled(true);
+                                                editWnd.show();
+                                            });
+                                        }
+                                    },
+                                    {
+                                        icon: '@Url.Content("~/Content/Images/remove.png")',
+                                        iconCls: 'icon-padding',
+                                        text: 'Удалить',
+                                        tooltip: 'Удалить',
+                                        handler: function (grid, rowIndex, colIndex) {
+                                            checkEditRole(function () {
+                                                var request = function () {
+                                                    var rec = grid.getStore().getAt(rowIndex);
+                                                    Ext.Ajax.request({
+                                                            url: '@Url.Action("RemoveCity")',
+                                                            params: {
+                                                                id: rec.get("Id")
+                                                            },
+                                                            success: function (response) {
+                                                                if (response.responseText != "") {
+                                                                    var data = Ext.decode(response.responseText);
+                                                                    if (data.success) {
+                                                                        store.reload();
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        Ext.MessageBox.alert('Ошибка', data.message);
+                                                                    }
+                                                                }
+                                                            },
+                                                            failure: function (response) {
+                                                                Ext.MessageBox.alert('Ошибка', 'Неизвестная ошибка');
+                                                            }
+                                                        });
+                                                    }
+                                                Ext.MessageBox.show({
+                                                    title: 'Информационное сообщение',
+                                                    msg: "Удалить город из списка?",
+                                                    buttons: Ext.MessageBox.YESNO,
+                                                    fn: function (btn) {
+                                                        if (btn === 'yes') {
+                                                            request();
+                                                        }
+                                                    }
+                                                });
+                                            });
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+
+                    });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+
+
+                gridPanel.getStore()
+                .on('load',
+                    function(store, records, options) {
+                        var focus = '@ViewBag.Focus';
+                        if (focus && focus.length > 0) {
+
+                            var focusRow = store.findExact('Id', parseInt(focus));
+                            if (focusRow >= 0) {
+                                var rowData = store.getAt(focusRow);
+                                gridPanel.getView().focusRow(rowData);
+                                gridPanel.getSelectionModel().select(rowData);
+                            }
+                        }
+                        return false;
+                    });
+
+            });
+        </script>
+    </div>
+}

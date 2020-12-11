@@ -1,0 +1,139 @@
+﻿@model Urfu.Its.Web.DataContext.ForeignLanguageDisciplineTmerPeriod
+
+
+@{
+    ViewBag.Title = "Редактирование количества подгрупп";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <h4>Редактирование количества подгрупп</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Id)
+        <input type="hidden" name="competitionGroupId" value="@ViewBag.competitionGroupId"/>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Period.ForeignLanguage.Module.numberAndTitle, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DisplayFor(model => model.Period.ForeignLanguage.Module.numberAndTitle)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Period.Year, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DisplayFor(model => model.Period.Year)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Period.Semester, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DisplayFor(model => model.Period.Semester.Name)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Tmer.Tmer.rmer, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DisplayFor(model => model.Tmer.Tmer.rmer)
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-md-2" for="catalogDisciplineUuid">Дисциплина</label>
+            <div class="col-md-10" >
+                @Html.DisplayFor(model => model.Tmer.Discipline.Discipline.title)
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.Label("", htmlAttributes: new { @class = "control-label col-md-2" },labelText:"Количество групп")
+            <div class="col-md-10">
+                <input class="form-control text-box single-line" data-val="true" data-val-number="The field Колличество подгрупп must be a number." data-val-required="Требуется поле Колличество подгрупп." id="GroupCount" name="GroupCount" type="number" value="@ViewBag.ExpectedChildCount">
+                <span class="field-validation-valid text-danger" data-valmsg-for="GroupCount" data-valmsg-replace="true"></span>
+            </div>
+        </div>
+
+        @if (@Model.Tmer.Tmer.kmer == "TLEKC" || @Model.Tmer.Tmer.kmer == "TPRAK")
+        {
+            <div class="form-group">
+                @Html.Label(Model.Tmer.Tmer.kmer == "TLEKC" ? "Распределение практических занятий" : "Распределение лабораторных занятий", htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Distribution, new { htmlAttributes = new { @class = "form-control", type = "hidden" } })
+                    @Html.ValidationMessageFor(model => model.Distribution, "", new { @class = "text-danger" })
+                    <p id="distrbox"></p>
+                    <p id="distroWarn" class="text-danger"></p>
+                </div>
+            </div>
+        }
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Сохранить" class="btn btn-default" />
+            </div>
+        </div>
+
+    </div>
+}
+
+
+
+<div>
+    @Html.ActionLink("Вернуться к списку", "Index", new { focus = Model.Id, competitionGroupId=ViewBag.competitionGroupId })
+</div>
+
+
+@section scripts
+{
+    @if (@Model.Tmer.Tmer.kmer == "TLEKC" || @Model.Tmer.Tmer.kmer == "TPRAK")
+    {
+        <script>
+            function computeWarning() {
+                var total = 0;
+                $("#distrbox").children().each(function (i) {
+                    total += parseInt($(this).val());
+                });
+                var ec = '@ViewBag.ExpectedChildCount';
+                if (ec && ec.length > 0) {
+                    $("#distroWarn").empty();
+                    if (ec != total)
+                        $("#distroWarn").text("Сумма распределений равна " + total + " , количество подгрупп равно " + ec);
+                }
+            };
+
+            function rebuildDistr() {
+                var str = "";
+                $("#distrbox").children().each(function(i) {
+                    if (str !== "")
+                        str += ",";
+                    str += $(this).val();
+                });
+                $("#Distribution").val(str);
+                computeWarning();
+            };
+
+            function buildBoxes() {
+                var count = $("#GroupCount").val();
+                var distr = $("#Distribution").val().split(",");
+
+                $("#distrbox").empty();
+                for (var i = 0; i < count; i++) {
+                    $("#distrbox").append('<input class="form-control text-box single-line" type="number" onchange="rebuildDistr()" value="' + (distr[i]||1) + '">');
+                }
+            };
+
+            $(document).ready(function () {
+                $("#GroupCount").change(function () {
+                    buildBoxes();
+                    rebuildDistr();
+                });
+                buildBoxes();
+                computeWarning();
+            });
+        </script>
+    }
+}
+
+

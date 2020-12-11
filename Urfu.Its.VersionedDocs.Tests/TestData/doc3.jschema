@@ -1,0 +1,38 @@
+﻿{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "Annotation": {
+      "type": "string"
+    },
+    "Info": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Name"
+      ]
+    },
+    "Info2": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Name"
+      ]
+    }
+  },
+  "required": [
+    "Annotation",
+    "Info",
+    "Info2"
+  ]
+}

@@ -1,0 +1,347 @@
+﻿@model Urfu.Its.Frames.Controllers.ScanListVM
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Scan</title>
+
+    @Styles.Render("~/Content/css")
+
+    <style>
+        input, select, textarea {
+            max-width: initial;
+        }
+        .btn-danger {
+            color: #ce1a16;
+            background-color: #f5f5f5;
+            border-color: #f5f5f5;
+        }
+        .btn-sm, .btn-xs {
+            border-radius: 10px;
+        }
+        p.dline {
+            line-height: .8;
+            font-weight: bold;
+        }
+        .message {
+            padding-left: 15px;            
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    @*<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.validate.min.js"></script>*@
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <h4>@Model.DisciplineTitle</h4>
+        <div class="row">
+            <h5 class="col-sm-4">@Model.YearInfo</h5>
+            <h5 class="col-sm-4">@Model.Semester</h5>
+            <h5 class="col-sm-4">@Model.PeriodInfo()</h5>
+        </div>
+
+
+        <div class="container row">
+            @Html.ActionLink("Выбор предприятия, руководителя, темы", "Practice", null, new { ID = Model.PracticeID }, new { @class = "btn btn-info", role = "button" })
+            @Html.ActionLink("Шаблоны документов", "Document", null, new { ID = Model.PracticeID }, new { @class = "btn btn-info", role = "button" })
+            @Html.ActionLink("Сканы документов", "Scan", null, new { ID = Model.PracticeID }, new { @class = "btn btn-success", role = "button" })
+        </div>
+        <p>
+        </p>
+        <div class="message">
+            <p class="dline">Объем файла не более 10 Мб.</p>
+            <p class="dline">Перед загрузкой документов сократите объем изображений.</p>
+            <p class="dline">Не загружайте документы с изображениями высокого качества.</p>
+            <p class="dline">По статистике средний объем загружаемого документа не превышает 3 Мб.</p>
+        </div>
+        <p>
+        </p>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-sm-12">
+                        До начала практики
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                @foreach (var d in Model.BeforeDocuments)
+                {
+                    <p>
+                        <div class="container row">
+                            <div class="col-sm-3">@d.TypeName</div>
+
+                            <div class="col-sm-2">
+                                @if (d.DocumentId != null && (d.Status == "Согласовано"))
+                                {
+                                    <button type="button" disabled class="btn btn-primary" onclick="loadClicked(@d.TypeId)">
+                                        обзор... <span class="glyphicon glyphicon-search"></span>
+                                    </button>
+                                }
+                                else
+                                { <button type="button" class="btn btn-primary" onclick="loadClicked(@d.TypeId)">
+                                        обзор... <span class="glyphicon glyphicon-search"></span>
+                                    </button>
+                                }
+                            </div>
+                            <div class="col-sm-3">
+                                @if (d.DocumentId != null && !string.IsNullOrWhiteSpace(d.DocumentName))
+                                {
+                                    @Html.ActionLink(@d.DocumentName, "GetScan", new { documentId = d.DocumentId });
+
+                                }
+                            </div>
+                            <div class="col-sm-1">@d.Date</div>
+                            <div class="col-sm-1">
+                                @if (d.DocumentId != null && (d.Status == "" || d.Status == "Отклонено") && !string.IsNullOrWhiteSpace(d.DocumentName))
+                                {
+                                    <button type="button" class="btn btn-danger btn-xs" onclick="removeClicked(@d.TypeId, '@d.DocumentName')">
+                                        <span class="glyphicon glyphicon-remove"></span>
+
+                                    </button>
+                                }
+                            </div>
+                            <div class="col-sm-2 col-sm-push-1">@d.StatusComment()</div>
+                        </div>
+                    </p>
+                }
+
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-sm-12">
+                        Для дистанционной формы прохождения практики
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                @foreach (var d in Model.DistantDocuments)
+                {
+                    <p>
+                        <div class="container row">
+                            <div class="col-sm-3">@d.TypeName</div>
+
+                            <div class="col-sm-2">
+                                @if (d.DocumentId != null && (d.Status == "Согласовано"))
+                                {
+                                    <button type="button" disabled class="btn btn-primary" onclick="loadClicked(@d.TypeId)">
+                                        обзор... <span class="glyphicon glyphicon-search"></span>
+                                    </button>
+                                }
+                                else
+                                { <button type="button" class="btn btn-primary" onclick="loadClicked(@d.TypeId)">
+                                        обзор... <span class="glyphicon glyphicon-search"></span>
+                                    </button>
+                                }
+                            </div>
+                            <div class="col-sm-3">
+                                @if (d.DocumentId != null && !string.IsNullOrWhiteSpace(d.DocumentName))
+                                {
+                                    @Html.ActionLink(@d.DocumentName, "GetScan", new { documentId = d.DocumentId });
+
+                                }
+                            </div>
+                            <div class="col-sm-1">@d.Date</div>
+                            <div class="col-sm-1">
+                                @if (d.DocumentId != null && (d.Status == "" || d.Status == "Отклонено") && !string.IsNullOrWhiteSpace(d.DocumentName))
+                                {
+                                    <button type="button" class="btn btn-danger btn-xs" onclick="removeClicked(@d.TypeId, '@d.DocumentName')">
+                                        <span class="glyphicon glyphicon-remove"></span>
+
+                                    </button>
+                                }
+                            </div>
+                            <div class="col-sm-2 col-sm-push-1">@d.StatusComment()</div>
+                        </div>
+                    </p>
+                }
+
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-sm-12">
+                        Отчет по практике
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                @foreach (var d in Model.AfterDocuments)
+                {
+                    <p>
+                        <div class="container row">
+                            <div class="col-sm-4">@d.TypeName</div>
+                            <div class="col-sm-2">
+                                @if (d.DocumentId != null && (d.Status == "Согласовано"))
+                                {
+                                    <button type="button" disabled class="btn btn-primary" onclick="loadClicked(@d.TypeId)">обзор... <span class="glyphicon glyphicon-search"></span></button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-primary" onclick="loadClicked(@d.TypeId)">обзор... <span class="glyphicon glyphicon-search"></span></button>
+
+                                }
+                            </div>
+                            <div class="col-sm-3">
+                                @if (d.DocumentId != null && !string.IsNullOrWhiteSpace(d.DocumentName))
+                                {
+                                    @Html.ActionLink(@d.DocumentName, "GetScan", new { documentId = d.DocumentId });
+                                }
+                            </div>
+                            <div class="col-sm-1">@d.Date</div>
+                            <div class="col-sm-1">
+                                @if (d.DocumentId != null && (d.Status == "" || d.Status == "Отклонено") && !string.IsNullOrWhiteSpace(d.DocumentName))
+                                {
+                                    <button type="button" class="btn btn-danger btn-xs" onclick="removeClicked(@d.TypeId, '@d.DocumentName')">
+                                        <span class="glyphicon glyphicon-remove"></span>
+                                    </button>
+                                }
+                            </div>
+                            <div class="col-sm-2">@d.StatusComment()</div>
+                        </div>
+                    </p>
+                }
+            </div>
+        </div>
+    </div>
+
+    @*<div class="modal fade" id="ModalForm" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ModalLabel">Загрузка сканов</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="file-loading">
+                            <input id="file" name="file" type="file">
+                        </div>
+                        <div id="file-errors"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" title="upload logic">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+
+    <form id="loadForm" method='post' action='@Url.Action("UploadDocument")' modelAttribute="data" enctype='multipart/form-data'>
+        <div style="overflow: hidden;height : 0px;">
+            @*<input type="file" id="file" onchange="upload()" />*@
+            <input type="hidden" name="practiceId" value="@Model.PracticeID" />
+            <input type="hidden" id="documentType" name="type" value="" />
+            @*<input type="file" id="file" name="file" onchange="$('#loadForm').submit()" />*@
+            <input type="file" id="file" name="file" onchange="submitform(event)" />
+        </div>
+        </form>
+        @* <form id="deleteForm" method="delete" action='@Url.Action("DeleteDocument")' modelAttribute="data" enctype='multipart/form-data'>
+                <div style="overflow: hidden;height : 0px;">
+                    <input type="hidden" name="practiceId" value="@Model.PracticeID" />
+                    <input type="hidden" id="documentType" name="type" value="0" />
+                    </div>
+            </form>*@
+
+            <script>
+
+        //var documentType = 0;
+                function submitform(event) {
+                    var file = document.getElementById('file').files[0];
+                    if (file && file.size < 10485760) {
+                        $('#loadForm').submit();
+                    }
+                    else {
+                        alert("Ваш документ не загружен. Превышен допустимый размер файла");
+                        event.preventDefault();                       
+                    }
+                }
+
+
+        function loadClicked(type) {
+            //documentType = type
+            var documentType = document.getElementById("documentType");
+            documentType.value = type;
+
+            performClick("file");
+        }
+
+
+        // Формирование события клика на элементе.
+        function performClick(elemId) {
+            var elem = document.getElementById(elemId);
+            if (elem && document.createEvent) {
+                elem.value = "";
+
+                var evt = document.createEvent("MouseEvents");
+                evt.initEvent("click", true, false);
+                elem.dispatchEvent(evt);
+            }
+        }
+
+        function removeClicked(type, name) {
+            if (confirm('Вы действительно хотите удалить приложенный документ ' + name + '?'))
+        {
+                //documentType = type
+                var form_data = new FormData();
+            form_data.append("practiceId", @Model.PracticeID);
+            form_data.append("type", type);
+            $.ajax({
+                url: '@Url.Action("DeleteDocument")',
+                type: "POST",
+                dataType: 'script',
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: form_data,
+                success: function (html) {
+                    location.reload();
+                }
+            });
+        }
+        };
+
+
+        @*function upload() {
+            var file_data = $("#file").prop("files")[0];
+            debugger;
+            var form_data = new FormData();
+            form_data.append("practiceId", @Model.PracticeID);
+            form_data.append("type", documentType);
+            form_data.append("file", file_data);
+
+            $.ajax({
+                url: '@Url.Action("UploadDocument")',
+                dataType: 'script',
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: form_data,
+                type: 'post'
+            });
+
+        };*@
+
+            </script>
+
+</body>
+
+
+
+</html>

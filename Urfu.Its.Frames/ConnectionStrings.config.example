@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<connectionStrings>
+  <add name="DefaultConnection" connectionString="Data Source=(LocalDb)\v11.0;AttachDbFilename=|DataDirectory|\aspnet-Urfu.Its.Web-20150628051818.mdf;Initial Catalog=aspnet-Urfu.Its.Web-20150628051818;Integrated Security=True" providerName="System.Data.SqlClient" />
+</connectionStrings>

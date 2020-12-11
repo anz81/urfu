@@ -1,0 +1,42 @@
+﻿@model IEnumerable<Urfu.Its.Web.DataContext.Teacher>
+@{
+    Layout = null;
+}
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.initials)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.post)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.workPlace)
+        </th>
+        <th></th>
+    </tr>
+
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            @Html.HiddenFor(modelItem => item.pkey)
+            <td>
+                @Html.DisplayFor(modelItem => item.initials)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.post)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.workPlace)
+            </td>
+            <td>
+                @Html.ActionLink("Выбрать", "AttachTeacherExecute", new { item.pkey, moduleId = ViewBag.ModuleId, ViewBag.eduplanUUID, ViewBag.VariantId, ViewBag.catalogDisciplineUUID }, new { onclick = "this.href+='&load='+document.querySelector('input[name=\"loadsRadioGroup\"]:checked').value" })
+
+            </td>
+        </tr>
+    }
+
+
+</table>

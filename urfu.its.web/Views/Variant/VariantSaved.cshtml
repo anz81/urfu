@@ -1,0 +1,34 @@
+﻿@model Urfu.Its.Web.DataContext.Variant
+
+<div class="alert alert-@(ViewBag.Saved ? "success" : "warning")"> 
+    @if (ViewBag.Saved)
+    {
+        <text>Сохранены модули</text>
+    }
+    else
+    {
+        <text>Не сохранены модули</text>
+    }
+
+    @if (Model.IsBase)
+    {
+        <text>версии ОП</text>
+    }
+    else
+    {
+        <text>траектории ОП</text>
+    }
+    &quot;@Model.Program.Direction.OksoAndTitle&quot;, @Model.Program.familirizationCondition, @Model.Program.familirizationType, @Model.Program.qualification
+    <br />
+    Причина - @ViewBag.Message
+    
+</div>
+@if (Model.IsBase)
+{
+    @Html.ActionLink("К списку версий ОП", "Index", "EduPrograms")
+}
+else
+{
+    @Html.ActionLink("К списку траекторий ОП", "Index")
+}
+ | @Html.ActionLink("Продолжить редактирование", "BasicContentEdit", new { variantId = Model.Id }, null)

@@ -1,0 +1,680 @@
+﻿@{
+    ViewBag.Title = "Коэффициенты для расчета рейтинга";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+<style>
+    .my-fieldset .x-fieldset-header-text {
+        font-weight: bold;
+        font-size: medium;
+    }
+    .my-buttongroup {
+        border-top: 1px solid #e5e5e5;
+        margin-top: 20px;
+    }
+    
+    .x-menu-default {       
+        border-radius: 5px;
+    }
+
+    .x-menu-item-text-default {      
+        padding: 8px 10px;
+        font-size: 15px;
+        color:#000;;
+    }
+</style>
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function() {
+            Ext.tip.QuickTipManager.init();
+
+            Ext.define('Coefficient',
+                {
+                    extend: 'Ext.data.Model',
+                    fields: [
+                        {
+                            name: 'Id',
+                            convert: function(value) {
+                                return (value == null) ? null : parseInt(value, 10);
+                            }
+                        }, 'ModuleTitle',
+                        'ModuleType', 'Level', 'ModuleTypeName',
+                        { name: 'Year', type: 'int' },
+                        {
+                            name: 'Coefficient',
+                            type: 'float'
+                        }
+                    ]
+                });
+
+            var ProjectLeveldata = [
+                {
+                    "level": "А",
+                }, {
+                    "level": "В"
+                }, {
+                    "level": "С"
+                }, {
+                    "level": "ВС"
+                }
+            ];
+
+            var MupLeveldata = [
+                {
+                    "level": "базовый"
+                }, {
+                    "level": "повышенный"
+                }
+            ];
+
+            var ForeignLanguageLeveldata = [
+                {
+                    "level": "A"
+                }, {
+                    "level": "B"
+                }, {
+                    "level": "С"
+                }
+            ];
+
+            var localStorageName = "RatingCoefficients";
+
+            var prevSettings = {}
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem(localStorageName) || "[]");
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+                if (prevSettings["Year"] == null) {
+                    prevSettings["Year"] = @(DateTime.Now.Month < 7 ? DateTime.Now.Year - 1 : DateTime.Now.Year);
+                }
+            } catch (err) {
+                console.log(err);
+            }
+
+            var yearfilter = Ext.create('Ext.form.field.Text',
+                {
+                    fieldLabel: 'Учебный год',
+                    labelWidth: 100,
+                    allowBlank: false,
+                    padding: '0 0 0 30',
+                    id: 'yearfilter',
+                    value: prevSettings["Year"]
+                });
+
+
+            var FLmodulesStore = Ext.create("Ext.data.Store",
+                {
+                    proxy: {
+                        type: 'ajax',
+                        url: '@Url.Action("GetForeignLanguageModules")',
+                        extraParams: {
+                            year: yearfilter.value
+                        },
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data'
+                        }
+                    },
+                    autoLoad: true
+                });
+
+            var MUPmodulesstore = Ext.create("Ext.data.Store",
+                {
+                    proxy: {
+                        type: 'ajax',
+                        url: '@Url.Action("GetMUPModules")',
+                        extraParams: {
+                            year: yearfilter.value
+                        },
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data'
+                        }
+                    },
+                    autoLoad: true
+                });
+
+
+            function setFilters(year) {
+                var settings = [
+                    { property: 'Year', value: year }
+                ];
+                CoefficientsStore.setFilters(settings);
+                FLmodulesStore.getProxy().extraParams = {
+                    year: year
+                };
+                FLmodulesStore.reload();
+                MUPmodulesstore.getProxy().extraParams = {
+                    year: year
+                };
+                MUPmodulesstore.reload();
+                localStorage.setItem(localStorageName, JSON.stringify(settings));
+            };
+
+
+            var CoefficientsStore = Ext.create("Ext.data.Store",
+                {
+                    autoLoad: true,
+                    model: 'Coefficient',
+                    //remoteSort: true,
+                    remoteFilter: true,
+                    proxy: {
+                        type: 'ajax',
+                        url: window.location.pathname,
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data'
+                        }
+                    },
+                    filters: [
+                        { property: 'Year', value: yearfilter.getValue() }
+                    ],
+                    groupField: 'ModuleTypeName',
+                });
+
+            var formpanel = Ext.create('Ext.form.Panel',
+                {
+                    id: 'panelId',
+                    region: 'center',
+                    bodyPadding: 10,
+                    layout: {
+                        type: 'hbox',
+                        pack: 'start',
+                        align: 'stretch'
+                    },
+                    viewModel: {
+                        data: {
+                            theCoefficient: null
+                        },
+                        stores: {
+                            moduleTypesStore: {
+                                autoLoad: true,
+                                proxy: {
+                                    type: 'ajax',
+                                    url: '@Url.Action("GetModuleTypes")',
+                                    reader: { type: 'json' }
+                                }
+                            },
+                            modulelevels: {}
+                        },
+                        formulas: {
+                            isProjectType: function(get) {
+                                return get('theCoefficient.ModuleType') === MODULE_TYPE_PARAM.project ? true : false;
+                            },
+                            addButtonDisabled: function(get) {
+                                var moduleType = get('theCoefficient.ModuleType');
+                                if (moduleType === MODULE_TYPE_PARAM.project)
+                                    return get('theCoefficient.Id') !== null ? true : false;
+                                else return get('theCoefficient.ModuleId') !== null ? true : false;
+                            }
+                        }
+                    },
+                    fieldDefaults: {
+                        labelAlign: "left",
+                        labelWidth: 120,
+                        msgTarget: 'side'
+                    },
+                    items: [
+                        {
+                            xtype: 'gridpanel',
+                            id: 'gridpanelId',
+                            minWidth: 500,
+                            store: CoefficientsStore,
+                            columnLines: true,
+                            selModel: {
+                                mode: 'SINGLE'
+                            },
+                            bind: {
+                                selection: '{theCoefficient}'
+                            },
+                            dockedItems: [
+                                {
+                                    xtype: 'toolbar',
+                                    dock: 'top',
+                                    items: [
+                                        yearfilter,
+                                        {
+                                            xtype: 'button',
+                                            text: 'Применить',
+                                            handler: function() {
+                                                setFilters(yearfilter.value);
+                                                Ext.each(Ext.getCmp('EditPanelId').query('field'),
+                                                    function(field) {
+                                                        field.reset();
+                                                    });
+                                                Ext.getCmp('panelId').query('[name=Year]')[0].setValue(yearfilter.value);
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            flex: 0.4,
+                            features: [
+                                {
+                                    ftype: 'grouping',
+                                    startCollapsed: true,
+                                    groupHeaderTpl: '{name}',
+                                    enableGroupingMenu: false
+                                }
+                            ],
+                            columns: [
+                                {
+                                    text: 'Название модуля',
+                                    dataIndex: 'ModuleTitle',
+                                    width: '40%'
+                                },
+                                {
+                                    text: 'Уровень',
+                                    dataIndex: 'Level',
+                                    width: '25%'
+                                },
+                                {
+                                    text: 'Год',
+                                    dataIndex: 'Year',
+                                    width: '20%'
+                                },
+                                {
+                                    xtype: 'numbercolumn',
+                                    text: 'Коэффициент',
+                                    dataIndex: 'Coefficient',
+                                    width: '15%',
+                                    format: '0.00'
+                                }
+                            ],
+                            listeners: {
+                                selectionchange: function(grid, selection, eOpts) {
+                                    if (selection.length > 0) {
+                                        var rec = selection[0];
+                                        if (rec)
+                                            this.up().getForm().loadRecord(rec);
+                                    }
+                                },
+                                rowcontextmenu: function(t, record, tr, rowIndex, e, eOpts) {
+                                    e.preventDefault();
+                                    var menu = t.myMenu;
+                                    if (!menu) {
+                                        menu = t.myMenu = new Ext.menu.Menu({
+                                            plain: true,
+                                            cls: 'contextmenu',
+                                            items: [
+                                                {
+                                                    text: 'Свернуть группировку',
+                                                    id: 'collapse',
+                                                }
+                                            ],
+                                            listeners: {
+                                                click: {
+                                                    fn: function() { t.features[0].collapseAll() }
+                                                },
+                                            }
+                                        })
+                                    }
+                                    menu.showAt(e.getXY());
+                                }
+                            }
+                        }, {
+                            margin: '0 0 0 60',
+                            items: [
+                                {
+                                    xtype: 'fieldset',
+                                    id: 'EditPanelId',
+                                    title: 'Редактирование/Добавление коэффициента',
+                                    fieldDefaults: {
+                                        labelAlign: "left",
+                                        labelWidth: 120,
+                                        anchor: '100%',
+                                        msgTarget: 'side'
+                                    },
+                                    width: 510,
+                                    cls: 'my-fieldset',
+                                    items: [
+                                        {
+                                            xtype: 'hidden',
+                                            name: 'Id',
+                                            //bind: '{theCoefficient.Id}'
+                                        }, {
+                                            xtype: 'numberfield',
+                                            fieldLabel: 'Год',
+                                            name: 'Year',
+                                            allowBlank: false,
+                                            hideTrigger: true,
+                                            readOnly: true,
+                                            value: yearfilter.value,
+                                            cls: 'excludethis'
+                                        }, {
+                                            xtype: 'combobox',
+                                            fieldLabel: 'Тип модуля',
+                                            name: 'ModuleType',
+                                            allowBlank: false,
+                                            id: 'moduleTypecombo',
+                                            bind: {
+                                                store: '{moduleTypesStore}',
+                                                //value: '{theCoefficient.ModuleType}',
+                                                readOnly: '{theCoefficient.Id}'
+                                            },
+                                            queryMode: 'local',
+                                            valueField: 'moduleType',
+                                            displayField: 'moduleName',
+                                            forceSelection: true,
+                                            editable: false,
+                                            reference: 'moduleTypefield',
+                                            publishes: 'dirty',
+                                            listeners: {
+                                                change: function(combo, newValue, oldValue) {
+                                                    clearGrigSelection();
+                                                    var modulecombo = combo.next();
+                                                    if (modulecombo !== null && newValue === MODULE_TYPE_PARAM.project) {
+                                                        modulecombo.setHidden(true);
+                                                        modulecombo.allowBlank = true;
+                                                    } else if (modulecombo.hidden) {
+                                                        (modulecombo.setHidden(false));
+                                                        modulecombo.allowBlank = false;
+                                                    }
+                                                    Ext.getCmp('panelId').query('[isFormField][name ="ModuleId"][name ="Level"][name ="Coefficient"]')
+                                                        .forEach(function(field) {
+                                                            field.reset();
+                                                        });
+                                                    setdataLevelsStore(combo);
+                                                    //combo.nextSibling().clearValue();
+                                                },
+                                            }
+                                        },
+                                        {
+                                            xtype: 'combobox',
+                                            fieldLabel: 'Название модуля',
+                                            name: 'ModuleId',
+                                            queryMode: 'local',
+                                            valueField: 'moduleId',
+                                            displayField: 'moduleTitle',
+                                            allowBlank: false,
+                                            forceSelection: true,
+                                            bind: {
+                                                hidden: '{isProjectType}',
+                                                disabled: '{isProjectType}',
+                                                readOnly: '{!moduleTypefield.dirty}',
+                                            },
+                                            listeners: {
+                                                select: function(combo, record) {
+                                                    clearGrigSelection();
+                                                    findByModuleName(combo, record);
+                                                }
+                                            },
+                                        },
+                                        {
+                                            xtype: 'combobox',
+                                            fieldLabel: 'Уровень',
+                                            name: 'Level',
+                                            allowBlank: false,
+                                            forceSelection: true,
+                                            bind: {
+                                                store: '{modulelevels}',
+                                                readOnly: '{!moduleTypefield.dirty}',
+                                            },
+                                            displayField: 'level',
+                                            queryMode: 'local',
+                                            listeners: {
+                                                select: function(combo, record) {
+                                                    clearGrigSelection();
+                                                    findByLevel(combo, record);
+                                                }
+                                            }
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            fieldLabel: 'Коэффициент',
+                                            name: 'Coefficient',
+                                            minValue: 0.01,
+                                            allowBlank: false,
+                                            step: 0.01,
+                                            decimalPrecision: 2,
+                                            hideTrigger: true,
+                                            keyNavEnabled: true,
+                                        },
+                                        {
+                                            xtype: 'buttongroup',
+                                            frame: false,
+                                            padding: '15 0 15 0',
+                                            cls: 'my-buttongroup',
+                                            layout: {
+                                                type: 'hbox'
+                                            },
+                                            items: [
+                                                {
+                                                    text: 'Добавить',
+                                                    bind: {
+                                                        disabled: '{addButtonDisabled}'
+                                                    },
+                                                    handler: function() {
+                                                        var form = Ext.getCmp('panelId').getForm();
+                                                        if (!form.isValid()) {
+                                                            Ext.Msg.alert('Ошибка', 'Заполнены не все поля');
+                                                            return;
+                                                        }
+                                                        addRecord(form, false);
+                                                    }
+                                                }, {
+                                                    text: 'Обновить',
+                                                    margin: '0 0 0 5',
+                                                    bind: {
+                                                        disabled: '{!addButtonDisabled}'
+                                                    },
+                                                    disabled: true,
+                                                    handler: function() {
+                                                        var form = Ext.getCmp('panelId').getForm();
+                                                        if (!form.isValid()) {
+                                                            Ext.Msg.alert('Ошибка', 'Заполнены не все поля');
+                                                            return;
+                                                        }
+                                                        var values = form.getFieldValues();
+                                                        if (values.Id === "" || values.Id === null)
+                                                            addRecord(form, true);
+                                                        else updateRecord(form);
+                                                    }
+                                                },
+                                                {
+                                                    text: 'Очистить',
+                                                    margin: '0 0 0 5',
+                                                    handler: function() {
+                                                        Ext.each(Ext.getCmp('EditPanelId').query('field[cls!=excludethis]'),
+                                                            function(field) {
+                                                                field.reset();
+                                                            });
+                                                        clearGrigSelection();
+                                                    }
+                                                },
+                                                {
+                                                    text: 'Удалить',
+                                                    margin: '0 0 0 5',
+                                                    bind: {
+                                                        disabled: '{!theCoefficient.Id}'
+                                                    },
+                                                    disabled: true,
+                                                    handler: function() {
+                                                        //var id = Ext.getCmp('panelId').getViewModel().data.theCoefficient.Id;
+                                                        var record = Ext.getCmp('panelId').getForm().getRecord();
+                                                        if (record.get('Id') !== "") {
+                                                            Ext.MessageBox.show({
+                                                                title: 'Удаление',
+                                                                msg: 'Вы действительно хотите удалить запись?',
+                                                                buttons: Ext.MessageBox.YESNO,
+                                                                fn: function(button) {
+                                                                    if ('yes' === button) {
+                                                                        Ext.Ajax.request({
+                                                                            method: 'GET',
+                                                                            url: '@Url.Action("Delete")',
+                                                                            params: { Id: record.get('Id') },
+                                                                            success: function(response) {
+                                                                                if (record.get('ModuleType') === MODULE_TYPE_PARAM.foreignLanguage) {
+                                                                                    if (CoefficientsStore.getData().items.filter(module => module.get('ModuleId') === record.get('ModuleId')).length > 1)
+                                                                                        CoefficientsStore.remove(record);
+                                                                                    else {
+                                                                                        record.set('Id', null);
+                                                                                        record.set('Coefficient', null);
+                                                                                        record.set('Level', '');
+                                                                                        record.commit();
+                                                                                    }
+                                                                                } else if (record.get('ModuleType') === MODULE_TYPE_PARAM.mup) {
+                                                                                    record.set('Id', null);
+                                                                                    record.set('Coefficient', null);
+                                                                                    record.commit();
+                                                                                } else CoefficientsStore.remove(record);
+                                                                                //CoefficientsStore.reload();
+                                                                                Ext.MessageBox.alert('', 'Запись удалена');
+                                                                                Ext.getCmp('panelId').getForm().reset();
+                                                                            },
+                                                                            failure: function(xhr) {
+                                                                                Ext.MessageBox.show({
+                                                                                    msg: xhr.responseText
+                                                                                })
+
+                                                                            }
+
+                                                                        })
+                                                                    }
+                                                                },
+                                                                icon: Ext.MessageBox.QUESTION
+                                                            })
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            width: 540
+                        }
+                    ]
+                });
+
+            function findByLevel(combo, record) {
+                var storeRecord;
+                var moduletype = Ext.getCmp('moduleTypecombo').value;
+                if (moduletype === MODULE_TYPE_PARAM.project) {
+                    storeRecord = CoefficientsStore.findRecord('Level', record.get('level'));
+                } else {
+                    var moduleName = combo.prev().value;
+                    if (moduleName === null)
+                        return;
+                    else {
+                        storeRecord = CoefficientsStore.getData().items.find(module => module.get('ModuleId') === moduleName && module.get('Level') === record.get('level'));
+                    }
+                }
+                if (storeRecord)
+                    Ext.getCmp('gridpanelId').getSelectionModel().select(storeRecord);
+            }
+
+            function findByModuleName(combo, record) {
+                var storeRecord;
+                var level = combo.next().value;
+                if (level)
+                    storeRecord = CoefficientsStore.getData().items.find(module => module.get('ModuleId') === record.get('moduleId') && module.get('Level') === level);
+                else
+                    storeRecord = CoefficientsStore.findRecord('ModuleId', record.get('moduleId'));
+                if (storeRecord) {
+                    Ext.getCmp('gridpanelId').getSelectionModel().select(storeRecord);
+                }
+            }
+
+            function clearGrigSelection() {
+                var selected = Ext.getCmp('gridpanelId').selection;
+                if (selected)
+                    Ext.getCmp('gridpanelId').getSelectionModel().view.deselect(selected);
+            }
+
+            function updateRecord(form) {
+                form.submit({
+                    url: '@Url.Action("UpdateCoefficient")',
+                    success: function(form, action) {
+                        var record = form.getRecord();
+                        var newValues = form.getFieldValues();
+                        record.set(newValues);
+                        //record.set('Level', newValues.Level);
+                        //record.set('Coefficient', newValues.Coefficient);
+                        record.commit();
+                        Ext.MessageBox.alert('', 'Информация сохранена');
+                    },
+                    failure: function(form, action) {
+                        if (action.result != null) {
+                            Ext.MessageBox.alert('', 'Информация не сохранена. ' + action.result.message);
+                        } else
+                            Ext.MessageBox.alert('', 'Ошибка при сохранении');
+                    }
+                });
+            }
+
+            function addRecord(form, flag) {
+                form.submit({
+                    url: '@Url.Action("CreateCoefficient")',
+                    success: function(form, action) {
+                        var newValues = action.result.newCoefficient;
+                        if (flag) {
+                            var record = form.getRecord();
+                            //var newValues = form.getFieldValues();
+                            record.set('Id', newValues.Id);
+                            record.set('Level', newValues.Level);
+                            record.set('Coefficient', newValues.Coefficient);
+                            //record.set(newValues);
+                        } else {
+                            var record = Ext.create('Coefficient', {});
+                            record.set(newValues);
+                            CoefficientsStore.add(record);
+                            CoefficientsStore.sort([
+                                {
+                                    property: 'ModuleTitle',
+                                    direction: 'ASC'
+                                },
+                                {
+                                    property: 'Level',
+                                    direction: 'ASC'
+                                }
+                            ]);
+
+                        }
+                        record.commit();
+                        form.loadRecord(record);
+                        Ext.MessageBox.alert('', 'Информация сохранена');
+                    },
+                    failure: function(form, action) {
+                        if (action.result != null) {
+                            Ext.MessageBox.alert('', 'Информация не сохранена. ' + action.result.message);
+                        } else Ext.MessageBox.alert('', 'Ошибка при сохранении');
+                    }
+                });
+            }
+
+
+            const MODULE_TYPE_PARAM = {
+                foreignLanguage: 2,
+                project: 4,
+                mup: 6
+            };
+
+            function setdataLevelsStore(combo) {
+                var panel = Ext.getCmp('panelId');
+                panel.query('[name=Level]')[0].clearValue();
+                var modulelevelsstore = panel.viewModel.getStore('modulelevels');
+                switch (combo.value) {
+                case MODULE_TYPE_PARAM.foreignLanguage:
+                    modulelevelsstore.setData(ForeignLanguageLeveldata);
+                    combo.nextSibling().bindStore(FLmodulesStore);
+                    break;
+                case MODULE_TYPE_PARAM.project:
+                    modulelevelsstore.setData(ProjectLeveldata);
+                    break;
+                case MODULE_TYPE_PARAM.mup:
+                    modulelevelsstore.setData(MupLeveldata);
+                    combo.nextSibling().bindStore(MUPmodulesstore);
+                    break;
+                }
+            }
+
+            var items = [
+                formpanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+    </script>
+}

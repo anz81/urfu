@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="Properties\AssemblyInfo.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="Moq" Version="4.15.2" />
+	  <PackageReference Include="MSTest.TestFramework" Version="2.1.2" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Urfu.Its.Integration\Urfu.Its.Integration.csproj">
+			<Project>{14109828-D1B0-49C4-9910-56050DE04FDC}</Project>
+			<Name>Urfu.Its.Integration</Name>
+		</ProjectReference>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Properties\" />
+	</ItemGroup>	
+</Project>

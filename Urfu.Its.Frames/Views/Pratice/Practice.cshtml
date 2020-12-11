@@ -1,0 +1,907 @@
+﻿@using Urfu.Its.Web.DataContext
+
+@model Urfu.Its.Frames.Controllers.PracticeVM
+
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Practice</title>
+    @Styles.Render("~/Content/css")
+    <style>
+        input, select, textarea {
+            max-width: initial;
+        }
+
+        .form-control {
+            height: auto;
+            min-height: 34px;
+        }
+
+        .ui-autocomplete {
+            margin: 0;
+            padding: 0;
+            padding-top: 7px;
+            padding-left: 13px;
+            list-style-type: none;
+        }
+
+       .ui-autocomplete > li > div {
+                margin-bottom: 4px;
+                margin-left: -13px;
+                padding: 3px 5px 3px 13px;
+                cursor: pointer;
+            }
+
+       .ui-autocomplete > li > div.ui-state-active {
+                    border: none;
+                    color: inherit;
+                    background: #c6d8e5;
+                }
+
+        #addNewOrganization {
+            margin-top: 7px;
+            margin-bottom: 10px;
+        }
+
+         #addNewOrganization span.ui-state-active {
+                border: none;
+                color: inherit;
+                background: none;
+            }
+
+        .top-buffer {
+            margin-top: 20px;
+            margin-bottom: 5px;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <link rel=" stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.theme.css" />
+    <script src="~/Scripts/jquery-ui-1.12.1.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+</head>
+<body>
+
+
+
+    <div class="container-fluid">
+        <h4>@Model.DisciplineTitle</h4>
+        <div class="row">
+            <h5 class="col-sm-4">@Model.YearInfo</h5>
+            <h5 class="col-sm-4">@Model.Semester</h5>
+            <h5 class="col-sm-4">@Model.PeriodInfo()</h5>
+        </div>
+
+        <div class="container row">
+            @*
+                <a href="#" class="btn btn-success" role="button">Выбор предприятия, руководителя, темы</a>
+            *@
+
+            @Html.ActionLink("Выбор предприятия, руководителя, темы", "Practice", null, new { ID = Model.PracticeID }, new { @class = "btn btn-success", role = "button" })
+            @Html.ActionLink("Шаблоны документов", "Document", null, new { ID = Model.PracticeID }, new { @class = "btn btn-info", role = "button" })
+            @Html.ActionLink("Сканы документов", "Scan", null, new { ID = Model.PracticeID }, new { @class = "btn btn-info", role = "button" })
+        </div>
+        @*
+            <div class="btn-group btn-group-justified">
+                <a href="#" class="btn btn-primary">Выбор предприятия, руководителя, темы</a>
+                <a href="#" class="btn btn-primary">Шаблоны документов</a>
+                <a href="#" class="btn btn-primary">Сканы документов</a>
+            </div>
+        *@
+
+        @*
+            <div class="container row">
+                 <div class="col-sm-4"><a href="#" class="btn btn-success" role="button">Выбор предприятия, руководителя, темы</a></div>
+                 <div class="col-sm-4"><a href="#" class="btn btn-info" role="button">Шаблоны документов</a></div>
+                 <div class="col-sm-4"><a href="#" class="btn btn-info" role="button">Сканы документов</a></div>
+            </div>
+        *@
+
+        <p>
+        </p>
+        <div class="panel panel-default container-fluid">
+            <div class="panel-body">
+
+                <div class="row">
+                    <div class="col-sm-8"><h4 class="panel-title">УрФУ</h4></div>
+                    @if (Model.Admission != null)
+                    {
+                        <div class="col-sm-4">
+                            <label class="alert alert-info  pull-right">@Model.Admission.StatusName</label>
+                        </div>
+                    }
+                </div>
+                @if (Model.Admission != null && Model.Admission.Status == AdmissionStatus.Denied)
+                {
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="alert alert-danger">Причина отказа: @Model.Admission.ReasonOfDeny</div>
+                        </div>
+                    </div>
+                }
+
+                @using (Html.BeginForm("Practice", "Practice", FormMethod.Post, new { name = "admissionForm" }))
+                {
+                    @Html.HiddenFor(m => m.PracticeID)
+
+                    <div class="form-group">
+                        <label>Руководитель практики (от кафедры):</label>
+                        @if (Model.Admission == null || Model.Admission.Status == AdmissionStatus.Denied || Model.Admission.Status == AdmissionStatus.Indeterminate)
+                        {
+                            @Html.DropDownListFor(m => m.TeacherID, Model.Teachers, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.TeacherID, null, new { @class = "text-danger" })
+                        }
+                        else
+                        {
+                            @Html.HiddenFor(m => m.TeacherID)
+                            <p class="form-control">@Model.Admission.Teacher.Name</p>
+                        }
+                    </div>
+
+                    <div class="form-group">
+                        <label>Соруководитель практики (другое подразделение УрФУ):</label>
+                        @if (Model.Admission == null || Model.Admission.Status == AdmissionStatus.Denied || Model.Admission.Status == AdmissionStatus.Indeterminate)
+                        {
+                            @Html.DropDownListFor(m => m.Teacher2ID, Model.Teachers2, new { @class = "form-control" })
+                        }
+                        else
+                        {
+
+                            <p class="form-control">@Model.Admission.Teacher2.Name</p>
+                        }
+                    </div>
+
+                    <div class="form-group">
+                        <label>Подразделение УрФУ:</label>
+
+                        @if (Model.Admission == null || Model.Admission.Status == AdmissionStatus.Denied || Model.Admission.Status == AdmissionStatus.Indeterminate)
+                        {
+                            @Html.TextBoxFor(m => m.Subdivision, new { @class = "form-control" })
+                        }
+                        else
+                        {
+                            <p class="form-control">@Model.Subdivision</p>
+                        }
+                    </div>
+
+                    <div class="form-group">
+                        <label>Тема:</label>
+
+                        @if (Model.Admission == null || Model.Admission.Status == AdmissionStatus.Denied || Model.Admission.Status == AdmissionStatus.Indeterminate)
+                        {
+                            foreach (var t in Model.Themas)
+                            {
+                                <div class="radio">
+                                    @Html.RadioButtonFor(m => m.ThemaID, t.Id)
+                                    <p>@t.Thema</p>
+                                </div>
+                            }
+                            <p>
+                                <div class="control-label">
+                                    @Html.ValidationMessageFor(m => m.ThemaID, null, new { @class = "text-danger" })
+                                </div>
+                            </p>
+                        }
+                        else
+                        {
+                            @Html.HiddenFor(m => m.ThemaID)
+                            <p class="form-control">@Model.Admission.Thema.Thema</p>
+
+                        }
+                    </div>
+
+                    <div class="form-group">
+                        <label>Уточненная тема:</label>
+
+                        @if (Model.Admission == null)
+                        {
+                            @Html.TextBoxFor(m => m.FinishTheme, new { @class = "form-control" })
+                        }
+                        else
+                        {
+                            if (Model.IsEndDate())
+                            {
+                                <p class="form-control">@Model.FinishTheme</p>
+                            }
+                            else
+                            {
+                                @Html.TextBoxFor(m => m.FinishTheme, new { @class = "form-control" })
+                            }
+                        }
+                    </div>
+
+                    <div>
+                        @if (Model.Admission == null || Model.Admission.Status == AdmissionStatus.Denied || Model.Admission.Status == AdmissionStatus.Indeterminate)
+                        {
+                            <button type="submit" class="btn btn-default" name="operation" value="Admission">Подать заявку</button>
+                            <span>
+                                @if (ViewContext.ViewData.ModelState.IsValid && Model.ShowMessage)
+                                {
+                                    <script>
+                                        document.cookie = 'inform=!!!; path=/; expires=Thu, 01-Jan-70 00:00:01 GMT;';
+                                    </script>
+                                    <span>
+                                        <label class="alert alert-info"> Ваша заявка принята. Следите за изменением статуса.</label>
+                                    </span>
+                                }
+                            </span>
+
+
+                        }
+                        else
+                        {
+                            if (!Model.IsEndDate())
+                            {
+                                <button type="submit" class="btn btn-default" name="operation" value="Save">Сохранить</button>
+                            }
+                        }
+                    </div>
+                }
+
+            </div>
+        </div>
+
+        <p>
+        </p>
+         @{string TextOfAgreement ="Устанавливая галочку внутри данной формы, Я даю согласие на передачу своих персональных данных(или лица, законным представителем которого являюсь, в случае его недееспособности) в целях передачи Оператором в выбранную пользователем организацию для прохождения студенческой практики в рамках действующего законодательства Российской Федерации";}
+
+        <div>
+            @if (Model.AdmissionCompany != null)
+            {
+                <div class="panel panel-default container-fluid">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-sm-8"><h4 class="panel-title">@Model.AdmissionCompany.Company</h4></div>
+                            <div class="col-sm-4">
+                                <label class="alert alert-info pull-right">@Model.AdmissionCompany.StatusName</label>
+                            </div>
+                        </div>
+                        @if (Model.AdmissionCompany.Status == AdmissionStatus.Denied)
+                        {
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="alert alert-danger">Причина отказа: @Model.AdmissionCompany.ReasonOfDeny</div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-sm-10">@Model.AdmissionCompany.Direction</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-10">
+                                <label class="checkbox-inline"><input type="checkbox" value="1" disabled>с выездом</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-10">@Model.AdmissionCompany.GetCompanyDescription()</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-10"><a href="@Model.AdmissionCompany.Site">Сайт</a></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-10">@Model.AdmissionCompany.GetPersonInChargeDescription()</div>
+                        </div>
+
+                        <div>
+                            @if (Model.AdmissionCompany.HasScan)
+                            {
+                                @Html.ActionLink(@Model.AdmissionCompany.ScanName(), "GetContract", new { contractID = Model.AdmissionCompany.ContractID });
+                            }
+                            else
+                            {
+                                @Html.Label(@Model.AdmissionCompany.GetContractNumber())
+                            }
+                        </div>
+                        <div>
+                            @if (Model.AdmissionCompany.HasCompanyDocument)
+                            {
+                                @Html.ActionLink("Информация о предприятии", "GetCompanyDocument", new { contractID = Model.AdmissionCompany.ContractID });
+                            }
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <p>@Model.AdmissionCompany.Comment</p>
+                            </div>
+                        </div>
+                           @if(!Model.AdmissionCompany.IsShortDated)
+                           {
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        @Model.AdmissionCompany.GetDivisionDescription()
+                                    </div>
+                                    <div class="col-sm-12">
+                                        @Model.AdmissionCompany.GetAdditionalTermsDescription()
+                                    </div>
+                                    <div class="col-sm-4">
+                                        @if (Model.AdmissionCompany.AdditionalFileId.HasValue)
+                                        {
+                                            @Html.ActionLink(Model.AdmissionCompany.AdditionalFileName, "GetDocument", new { fileId = Model.AdmissionCompany.AdditionalFileId});
+                                        }
+
+                                    </div>
+                                </div>
+                                <div class="row top-buffer">
+                                    <div class="col-sm-4" align="left">
+                                        <label class="checkbox-inline">
+                                            @Html.CheckBox("Agreement", @Model.AdmissionCompany.Agreement, new { @disabled = "disabled" }) 
+                                            @TextOfAgreement
+                                        </label>
+                                    </div>
+                                </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            @if (Model.AdmissionCompany.AgreementFileStorageId.HasValue)
+                                            {
+                                                @Html.ActionLink("Согласие на передачу персональных данных", "GetDocument", new { fileId = Model.AdmissionCompany.AgreementFileStorageId});
+                                            }
+                                        </div>
+                                    </div>
+                           }
+                    </div>
+                </div>
+
+            }
+
+            @if (Model.AdmissionCompany == null || Model.AdmissionCompany.Status == AdmissionStatus.Denied)
+            {
+
+
+                <div class="panel-group" id="panelGroup">
+
+                    @*добавление информации о предприятии*@
+
+                    <div class="panel panel-primary container-fluid">
+                        <div class="row panel-heading">
+                            <div class="col-sm-9"><h4 class="panel-title"><a data-toggle="collapse" href="#AddContract">Добавить информацию о предприятии</a></h4></div>
+                        </div>
+
+                        <div id="AddContract" class="panel-collapse collapse">
+
+                            <div class="panel-body form-horizontal">
+
+                                <div class="panel panel-default">
+                                    <div id="chooseOrgForm" class="panel-body">
+                                        <div class="form-group">
+                                            @Html.LabelFor(m => m.PersonalContract.CompanyName, new {@class = "control-label col-sm-2"})
+
+                                            <div class="col-sm-10">
+                                                @*@Html.TextBoxFor(m => m.PersonalContract.CompanyName, new { @class = "form-control col-sm-10" })*@
+                                                @Html.TextBoxFor(m => m.PersonalContract.CompanyName, new {@class = "form-control col-sm-10"})
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="panel panel-default collapse" id="addNewOrgForm">
+                                    <div class="panel-body">
+                                        
+                                            @*<button type="button" class="btn btn-default">Добавить предприятие</button>*@                                           
+                                        @using (Html.BeginForm("Contract", "Practice", FormMethod.Post))
+                                        {
+                                            <div class="button-panel">
+                                                <button type="button" class="btn" id="cancelAddOrganizationButton">Отмена</button>
+                                                @*<button type="button" class="btn btn-default">Добавить предприятие</button>*@
+                                                <button class="btn btn-default" type="submit" name="admissionCompany" value="AddContract" href="">Добавить предприятие</button>
+
+                                            </div>
+                                            <p>
+
+                                            </p>
+                                                @Html.HiddenFor(m => m.PracticeID)
+                                                @Html.HiddenFor(m => m.InstituteTitle)
+
+                                            <label>Если Вы проходите практику на кафедре, то данный блок информации заполнять не надо, достаточно заполнить блок "УрФУ"</label>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.CompanyName, new { @class = "control-label col-sm-2" })
+
+                                                <div class="col-sm-10">
+                                                    @*@Html.TextBoxFor(m => m.PersonalContract.CompanyName, new { @class = "form-control col-sm-10" })*@
+                                                    @Html.TextBoxFor(m => m.PersonalContract.CompanyName, new { @class = "form-control col-sm-10" })
+                                                    @Html.ValidationMessageFor(m => m.PersonalContract.CompanyName, null, new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            @*Сокращенное название*@
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.ShortName, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.ShortName, new { @class = "form-control col-sm-10" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.INN, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.INN, new { @class = "form-control col-sm-10" })
+                                                    @Html.ValidationMessageFor(m => m.PersonalContract.INN, null, new { @class = "text-danger" })
+
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.Director, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.Director, new { @class = "form-control col-sm-10" })
+                                                    @Html.ValidationMessageFor(m => m.PersonalContract.Director, null, new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.DirectorInitials, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.DirectorInitials, new { @class = "form-control col-sm-10" })
+                                                    @Html.ValidationMessageFor(m => m.PersonalContract.DirectorInitials, null, new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.DirectorGenetive, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.DirectorGenetive, new { @class = "form-control col-sm-10" })
+                                                    @Html.ValidationMessageFor(m => m.PersonalContract.DirectorGenetive, null, new { @class = "text-danger" })
+
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.PostOfDirector, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.PostOfDirector, new { @class = "form-control col-sm-10" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.PostOfDirectorGenetive, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.PostOfDirectorGenetive, new { @class = "form-control col-sm-10" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.PersonInCharge, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.PersonInCharge, new { @class = "form-control col-sm-10" })
+                                                    @Html.ValidationMessageFor(m => m.PersonalContract.PersonInCharge, null, new { @class = "text-danger" })
+
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.PersonInChargeInitials, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.PersonInChargeInitials, new { @class = "form-control col-sm-10" })
+                                                    @Html.ValidationMessageFor(m => m.PersonalContract.PersonInChargeInitials, null, new { @class = "text-danger" })
+
+                                                </div>
+                                            </div>
+                                            @*Должность отвественного лица*@
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.PostOfPersonInCharge, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.PostOfPersonInCharge, new { @class = "form-control col-sm-10" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.Phone, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.Phone, new { @class = "form-control col-sm-10" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.PersonInChargeEmail, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.PersonInChargeEmail, new { @class = "form-control col-sm-10" })
+                                                    @Html.ValidationMessageFor(m => m.PersonalContract.PersonInChargeEmail, null, new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.CountryId, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.DropDownListFor(m => m.PersonalContract.CountryId, Model.Countries, new { @class = "form-control col-sm-10", id = "country" })
+                                                    @Html.ValidationMessageFor(m => m.PersonalContract.CountryId, null, new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.RegionId, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.DropDownListFor(m => m.PersonalContract.RegionId, Model.Regions, new { @class = "form-control col-sm-10", id = "region" })
+                                                    @Html.ValidationMessageFor(m => m.PersonalContract.RegionId, null, new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.CityId, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.DropDownListFor(m => m.PersonalContract.CityId, Model.Cities, new { @class = "form-control col-sm-10", id = "city" })
+                                                    @Html.ValidationMessageFor(m => m.PersonalContract.CityId, null, new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.Address, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.Address, new { @class = "form-control col-sm-10" })
+                                                </div>
+                                            </div>
+                                            @*Телефон предприятия*@
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.CompanyPhone, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.CompanyPhone, new { @class = "form-control col-sm-10" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.Email, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.Email, new { @class = "form-control col-sm-10" })
+                                                    @Html.ValidationMessageFor(m => m.PersonalContract.Email, null, new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            @*Сайт*@
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.Site, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextBoxFor(m => m.PersonalContract.Site, new { @class = "form-control col-sm-10" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.PersonalContract.Comment, new { @class = "control-label col-sm-2" })
+                                                <div class="col-sm-10">
+                                                    @Html.TextAreaFor(m => m.PersonalContract.Comment, new { @class = "form-control col-sm-10" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                @*
+                <div class="col-sm-10"></div>
+                <div class="col-sm-2 right"><button class="btn btn-default" type="submit" name="admissionCompany" value="AddContract" href="">Отправить</button></div>
+                                                *@
+                                                <div class="col-sm-12">
+                                                    <button class="btn btn-default pull-right" type="submit" name="admissionCompany" value="AddContract" href="">Отправить</button>
+                                                </div>
+                                            </div>
+                                        }
+
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <p>
+
+                    </p>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <p><strong>Выбрать предприятие</strong></p>
+                        </div>
+                    </div>
+
+
+                    @foreach (var m in Model.Companys)
+                    {
+                        <div class="panel panel-default container-fluid">
+                            <div class="panel-heading row">
+                                <div class="col-sm-9"><h4 class="panel-title"><a data-toggle="collapse" href="#@m.hId">@m.Name</a></h4></div>
+                                <div class="col-sm-3 text-right"><h4 class="panel-title">Осталось мест @m.Limit</h4></div>
+
+                            </div>
+                            <div id="@m.hId" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    @using (Html.BeginForm("Company", "Practice", FormMethod.Post))
+                                    {
+                                        @Html.HiddenFor(model => model.PracticeID)
+                                        <div class="row">
+                                            <div class="col-sm-10">@m.Direction</div>
+                                            <div class="col-sm-2"><label class="checkbox-inline"><input type="checkbox" value="1" disabled>с выездом</label></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-10">@m.GetCompanyAddressDescription()</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-10"><a href="@m.Site">Сайт</a></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-10">
+                                                @m.GetPersonInChargeDescription()
+                                            </div>
+                                            <div class="col-sm-10">
+                                                @if (m.HasScan)
+                                                {
+                                                    @Html.ActionLink(@m.ScanName(), "GetContract", new { contractID = m.ContractID })
+                                                }
+                                                else
+                                                {
+                                                    @Html.Label(@m.GetContractNumber())
+                                                }
+
+                                            </div>
+                                            <div>
+                                                @if (m.HasCompanyDocument)
+                                                {
+                                                    @Html.ActionLink("Информация о предприятии", "GetCompanyDocument", new { contractID = m.ContractID });
+                                                }
+                                            </div>
+                                            <div class="col-sm-10">@m.Comment</div>
+                                            <div class="col-sm-10">
+                                               @m.GetDivisionDescription()
+                                            </div>
+                                            <div class="col-sm-10">
+                                                @m.GetAdditionalTermsDescription()
+                                            </div>
+                                            <div class="col-sm-10">
+                                                @if (m.AdditionalFileId.HasValue)
+                                                {
+                                                    @Html.ActionLink(@m.AdditionalFileName, "GetDocument", new { fileId = m.AdditionalFileId })
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="row top-buffer">
+                                            <div class="col-sm-4" align="left" >
+                                                <label class="checkbox-inline">
+                                                    @Html.CheckBox("Agreement", false, new { id = "agree_" + @m.PeriodID, data_periodId = @m.PeriodID })
+                                                    @TextOfAgreement
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                @if (m.AgreementFileStorageId.HasValue)
+                                                {
+                                                    @Html.ActionLink("Согласие на передачу персональных данных", "GetDocument", new { fileId = m.AgreementFileStorageId});
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="row top-buffer">
+                                            <div class="col-sm-2">
+                                                @if (m.Limit > 0)
+                                                {
+                                                    <button disabled class="btn btn-default" type="submit" name="contractPeriodID" value="@m.PeriodID" id="submitBtn_@m.PeriodID" href="">Подать заявку</button>
+                                                }
+                                                else
+                                                {
+                                                    <button disabled class="btn btn-default" type="submit" name="contractPeriodID" value="@m.PeriodID" href="">Подать заявку</button>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        @*<div class="panel-footer">Panel Footer</div>*@
+
+                                    }
+                                </div>
+                                    </div>
+                        </div>
+                    }
+
+
+                </div>
+            }
+        </div>
+
+    </div>
+
+    @*<script>
+            $('.panel-collapse').on('show.bs.collapse', function () {
+                $(this).siblings('.panel-heading').addClass('active');
+            });
+
+            $('.panel-collapse').on('hide.bs.collapse', function () {
+                $(this).siblings('.panel-heading').removeClass('active');
+            });
+        </script>*@
+
+    <script type="text/javascript">
+        $(function() {
+
+            $('#country').change(function() {
+                // получаем выбранный id
+                var id = $(this).val();
+                $.ajax({
+                    type: 'GET',
+                    url: '@Url.Action("GetLocations")?parentId=' + id + '&level=2&id=region&targetProperty=PersonalContract.RegionId',
+                    success: function(data) {
+
+                        // заменяем содержимое присланным частичным представлением
+                        $('#region').replaceWith(data);
+                        $('#region').change(function() {
+                            // получаем выбранный id
+                            var id = $(this).val();
+                            $.ajax({
+                                type: 'GET',
+                                url: '@Url.Action("GetLocations")?parentId=' + id + '&level=3&id=city&targetProperty=PersonalContract.CityId',
+                                success: function(data) {
+
+                                    // заменяем содержимое присланным частичным представлением
+                                    $('#city').replaceWith(data);
+                                }
+                            });
+                        });
+                        $('#region').change();
+                    }
+                });
+            });
+        });
+
+        $(function () {
+            var NO_SEARCH_RESULT = 'no_result';
+            var orgSelector = $("#PersonalContract_CompanyName").autocomplete({
+            classes: {
+                "ui-autocomplete": "highlight2"
+            },
+            @*change: function (event, ui) {
+
+                if (ui.item == null)
+                    return;
+                var id = ui.item.CompanyId;
+                if (id) {
+                    $.ajax({
+                                type: 'GET',
+                                url: '@Url.Action("GetCompanyInfo")?Id=' + id,
+                        success: function (data) {
+                            $("#chooseOrgForm").append(data);
+                            $("#PersonalContract_CompanyName").prop('readonly', true);
+                        },
+                        error: function (jqXHR, textStatus, errorThrow) {
+                            alert(jqXHR.status);
+                            alert(errorThrow);
+                        }
+                                });
+                }
+
+            },*@
+            source: function (request, response) {
+                var searchString = request.term.trim();
+                if (searchString.length < 3)
+                    return;
+                $.ajax({
+                    url: '@Url.Action("AutoCompleteSearch","Practice")',
+                    dataType: "json",
+                    data: {
+                        term: searchString
+                    },
+                    success: function (data) {
+                        //var b = response(data);
+                        var result = $.map(data, function (item) {
+                            return {
+                                label: item.Name,
+                                //value: item.Name,
+                                CompanyId :item.Value
+                            };
+                        });
+                        if (!result.length) {
+                            result.push(NO_SEARCH_RESULT);
+                        }
+                        response(result);
+                    },
+                    //error: function (xhr, status, error) {
+                    //    //alert("Error");
+                    //}
+                    messages: {
+                        noResults: '',
+                        results: ''
+                    },
+                });
+                },
+
+                select: function (event, ui) {
+                    if (ui.item ==null) return;
+                    $("#PersonalContract_CompanyName").val(ui.item.label);
+                    if (ui.item == null)
+                    return;
+                    var id = ui.item.CompanyId;
+                    if (id) {
+                    $.ajax({
+                         type: 'GET',
+                        url: '@Url.Action("GetCompanyInfo")',
+                        data: {
+                            Id: id,
+                            practiceId: $("#PracticeID").val(),
+                            instituteTitle: $("#InstituteTitle").val()
+                               },
+                        success: function (data) {
+                            $("#chooseOrgForm").append(data);
+                            $("#PersonalContract_CompanyName").prop('readonly', true);
+                        },
+                        error: function (jqXHR, textStatus, errorThrow) {
+                            alert(jqXHR.status);
+                            alert(errorThrow);
+                        }
+                                });
+                }
+            },
+            minLength: 3,
+                create: function () {
+                    $('.ui-helper-hidden-accessible').remove();
+
+                    $(this).data('ui-autocomplete')._renderMenu = function (ul, items) {
+                        var that = this;
+                        var wrapper = $('<div/>');
+                        if (items.length === 1 && items[0].value === NO_SEARCH_RESULT) {
+                            $('<div>Предприятие не найдено... Но вы можете добавить новое предприятие</div>').appendTo(wrapper);
+                        } else {
+                            $.each(items, function (index, item) {
+                                that._renderItemData(ul, item);
+                            });
+                        }
+                        var button = $("<button/>", {
+                            id: 'addNewOrganization',
+                            html: '<span class="glyphicon glyphicon-plus-sign"></span> Добавить новое предприятие',
+                            class: 'btn btn-default btn-primary',
+                            click: function () {
+                                $("#PersonalContract_CompanyName").autocomplete("close");
+
+                                $('#chooseOrgForm').toggle();
+                                $('#addNewOrgForm').toggle();
+                            },
+                           
+                        });
+                        
+                        wrapper.on("click mouseenter", function (event) {
+
+                            event.stopImmediatePropagation();
+                        });
+                        button.appendTo(wrapper);
+                        wrapper.appendTo(ul);
+                };
+            }
+            //delay: 400
+        });
+
+    })
+    //$(document).ready(function () {
+    //    $("#PersonalContract_CompanyName").each(function () {
+    //        var url = $(this).data('autocomplete');
+    //        $this.autocomplete({
+    //            source: function (request, response) {
+    //                $.getJSON(url, { term: request.term },
+    //                    response);
+    //            }
+    //        });
+
+    //    });
+    //});
+        $("#cancelAddOrganizationButton").click(function () {
+            $('#chooseOrgForm').toggle();
+            $('#addNewOrgForm').toggle();
+            $('#PersonalContract_CompanyName').val("");
+        });
+
+        $(document).ready(function() {
+            $("#panelGroup").on("change", function (event) {
+                var checkbox = event.target;
+                if (checkbox.getAttribute('name') !== "Agreement") return;
+
+                var periodId = checkbox.dataset.periodid;
+                var submitBtn = document.getElementById("submitBtn_" + periodId);
+                if (!submitBtn) return;
+                
+                if (checkbox.checked){
+                    submitBtn.removeAttribute("disabled"); 
+                } else {
+                    submitBtn.setAttribute("disabled", "disabled");
+                }
+            })
+        });
+
+
+        //$('#addNewOrgForm input').on('blur', function () {
+        //    if ($('#country').val()=="") {
+        //        $('button.btn').prop('disabled', false);
+        //    } else {
+        //        $('button.btn').prop('disabled', 'disabled');
+        //    }
+        //});
+
+
+
+    </script>
+
+</body>
+
+</html>

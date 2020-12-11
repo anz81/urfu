@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - ИТС</title>
+    @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/themes/base/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/datatables")
+</head>
+<body>
+@Html.Partial("_Navbar")
+<div class="container-fluid body-content">
+    @RenderBody()
+    <hr/>
+    <footer>
+        <p>&copy; @DateTime.Now.Year - УрФУ ИТС</p>
+    </footer>
+</div>
+
+@Scripts.Render("~/bundles/otf")
+<script>
+    $.datepicker.setDefaults($.datepicker.regional['ru']);
+</script>
+@RenderSection("scripts", required: false)
+
+</body>
+</html>
+@{MvcApplication.Touch();}

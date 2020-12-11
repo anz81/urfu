@@ -1,0 +1,491 @@
+﻿@{
+    ViewBag.Title = "Справочник результатов обучения";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+<style>
+    .x-action-col-icon{
+        margin-left: 5px;
+    }
+    </style>
+
+@section scripts
+{
+    <script type="text/javascript">
+
+        Ext.define('EduResult',
+            {
+                extend: 'Ext.data.Model',
+                fields: [
+                    { name: 'id', type: 'int' },
+                    { name: 'code', type: 'string' },
+                    { name: 'description', type: 'string' },
+                    { name: 'directionId', type: 'string' },
+                    { name: 'directionOkso', type: 'string' },
+                    { name: 'directionName', type: 'string' },
+                    { name: 'profileId', type: 'string' },
+                    { name: 'profileCode', type: 'string' },
+                    { name: 'profileName', type: 'string' },
+                    { name: 'divisionId', type: 'string' },
+                    { name: 'divisionName', type: 'string' },
+                    { name: 'standard', type: 'string' }
+                ]
+            });
+
+        Ext.onReady(function () {
+            Ext.QuickTips.init();
+            var store = Ext.create("Ext.data.BufferedStore",
+                {
+                    model: 'EduResult',
+                    autoLoad: true,
+                    pageSize: 300,
+                    remoteSort: true,
+                    remoteFilter: true,
+                    proxy: {
+                        type: 'ajax',
+                        url: window.location.pathname,
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        }
+                    }
+                });
+
+            var prevSettings = {};
+            try {
+                var restoredSettings = JSON.parse(localStorage.getItem("EduResultsFilters") || "[]");
+                for (var i = 0; i < restoredSettings.length; i++) {
+                    var option = restoredSettings[i];
+                    prevSettings[option.property] = option.value;
+                }
+            } catch (err) {
+            }
+
+            var filtersWindow = null;
+            var setFilters = function() {
+                var settings = [
+                    { property: 'directionOkso', value: filtersWindow.getComponent("directionOksoFilter").getValue() },
+                    { property: 'directionName', value: filtersWindow.getComponent("directionNameFilter").getValue() },
+                    { property: 'divisionName', value: filtersWindow.getComponent("divisionNameFilter").getValue() },
+                    { property: 'profileCode', value: filtersWindow.getComponent("profileCodeFilter").getValue() },
+                    { property: 'description', value: filtersWindow.getComponent("descriptionFilter").getValue() },
+                    { property: 'standard', value: filtersWindow.getComponent("standardFilter").getValue() },
+                ];
+                store.setFilters(settings);
+                localStorage.setItem("EduResultsFilters", JSON.stringify(settings));
+            };
+
+             
+
+            filtersWindow = Ext.create('Ext.window.Window',
+                {
+                    title: "Фильтры",
+                    closeAction: 'hide',
+                    resizable: false,
+                    autoHeight: true,
+                    bodyPadding: 6,
+                    defaults: {
+                        xtype: 'textfield',
+                        labelWidth: 190,
+                        width: 600
+                    },
+
+                    items: [
+                        {
+                            fieldLabel: 'ОКСО направления',
+                            itemId: 'directionOksoFilter',
+                            value: prevSettings['directionOkso']
+                        },
+                        {
+                            fieldLabel: 'Стандарт ВО',
+                            itemId: 'standardFilter',
+                            value: prevSettings['standard']
+                        },
+                        {
+                            fieldLabel: 'Название направления',
+                            itemId: 'directionNameFilter',
+                            value: prevSettings['directionName']
+                        },
+                        {
+                            fieldLabel: 'Код образовательной программы',
+                            itemId: 'profileCodeFilter',
+                            value: prevSettings['profileCode']
+                        },                        
+                        {
+                            fieldLabel: 'Название формирующего подразделения',
+                            itemId: 'divisionNameFilter',
+                            value: prevSettings['divisionName']
+                        },
+                        {
+                            fieldLabel: 'Описание РО',
+                            itemId: 'descriptionFilter',
+                            value: prevSettings['description']
+                        }
+                    ],
+
+                    buttons: [
+                        {
+                            text: "OK",
+                            handler: function() {
+                                setFilters();
+                                this.up('window').hide();
+                            }
+                        }, {
+                            text: "Отмена",
+                            handler: function() { this.up('window').hide(); }
+                        }
+                    ]
+                });
+
+            setFilters();
+
+            var hideButtons = function (value, meta, record) {
+                if (record.get('canremove'))
+                    return "its - medium";
+                else
+            return 'x-hidden';
+            };
+
+            var grid = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: store,
+                    loadMask: true,
+
+                    tbar: [
+                        {
+                            xtype: 'button',
+                            text: 'Добавить РО',
+                            handler: function() { createRecordWindow(store).show(); }
+                        }, {
+                            xtype: 'button',
+                            text: 'Фильтры...',
+                            handler: function() { filtersWindow.show(); }
+                        }, {
+                            xtype: 'button',
+                            text: "Отменить фильтры",
+                            handler: function() {
+                                localStorage.setItem("EduResultsFilters", []);
+                                store.clearFilter();
+                            }
+                        }
+                    ],
+
+                    columns: [
+                        {
+                            xtype: 'rownumberer',
+                            width: 70,
+                            header: '№'
+                        }, {
+                            header: 'Код РО',
+                            dataIndex: 'code',
+                            width: 200,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            header: 'Описание РО',
+                            dataIndex: 'description',
+                            width: 150,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            header: 'ОКСО направления',
+                            dataIndex: 'directionOkso',
+                            width: 150,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            header: 'Название направления',
+                            dataIndex: 'directionName',
+                            width: 250,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            header: 'Код образовательной программы',
+                            dataIndex: 'profileCode',
+                            width: 250,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            header: 'Стандарт ВО',
+                            dataIndex: 'standard',
+                            width: 250,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },{
+                            header: 'Название образовательной программы',
+                            dataIndex: 'profileName',
+                            width: 250,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            header: 'Название формирующего подразделения',
+                            dataIndex: 'divisionName',
+                            width: 250,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            xtype: 'actioncolumn',
+                            resizable: false,
+                            sortable: false,
+                            width: 60,
+                            align: 'center',
+                            items: [
+                                {
+                                    icon: '@Url.Content("/Content/Images/edit.png")',
+                                    tooltip: 'Редактировать',
+                                    handler: function (grid, rowIndex, colIndex, item, e, record) {
+                                        createRecordWindow(store, record).show();
+                                    }
+                                },
+                                {
+                                    icon: '@Url.Content("/Content/Images/remove.png")',
+                                    tooltip: 'Удалить',                                    
+                                    handler: function (grid, rowIndex, colIndex, item, e, record) {
+                                        Ext.MessageBox.show({
+                                            title: 'Удаление',
+                                            msg: 'Вы действительно желаете удалить запись?',
+                                            buttons: Ext.MessageBox.YESNO,
+                                            fn: function (button) {
+                                                if ('yes' == button) {
+                                                 Ext.Ajax.request({
+                                                method: 'GET',
+                                                url: '@Url.Action("Delete")',
+                                                success: function(response) {
+                                                    store.load();
+                                                },
+                                                failure: function(d) {
+                                                    if (d.error)
+                                                        alert(d.error);
+                                                    console.error(d);
+                                                },
+                                                params: { id: record.get('id') }
+                                            });
+                                                }
+
+                                            },
+                                            icon:Ext.MessageBox.QUESTION
+                                        })
+                                    },
+                                    getClass: hideButtons
+                                }
+                            ]
+                        }
+                    ]
+                });
+
+            Urfu.createViewport('border', [grid]);
+
+            function createRecordWindow(store, record) {
+                return Ext.create('Ext.window.Window',
+                    {
+                        title: record ? 'Редактирование записи' : 'Добавление записи',
+                        resizable: false,
+                        autoHeight: true,
+                        bodyPadding: 6,
+                        modal: true,
+
+                        viewModel: {
+                            data: Ext.apply({}, record ? record.data : {}),
+                            stores: {
+                                standards: {
+                                    autoLoad: true,
+                                    proxy: {
+                                        type: 'ajax',
+                                        url: '@Url.Action("UserStandard")',
+                                        reader: { type: 'json' }
+                                    }
+                                  },
+                                directions: { },
+                                divisions: {
+                                    autoLoad: true,
+                                    proxy: {
+                                        type: 'ajax',
+                                        url: '@Url.Action("UserDivisions")',
+                                        reader: { type: 'json' }
+                                    }
+                                },
+                                profiles: {
+                                    autoLoad: '{directionId}{divisionId}',
+                                    proxy: {
+                                        type: 'ajax',
+                                        url: '@Url.Action("UserProfiles")',
+                                        reader: { type: 'json' },
+                                        extraParams: {
+                                            directionId: '{directionId}',
+                                            divisionId: '{divisionId}'
+                                        }
+                                    }
+                                }
+                            },
+                            formulas: {
+                                allowSelectProfile: function(get) {
+                                    return get('directionId') && get('divisionId');
+                                }
+                            }
+                        },
+
+                        items: {
+                            xtype: 'form',
+                            id: 'form',
+                            layout: { type: 'vbox', align: 'stretch' },
+                            defaults: {
+                                xtype: 'textfield',
+                                labelWidth: 190,
+                                width: 600,
+                                listeners: {
+                                    // Поиск в комбобоксах по вхождению подстроки без учета регистра в displayField, а не по началу значения displayField
+                                    beforequery: function (qe) {
+                                        qe.query = new RegExp(qe.query, 'i');
+                                        qe.forceAll = true;
+                                    }
+                                }
+                            },
+                            items: [
+                                {
+                                    fieldLabel: 'Идентификатор',
+                                    name: 'id',
+                                    bind: '{id}',
+                                    readOnly: true,
+                                    hidden: true,
+                                },
+                                {
+                                    fieldLabel: 'Код РО',
+                                    name: 'code',
+                                    bind: '{code}',
+                                    readOnly: true,
+                                    hidden: !record
+                                },
+                                {
+                                    fieldLabel: 'Описание РО',
+                                    name: 'description',
+                                    bind: '{description}',
+                                    allowBlank: false
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    name: 'standard',
+                                    fieldLabel: 'Стандарт ВО',
+                                    bind: {
+                                        store: '{standards}',
+                                        value: '{standard}'
+                                    },
+                                    allowBlank: false,
+                                    editable: true,
+                                    queryMode: 'local',
+                                    displayField: 'standard',
+                                    listeners: {
+                                        change: function (t, newValue, oldValue) {
+                                            try {
+                                                var viewModeldata = t.up('form').up('window').viewModel.data;
+                                                var standarddata = viewModeldata.standards.findRecord('standard',newValue).data;
+                                                t.up('form').up('window').viewModel.getStore('directions').setData(standarddata.directions);                                                                                                                                        
+                                             }
+                                            catch{
+                                                t.up('form').up('window').viewModel.data.directions.setData([]);
+                                            }    
+                                            var directionfield = t.up('form').query('[name=directionId]')[0];
+                                            directionfield.clearValue();  
+                                            if (record)
+                                                directionfield.setValue(record.data.directionId);
+                                        }
+                                    }
+
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    name: 'directionId',
+                                    fieldLabel: 'Направление',
+                                    bind: {
+                                        store: '{directions}',
+                                        value: '{directionId}'
+                                    },
+                                    allowBlank: false,
+                                    editable: true,
+                                    queryMode: 'local',
+                                    displayField: 'oksoAndTitle',
+                                    valueField: 'id'
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    name: 'divisionId',
+                                    fieldLabel: 'Подразделение',
+                                    bind: {
+                                        store: '{divisions}',
+                                        value: '{divisionId}'
+                                    },
+                                    allowBlank: false,
+                                    editable: true,
+                                    queryMode: 'local',
+                                    displayField: 'nameAndShortName',
+                                    valueField: 'id'
+                                },
+                                {
+                                    xtype: 'combobox',
+                                    name: 'profileId',
+                                    fieldLabel: 'Образовательная программа',
+                                    forceSelection: true,
+                                    anyMatch: true,
+                                    disabled: true,
+                                    bind: {
+                                        store: '{profiles}',
+                                        value: '{profileId}',
+                                        disabled: '{!allowSelectProfile}'
+                                    },
+                                    allowBlank: false,
+                                    editable: true,
+                                    queryMode: 'local',
+                                    displayField: 'name',
+                                    tpl: Ext.create('Ext.XTemplate',
+                                        '<tpl for=".">',
+                                        '<div class="x-boundlist-item" style="border-bottom:1px solid #f0f0f0;">',
+                                        '<div><b>{code}</b>{name}</div>' +
+                                        '</div>',
+                                        '</tpl>'
+                                    ),
+                                    valueField: 'id'
+                                }
+                            ]
+                        },
+
+                        buttons: [
+                            {
+                                text: "OK",
+                                formBind: true,
+                                handler: function() {
+                                    var window = this.up('window');
+                                    var form = window.down('form');
+                                    if (form.isValid()) {
+                                        Ext.Ajax.request({
+                                            url: record ? '@Url.Action("Edit")' : '@Url.Action("Create")',
+                                            success: function(response) {
+                                                var d = Ext.JSON.decode(response.responseText);
+                                                if (!d.success) {
+                                                    if (d.errors) {
+                                                        var basicForm = form.getForm();
+                                                        for (var key in d.errors) {
+                                                            if (d.errors.hasOwnProperty(key)) {
+                                                                var field = basicForm.findField(key);
+                                                                if (field)
+                                                                    field.markInvalid(d.errors[key]);
+                                                            }
+                                                        }
+                                                    }
+                                                    if (e.error)
+                                                        alert(e.error);
+                                                } else {
+                                                    window.close();
+                                                    store.load();
+                                                }
+                                            },
+                                            failure: function(d) {
+                                                if (d.error)
+                                                    alert(d.error);
+                                                console.error(d);
+                                            },
+                                            jsonData: form.getValues()
+                                        });
+                                    }
+                                }
+                            }, {
+                                text: "Отмена",
+                                handler: function() { this.up('window').close(); }
+                            }
+                        ]
+                    });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,263 @@
+﻿
+@{
+    ViewBag.Title = "Доверенность";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@{
+
+    <div class="form-horizontal">
+        <script type="text/javascript">
+
+            Ext.onReady(function () {
+                Ext.tip.QuickTipManager.init();
+                
+                var store = Ext.create("Ext.data.Store",
+                    {
+                        idProperty: 'Id',
+                        fields: [
+                            "Id","Number", "StartDate","EndDate"
+                        ],
+                        autoLoad: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: '@Url.Action("GetLetterOfAttorney")',
+                            reader: {
+                                type: 'json'
+                            }
+                        }
+                    });
+
+                function required(value) {
+                    return (value != undefined && value.length > 0) ? true : "Поле не может быть пустым";
+                }
+
+                function checkEditRole(actions) {
+                    if ('@ViewBag.CanEdit' == 'True') {
+                        actions();
+                    }
+                    else {
+                        Ext.MessageBox.alert('Ошибка', "У вас нет прав вносить изменения в справочник");
+                    }
+                }
+
+                var editWnd = Ext.create('Ext.window.Window',
+                    {
+                        title: "Добавление доверенности",
+                        closeAction: 'hide',
+                        resizable: false,
+                        autoHeight: true,
+                        bodyPadding: 6,
+                        rowHeight: 100,
+                        items: [{
+                            xtype: 'hidden',
+                            itemId: 'Id',
+                        }, {
+                            xtype: 'textfield',
+                            fieldLabel: 'Номер доверенности*',
+                            labelWidth: 140,
+                            itemId: 'Number',
+                            width: 500,
+                            maxLength: 20,
+                            validator: required
+                        }, {
+                            xtype: 'datefield',
+                            fieldLabel: 'Дата начала действия доверенности*',
+                            labelWidth: 140,
+                            itemId: 'StartDate',
+                            format: 'd.m.Y',
+                            width: 500,
+                            validator: required,
+                            startDay: 1,
+                            invalidText: "Дата должна быть указана в формате дд.мм.гггг "
+                            }, {
+                                xtype: 'datefield',
+                                fieldLabel: 'Дата окончания действия доверенности*',
+                                labelWidth: 140,
+                                itemId: 'EndDate',
+                                format: 'd.m.Y',
+                                width: 500,
+                                validator: required,
+                                startDay: 1,
+                                invalidText: "Дата должна быть указана в формате дд.мм.гггг "
+                            }
+                        ],
+
+                        buttons: [{
+                            text: "Сохранить",
+                            handler: function () {
+                                var isValid = true;
+                                editWnd.items.items.forEach(function (element, index, array) {
+                                    if (!element.isValid()) isValid = false;
+                                });
+                                if (!isValid) return false;
+
+                                Ext.Ajax.request({
+                                    url: '@Url.Action("EditLettersOfAttorney")',
+                                    params: {
+                                        id: editWnd.getComponent("Id").getValue() ? editWnd.getComponent("Id").getValue() : 0,                                 
+                                        number: editWnd.getComponent("Number").getValue(),
+                                        startdate: editWnd.getComponent("StartDate").getValue(),
+                                        enddate: editWnd.getComponent("EndDate").getValue(),
+                                    },
+                                    success: function (response) {
+                                        if (response.responseText != " ") {
+                                            var data = Ext.decode(response.responseText);
+                                            if (data.success) {
+                                                editWnd.hide();
+                                                store.reload();
+                                            }
+                                            else {
+                                                Ext.MessageBox.alert('Ошибка', data.message);
+                                            }
+                                        }
+                                    },
+                                    failure: function (response) {
+                                        Ext.MessageBox.alert('Ошибка', 'Неизвестная ошибка');
+                                    }
+                                });
+                            }
+                            },{
+                                text: "Отмена",
+                                handler: function () { editWnd.hide(); }
+                            }]
+                    });
+
+                var gridPanel = Ext.create('Ext.grid.Panel',
+                    {
+                        region: 'center',
+                        store: store,
+                        loadMask: true,
+                        columnLines: true,                       
+                        tbar: [{
+                            xtype: 'button',
+                            text: "Добавить",
+                            handler: function () {
+                                checkEditRole(function () {
+                                    editWnd.items.items.forEach(function (element, index, array) {
+                                        element.setValue("");
+                                        element.clearInvalid();
+                                    });
+                                    editWnd.show();
+                                })
+                            }
+                        }],
+                        columns: [{
+                            xtype: 'rownumberer', width: 50
+                        }, {
+                                header: 'Номер доверенности',
+                                align: 'right',
+                                dataIndex: 'Number',
+                                width: 300,
+                                cellWrap: true,
+                               renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            header: 'Дата начала действия доверенности',
+                            align: 'right',
+                            dataIndex: 'StartDate',
+                            width: 300,
+                            cellWrap: true,
+                            startDay: 1,
+                            }, {
+                                header: 'Дата окончания действия доверенности',
+                                align: 'right',
+                                dataIndex: 'EndDate',
+                                width: 300,
+                                ранитьellWrap: true,
+                                startDay: 1,
+                            }, {                       
+                            xtype: 'actioncolumn',
+                            region: 'center',
+                            sortable: false,
+                            width: 70,
+                            items: [
+                                {
+                                    icon: '@Url.Content("~/Content/Images/edit.png")',
+                                    iconCls: 'icon-padding',
+                                    text: 'Редактировать',
+                                    tooltip: 'Редактировать',
+                                    handler: function (grid, rowIndex, colIndex) {
+                                        checkEditRole(function () {
+                                            var rec = grid.getStore().getAt(rowIndex);
+                                            editWnd.items.items.forEach(function (element, index, array) {
+                                                //if (rec.data[element.itemId] != undefined)  ???
+                                                element.setValue(rec.data[element.itemId]);
+                                            });
+                                            editWnd.show();
+                                        });
+                                    }
+                                }, {
+                                    icon: '@Url.Content("~/Content/Images/remove.png")',
+                                    iconCls: 'icon-padding',
+                                    text: 'Удалить',
+                                    tooltip: 'Удалить',
+                                    handler: function (grid, rowIndex, colIndex) {
+                                        checkEditRole(function () {
+                                            var request = function () {
+                                                var rec = grid.getStore().getAt(rowIndex);
+                                                Ext.Ajax.request({
+                                                    url: '@Url.Action("RemoveLettersOfAttorney")',
+                                                    params: {
+                                                        id: rec.get("Id")
+                                                    },
+                                                    success: function (response) {
+                                                        if (response.responseText != "") {
+                                                            var data = Ext.decode(response.responseText);
+                                                            if (data.success) {
+                                                                store.reload();
+                                                            }
+                                                            else {
+                                                                Ext.MessageBox.alert('Ошибка', data.message);
+                                                            }
+                                                        }
+                                                    },
+                                                    failure: function (response) {
+                                                        Ext.MessageBox.alert('Ошибка', 'Неизвестная ошибка');
+                                                    }
+                                                });
+                                            };
+
+                                            Ext.MessageBox.show({
+                                                title: 'Удалить доверенность?',
+                                                msg: "Вы действительно хотите удалить информацию о доверенности?",
+                                                buttons: Ext.MessageBox.YESNO,
+                                                fn: function (btn) {
+                                                    if (btn === 'yes') {
+                                                        request();
+                                                    }
+                                                },
+                                                icon: Ext.MessageBox.QUESTION
+                                            });
+                                        });
+                                    }
+                                }]
+
+                        }
+                        ]
+                    });
+
+                var items = [
+                    gridPanel
+                ];
+
+                Urfu.createViewport('border', items);
+
+                gridPanel.getStore().on('load', function (store, records, options) {
+                    var focus = '@ViewBag.Focus';
+                    if (focus && focus.length > 0) {
+
+                        var focusRow = store.findExact('Id', parseInt(focus));
+                        if (focusRow >= 0) {
+                            var rowData = store.getAt(focusRow);
+                            gridPanel.getView().focusRow(rowData);
+                            gridPanel.getSelectionModel().select(rowData);
+                        }
+                    }
+                    return false;
+                });
+                     
+            });
+
+        </script>
+    </div>
+}

@@ -1,0 +1,44 @@
+﻿@model Urfu.Its.Web.Models.MinorAutoVM
+
+@{
+    ViewBag.Title = "Расчёт зачислений на майноры";
+}
+
+
+<h2>@ViewBag.Title</h2>
+
+<h3>Расчёт выполнен</h3>
+
+<table class="table" id="tablePrograms">
+    <thead>
+
+        <tr>
+            <th>
+                Год
+            </th>
+            <th>
+                Семестр
+            </th>
+            <th>
+                Создано зачислений
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                @Model.Year
+            </td>
+            <td>
+                @Model.Semester
+            </td>
+            <th>
+                @Model.AdmittedCount
+            </th>
+        </tr>
+    </tbody>
+</table>
+
+@Html.ActionLink("Отчёт о результате", "DownloadAutoAdmissionReport", "Admission2")
+<br>
+@Html.ActionLink("К списку майноров","Minors","Admission2")

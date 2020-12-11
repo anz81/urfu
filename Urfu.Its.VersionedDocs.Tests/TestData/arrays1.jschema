@@ -1,0 +1,97 @@
+﻿{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "StringArray1": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "string"
+      }
+    },
+    "BooleanArray1": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "boolean"
+      }
+    },
+    "IntegerArray1": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "integer"
+      }
+    },
+    "NumberArray1": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "number"
+      }
+    },
+    "StringArrayWithNulls1": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": ["null", "string"]
+      }
+    },
+    "EmptyStringArray1": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "string"
+      }
+    },
+    "ObjectArray1": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "StringProp1": {
+            "type": "string"
+          },
+          "BooleanProp1": {
+            "type": "boolean"
+          },
+          "IntegerProp1": {
+            "type": "integer"
+          },
+          "NumberProp1": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "StringProp1",
+          "BooleanProp1",
+          "IntegerProp1",
+          "NumberProp1"
+        ]
+      }
+    },
+    "ArrayOfIntArrays1": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "array",
+        "additionalItems": false,
+        "items": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "required": [
+    "StringArray1",
+    "BooleanArray1",
+    "IntegerArray1",
+    "NumberArray1",
+    "StringArrayWithNulls1",
+    "EmptyArray1",
+    "ObjectArray1",
+    "ArrayOfIntArrays1"
+  ]
+}

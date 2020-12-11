@@ -1,0 +1,771 @@
+﻿@using Newtonsoft.Json
+@using Urfu.Its.Common
+@using Urfu.Its.Web.DataContext
+@model Urfu.Its.Web.Models.EditVariantVM
+@{
+
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+
+}
+<div id="variantProps" style="display:none">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.EduProgram)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.qualification)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.familirizationType)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.familirizationCondition)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    @Html.DisplayFor(model => model.EduProgram)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.qualification)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.familirizationType)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.familirizationCondition)
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        
+        var btnStatePrefix = "btn-state-";
+        var variantState = @((int) Model.State);
+        var approved = @((int) VariantState.Approved);
+        function gettoken() {
+            var token = '@Html.AntiForgeryToken()';
+            token = $(token).val();
+            return token;
+        }
+
+        function changeState(state) {
+
+            if (state == variantState) return;
+            Ext.Ajax.request({
+                method: 'POST',
+                url: '@Url.Action("ChangeState","Variant",new {variantId = Model.VariantId})',
+                params: {
+                    state: state,
+                    __RequestVerificationToken: gettoken()
+                },
+                success: function (response) {
+                    var data = Ext.decode(response.responseText);
+                    if (data.result) {
+                        //window.location.reload();
+                        $('#' + btnStatePrefix + variantState).removeClass('btn-primary');
+                        $('#' + btnStatePrefix + state).addClass('btn-primary');
+                        variantState = state;
+                    }
+                    else {
+                        Ext.MessageBox.alert('Ошибка',
+                            data.message,
+                            function () {
+                                //action to complete when user clicks ok.
+                            });
+                    }
+                },
+                error: function (response) {
+                    Ext.MessageBox.alert('Ошибка',
+                        "Не удалось сменить состояние документа, недостаточно прав",
+                        function () {
+                            //action to complete when user clicks ok.
+                        });
+                }
+            });
+        };
+
+        Ext.onReady(function () {
+            Ext.Ajax.timeout = 60000
+            Ext.tip.QuickTipManager.init();
+            var html = $('#variantProps').html();
+
+            var plainPanel = Ext.create('Ext.Panel',
+            {
+                padding: '5px',
+                border: false,
+                html: html
+            });
+
+            var formPanel = Ext.create('Ext.form.Panel',
+            {
+                title: 'Параметры @(Model.IsBase ? "версии ОП" : "траектории")',
+                collapsible: true,
+                padding: '5px',
+                //border: true,
+                frame: true,
+                defaults: {
+                    width: 500,
+                    cls: 'field-margin'
+                },
+                items: [
+                    {
+                        xtype: 'hidden',
+                        name: '__RequestVerificationToken',
+                        value: gettoken()
+                    },
+                    {
+                        xtype: 'hidden',
+                        name: 'VariantId',
+                        value: '@Model.VariantId'
+                    },
+                    {
+                        xtype: 'textfield',
+                        fieldLabel: '@Html.DisplayNameFor(m=>m.Name)',
+                        name: 'Name',
+                        cls: 'field-margin',
+                        value: '@Model.Name'
+                    }, {
+                        xtype: 'numberfield',
+                        fieldLabel: '@Html.DisplayNameFor(m => m.StudentsLimit)',
+                        name: 'StudentsLimit',
+                        cls: 'field-margin',
+                        hideTrigger: true,
+                        minValue: 0,
+                        value: '@Model.StudentsLimit'
+                    }, {
+                        xtype: 'numberfield',
+                        fieldLabel: '@Html.DisplayNameFor(m => m.Year)',
+                        name: 'Year',
+                        hideTrigger: true,
+                        cls: 'field-margin',
+                        minValue: 2014,
+                        value: '@Model.Year'
+                    }, {
+                        xtype: 'datefield',
+                        fieldLabel: '@Html.DisplayNameFor(m => m.SelectionDeadline)',
+                        name: 'SelectionDeadline',
+                        cls: 'field-margin',
+                        value: '@String.Format("{0:dd.MM.yy}",Model.SelectionDeadline)'
+                    }
+                ],
+                buttons: [
+                    {
+                        text: 'Сохранить',
+                        handler: function () {
+                            formPanel.getForm()
+                                .submit({
+                                    url: '@Url.Action("BasicContentEdit")',
+                                    success: function (form, action) {
+                                        Ext.MessageBox.alert('Параметры сохранены. ');
+                                    },
+                                    failure: function (form, action) {
+                                        Ext.MessageBox.alert('Параметры не сохранены. ', action.result.message);
+                                    }
+                                });
+                        }
+                    }
+                ]
+            });
+            //var fields = [
+            //    "Id", "GroupName", "GroupType", "SemestersTestUnits", "TestUnits", "WithGroupSelection",
+            //    "WithoutGroupSelection"
+            //];
+            var groupsStore = Ext.create("Ext.data.Store",
+            {
+
+                //fields: fields,
+
+                autoLoad: true,
+                //idProperty: 'id',
+                proxy: {
+                    type: 'ajax',
+                    url: '@Url.Action("GetGroupsForVariant",new {variantId = Model.VariantId})',
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    },
+                    timeout: 60000
+                },
+                //autosync: true
+            });
+
+
+            function totalSemesters(semIndex) {
+                var sum = 0;
+                groupsStore.each(function (record) {
+                    if (record.data.GeneralGroup)
+                        sum += record.data.SemestersTestUnits[semIndex];
+                });
+                return sum;
+            }
+
+            var groupsGridPanel = Ext.create('Ext.grid.Panel',
+            {
+                title: "Группы УП",
+                collapsible: true,
+                region: 'center',
+                store: groupsStore,
+                height: 350,
+                frame: true,
+                padding: '5px',
+                loadMask: true,
+                columnLines: true,
+                features: [{
+                    ftype: 'summary',
+                    dock: 'bottom'
+                }],
+                plugins: [
+                    Ext.create('Ext.grid.plugin.CellEditing', {
+                        clicksToEdit: 1,
+                        listeners: {
+                            'beforeedit': function (e, editor) {
+                                return variantState != approved;
+                            }
+                        }
+                    })],
+                columns: [
+                    { xtype: 'rownumberer', width: 50 },
+                    {
+                        dataIndex: 'Id',
+                        hidden: true
+                    },
+                    {
+                        header: 'Группа',
+                        dataIndex: 'GroupName',
+                        width: 400,
+                        cellWrap: true,
+                        summaryType: function (records) {
+                            return "Итого";
+                        },
+                        renderer: Ext.util.Format.htmlEncode
+                    },
+                    {
+                        header: 'Зачётные единицы в группе (план)',
+                        dataIndex: 'TestUnits',
+                        width: 150,
+                        renderer: Ext.util.Format.htmlEncode,
+                        summaryType: function (records) {
+                            var sum = 0;
+                            groupsStore.each(function (record) {
+                                if (record.data.GeneralGroup)
+                                    sum += record.data.TestUnits;
+                            });
+                            return sum;
+                        },
+                        editor: {
+                            xtype: 'numberfield',
+                            hideTrigger: true,
+                            allowBlank: false,
+                            minValue: 0
+                        }
+                    },
+                    {
+                        header: 'Зачётные единицы в группе (факт)',
+                        width: 150,
+                        renderer: Ext.util.Format.htmlEncode,
+                        renderer: function (value, meta, record) {
+                            var sum = 0;
+                            for (var i = 0; i <= 7; i++) {
+                                sum = sum + record.data.SemestersTestUnits[i];
+                            }
+                            return sum;
+                        },
+                        summaryType: function (records) {
+                            var sum = 0;
+                            for(var i = 0; i <= 7; i++)
+                            {
+                                sum = sum + totalSemesters(i);
+                            }
+                            return sum;
+                        }
+                    },
+                    {
+                        header: 'Семестр 1',
+                        //dataIndex: 'SemestersTestUnits',
+                        width: 110,
+                        renderer: function (value, meta, record) {
+                            return record.data.SemestersTestUnits[0];
+                        },
+                        summaryType: function (records) {
+                            return totalSemesters(0);
+                        }
+                    },
+                    {
+                        header: 'Семестр 2',
+                        //dataIndex: 'SemestersTestUnits',
+                        width: 110,
+                        renderer: function (value, meta, record) {
+                            return record.data.SemestersTestUnits[1];
+                        },
+                        summaryType: function (records) {
+                            return totalSemesters(1);
+                        }
+                    },
+                    {
+                        header: 'Семестр 3',
+                        //dataIndex: 'SemestersTestUnits',
+                        width: 110,
+                        renderer: function (value, meta, record) {
+                            return record.data.SemestersTestUnits[2];
+                        },
+                        summaryType: function (records) {
+                            return totalSemesters(2);
+                        }
+                    },
+                    {
+                        header: 'Семестр 4',
+                        dataIndex: 'SemestersTestUnits',
+                        width: 110,
+                        renderer: function (value, meta, record) {
+                            return record.data.SemestersTestUnits[3];
+                        },
+                        summaryType: function (records) {
+                            return totalSemesters(3);
+                        }
+                    },
+                    {
+                        header: 'Семестр 5',
+                        //dataIndex: 'SemestersTestUnits',
+                        width: 110,
+                        renderer: function (value, meta, record) {
+                            return record.data.SemestersTestUnits[4];
+                        },
+                        summaryType: function (records) {
+                            return totalSemesters(4);
+                        }
+                    },
+                    {
+                        header: 'Семестр 6',
+                        //dataIndex: 'SemestersTestUnits',
+                        width: 110,
+                        renderer: function (value, meta, record) {
+                            return record.data.SemestersTestUnits[5];
+                        },
+                        summaryType: function (records) {
+                            return totalSemesters(5);
+                        }
+                    },
+                    {
+                        header: 'Семестр 7',
+                        //dataIndex: 'SemestersTestUnits',
+                        width: 110,
+                        renderer: function (value, meta, record) {
+                            return record.data.SemestersTestUnits[6];
+                        },
+                        summaryType: function (records) {
+                            return totalSemesters(6);
+                        }
+                    },
+                    {
+                        header: 'Семестр 8',
+                        //dataIndex: 'SemestersTestUnits',
+                        width: 110,
+                        renderer: function (value, meta, record) {
+                            return record.data.SemestersTestUnits[7];
+                        },
+                        summaryType: function (records) {
+                            return totalSemesters(7);
+                        }
+                    }
+
+                ]
+
+            });
+            groupsGridPanel.on('edit',
+                function (editor, eValue) {
+                    var record = eValue.record;
+                    Ext.Ajax.request({
+                        url: '@Url.Action("SetVariantGroupTestUnits")',
+                        params: {
+                            groupId: record.data.Id,
+                            testUnits: eValue.value,
+                            __RequestVerificationToken: gettoken()
+                        },
+                        success: function (response) {
+                            var data = Ext.decode(response.responseText);
+
+                            if (data.message && data.message.length > 0) {
+                                Ext.MessageBox.alert('Ошибка',
+                                    data.message,
+                                    function () {
+                                        //action to complete when user clicks ok.
+                                    });
+                                record.reject();
+                            }
+                            record.commit();
+                            //gridPanel.getView().refresh();
+                        },
+                        error: function (response) {
+                            record.reject();
+                        }
+                    });
+
+                    // commit the changes right after editing finished
+                    //e.grid.store.save();
+
+                });
+
+
+            var modulesStore = Ext.create("Ext.data.Store",
+            {
+
+                //fields: fields,
+
+                autoLoad: true,
+                //idProperty: 'id',
+                proxy: {
+                    type: 'ajax',
+                    url: '@Url.Action("GetVariantContentRows",new {variantId = Model.VariantId})',
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    },
+                    timeout: 120000
+
+
+                },
+                //autosync: true
+            });
+            var variantSelectionGroups = @Html.Raw(Json.Encode(@ViewBag.VariantSelectionGroups));
+            var programVariantSelectionGroups = @Html.Raw(Json.Encode(@ViewBag.ProgramVariantSelectionGroups));
+
+            var moduleTypes = @Html.Raw(Json.Encode(@ViewBag.ModuleTypes));
+            var groupTypes = {};//'@(Html.Raw(Json.Encode(EnumHelper<VariantGroupType>.GetDisplayValuesDict())))';
+            @{
+                foreach (var keyValuePair in EnumHelper<VariantGroupType>.GetDisplayValuesDict())
+                {
+                    <text>groupTypes["@((int)keyValuePair.Key)"] = '@keyValuePair.Value';</text>
+                }
+            }
+
+            var comboModuleTypes = new Ext.form.ComboBox({
+                store: Ext.create('Ext.data.Store', {
+                    fields:
+                    [
+                        { type: 'string', name: 'Id' },
+                        { type: 'string', name: 'Name' }
+                    ],
+                    data: moduleTypes
+                }),
+                valueField: "Id",
+                displayField: "Name",
+                editable: false
+            });
+            var comboSelectionGroups = new Ext.form.ComboBox({
+                store: Ext.create('Ext.data.Store',
+                {
+                    fields:
+                    [
+                        { type: 'string', name: 'Id' },
+                        { type: 'string', name: 'Name' }
+                    ],
+                    data: variantSelectionGroups
+                }),
+                valueField: "Id",
+                displayField: "Name",
+                editable: false,
+                listeners:{}
+            });
+
+            var comboBoxRenderer = function(combo,fieldName) {
+                return function(value,meta,record) {
+                    var idx = combo.store.find(combo.valueField, value);
+                    var rec = combo.store.getAt(idx);
+                    //if (record && record.data.Base) return "В основной";
+                    if (fieldName === 'ModuleTypeId')
+                        return (rec === null ? '' : rec.get(combo.displayField) );
+                    return Urfu.renders.htmlEncodeWithToolTip((rec === null ? '' : rec.get(combo.displayField) ),meta);
+                };
+            }
+
+
+            var modulesGridPanel = Ext.create('Ext.grid.Panel',
+            {
+                title: "Модули",
+                collapsible: true,
+                region: 'center',
+                store: modulesStore,
+                height: 700,
+                frame: true,
+                padding: '5px',
+                loadMask: true,
+                columnLines: true,
+                features: [
+                    {
+                        ftype: 'summary',
+                        dock: 'bottom'
+                    }
+                ],
+                viewConfig: {
+                    //getRowClass: function(record) {
+                    //    return record.get('Base')
+                    //        ? 'row-disabled'
+                    //        : '';
+                    //}
+
+                },
+                plugins: [
+                    Ext.create('Ext.grid.plugin.CellEditing', {
+                        clicksToEdit: 2,
+                        listeners: {
+                            'beforeedit': function (e, editor) {
+                                if (variantState == approved) return false;
+                                if (editor.record.get("Base")) return false;
+
+                                if (editor.field == "Selected" || editor.field == "Selectable") {
+                                    editor.record.set(editor.field, !editor.record.get(editor.field));
+                                    updateModule(editor.field,editor.record);
+                                    return false;
+                                }
+
+
+                                if (editor.field == "SelectionGroupId") {
+                                    if (editor.record.data.Base)
+                                        comboSelectionGroups.getStore()
+                                            .loadData(programVariantSelectionGroups);
+                                    else comboSelectionGroups.getStore().loadData( variantSelectionGroups );
+
+                                }
+                            },
+                            'edit': function (e,editor) {
+                                if (editor.originalValue) if (editor.originalValue.toString() == editor.value) {
+                                    editor.record.reject(); return;
+                                }
+                                updateModule(editor.field, editor.record);
+
+                                //this.isEditAllowed = false;
+                            }
+                        }
+                    })
+                ],
+                columns: [
+                    { xtype: 'rownumberer', width: 50 },
+                    {
+                        dataIndex: 'VariantId',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'VariantContentId',
+                        hidden: true
+                    },
+                    {
+                        //xtype: 'textcolumn',
+                        header: '@(Model.IsBase?"Включить модуль в основную траекторию":"Включить модуль в траекторию")',
+                        dataIndex: 'Selected',
+                        width: 150,
+                        editor: {
+                            xtype: 'textfield',
+                        },
+                        renderer: function(value, meta, record) {
+                            return Urfu.renders.htmlEncodeWithToolTip(record.get("Base") ? "В основной" : value ? "Да" : "Нет",meta);
+                        }
+                    },
+                    {
+                        header: 'Название модуля',
+                        dataIndex: 'ModuleName',
+                        width: 300,
+                        renderer: function (value,meta,record) {
+                            meta.tdAttr = 'data-qtip="' + Ext.String.htmlEncode(value) + '"';
+                            return '<a href="@Url.Action("Plans","Variant",new {variantId=Model.VariantId})&moduleId=' +
+                                record.get('ModuleId') + '">' + value + '</a>';
+                        }
+                    },
+                    {
+                        header: 'Зачётные единицы',
+                        dataIndex: 'TestUnits',
+                        width: 110,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip,
+                    },
+                    {
+                        header: 'Группа модуля',
+                        dataIndex: 'GroupType',
+                        width: 300,
+                        renderer: function(value,metaData) {
+                            return Urfu.renders.htmlEncodeWithToolTip(groupTypes[value],metaData);
+
+                        }
+                    },
+                    {
+
+                        header: 'Тип модуля',
+                        dataIndex: 'ModuleTypeId',
+                        width: 300,
+                        //renderer: Ext.util.Format.htmlEncode,
+                        editor: comboModuleTypes,
+                        renderer: comboBoxRenderer(comboModuleTypes,'ModuleTypeId')
+                    },
+                    {
+                        header: "Признак 'По выбору'",
+                        dataIndex: 'Selectable',
+                        width: 150,
+                        editor: {
+                            xtype: 'textfield',
+                        },
+                        renderer: function(value, meta, record) {
+                            return Urfu.renders.htmlEncodeWithToolTip(value ? "Да" : "Нет",meta);
+                        }
+                    },
+                    {
+                        header: "Лимит",
+                        dataIndex: 'Limits',
+                        width: 100,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: "Семестры",
+                        dataIndex: 'Terms',
+                        width: 100,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: "Группа выбора",
+                        dataIndex: 'SelectionGroupId',
+                        width: 200,
+                        //renderer: Ext.util.Format.htmlEncode
+                        editor: comboSelectionGroups,
+                        renderer: comboBoxRenderer(comboSelectionGroups)
+                    },
+                    {
+                        header: "Учебные планы",
+                        dataIndex: 'PlanInfo',
+                        width: 150,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+
+                ]
+            });
+            //TODO: Надо доделать
+            function updateModule(propName,record) {
+                modulesGridPanel.setLoading('Сохранение');
+                var data = {
+                    moduleId: record.data.ModuleId,
+                    variantId: '@Model.VariantId',
+                    groupType: record.get('RealGroupType'),
+                    subgroupType: record.get('SubgroupType'),
+                    moduleTypeId: record.get('ModuleTypeId'),
+                    __RequestVerificationToken: gettoken()
+                };
+                data[propName] = record.get(propName);
+                
+                Ext.Ajax.request({
+                    url: '@Url.Action("SetVariantModuleParams")',
+                    params: data,
+                    success: function (response) {
+                        var data = Ext.decode(response.responseText);
+
+                        if (data.message && data.message.length > 0) {
+                            Ext.MessageBox.alert('Ошибка',
+                                data.message,
+                                function () {
+                                    //action to complete when user clicks ok.
+                                });
+                            record.reject();
+                        }
+                        else{
+                            record.commit();
+                            if (propName == "Selected") groupsStore.reload();
+                        }
+                        modulesGridPanel.setLoading(false);
+                        //gridPanel.getView().refresh();
+                    },
+                    failure: function(response) {
+                        record.reject();
+                        modulesGridPanel.setLoading(false);
+                    },
+                    error: function (response) {
+                        record.reject();
+                        modulesGridPanel.setLoading(false);
+                    }
+                });
+            }
+
+            var items = [plainPanel,
+                formPanel, groupsGridPanel,modulesGridPanel
+            ];
+            var tbars = [
+                {
+                    xtype: 'box',
+                    autoEl: {
+                        tag: 'a',
+                        href: '@Url.Action("Index","EduProgramLimits",new {variantId = Model.VariantId})',
+                        html: 'Лимиты'
+                    }
+                },
+                {
+                    xtype: 'box',
+                    autoEl: {
+                        tag: 'a',
+                        href: '@Url.Action("Index","VariantSelectionGroup",new {variantId = Model.VariantId})',
+                        html: 'Управление группами выбора'
+                    }
+                },
+                {
+                    xtype: 'box',
+                    autoEl: {
+                        tag: 'a',
+                        href: '@Url.Action("Index","VariantContents",new {variantId = Model.VariantId})',
+                        html: 'Редактирование модулей'
+                    }
+                },
+                {
+                    xtype: 'box',
+                    autoEl: {
+                        tag: 'a',
+                        href: '@Url.Action("Download",new {variantId = Model.VariantId})',
+                        html: 'Открыть в Excel'
+                    }
+                },
+                '-',
+                {
+                    xtype: 'box',
+                    //disabled: '@(Model.State == VariantState.Development)' == "True", // 
+                    autoEl: {
+                        html:'<button id = "' + btnStatePrefix + '@((int) VariantState.Development)"  onclick="return changeState(@((int) VariantState.Development))" class="btn@(Model.State == VariantState.Development ? " btn-primary" : "")" " >Формируется</button>'
+                    },
+                    @*handler: function() {
+                        changeState(@((int) VariantState.Development));
+                    }*@
+                },
+                {
+                    xtype: 'box',
+                    //disabled: '@(Model.State == VariantState.Review)' == "True",
+                    autoEl: {
+                        html:'<button id = "' + btnStatePrefix + '@((int) VariantState.Review) " onclick="return changeState(@((int) VariantState.Review))" class="btn@(Model.State == VariantState.Review ? " btn-primary" : "")" ">На согласовании</button>'
+                    },
+                    @*handler: function() {
+                        changeState(@((int) VariantState.Review));
+                    }*@
+                },
+                {
+                    xtype: 'box',
+                    //disabled: '@(Model.State == VariantState.Approved)' == "True",
+                    autoEl: {
+                        html:'<button id = "' + btnStatePrefix + '@((int) VariantState.Approved)"  onclick="return changeState(@((int) VariantState.Approved))" class="btn@(Model.State == VariantState.Approved ? " btn-primary" : "")" ">Утверждена</button>'
+                    },
+                    @*handler: function() {
+                        changeState(@((int) VariantState.Approved));
+                    }*@  
+                }
+
+
+            ];
+            var settings = {
+                tbar: tbars,
+                //autoscroll: true
+                overflowY: 'scroll'
+            }
+            Urfu.createViewport('anchor', items, settings);
+        });
+    </script>
+}

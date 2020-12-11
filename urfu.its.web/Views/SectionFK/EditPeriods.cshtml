@@ -1,0 +1,79 @@
+﻿@model Urfu.Its.Web.Models.SectionFKTmersPeriodViewModel
+
+@{
+    ViewBag.Title = "EditPeriod";
+}
+<h3>Секция ФК: @Model.SectionFK.Module.title</h3>
+<h3>Дисциплина: @Model.Discipline.Discipline.title </h3>
+
+<h2>Редактирование периодов</h2>
+
+@using (Html.BeginForm())
+{
+
+@Html.AntiForgeryToken()
+
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+@Html.HiddenFor(model => model.SectionFK.ModuleId)
+@Html.HiddenFor(model => model.Discipline.Id)
+
+<table class="table table-striped table-hover table-bordered table-condensed">
+    <tr>
+        <th width="200px">
+            Нагрузка
+        </th>
+        <th width="50px">
+
+        </th>
+        <th width="150px">
+            Год
+        </th>
+        <th width="150px">
+            Курс
+        </th>
+        <th width="auto">
+            Семестр
+        </th>
+    </tr>
+
+    @for (var i = 0; i < Model.Rows.Count; i++)
+          {
+        <tr>
+            @Html.HiddenFor(model => model.Rows[i].Tmer.Id)
+            @Html.HiddenFor(model => model.Rows[i].Period.Id)
+            @if (i == 0 || Model.Rows[i].Tmer.TmerId != Model.Rows[i - 1].Tmer.TmerId)
+            {
+                <td rowspan="@Model.GetPeriodCount()">
+                    @Html.DisplayFor(model => model.Rows[i].Tmer.Tmer.rmer)
+                </td>
+            }
+            <td>
+                @Html.CheckBoxFor(model => model.Rows[i].Checked)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Rows[i].Period.Year)
+            </td>
+
+            <td>
+                @Html.DisplayFor(model => model.Rows[i].Course)
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Rows[i].Period.Semester.Name)
+            </td>
+        </tr>
+          }
+
+</table>
+
+
+  <div class="form-group">
+    <div class="col-md-offset-2 col-md-10">
+        <input type="submit" value="Сохранить" class="btn btn-default" />
+    </div>
+  </div>
+}
+
+<div>
+    @Html.ActionLink("Вернуться к списку", "Index")
+</div>

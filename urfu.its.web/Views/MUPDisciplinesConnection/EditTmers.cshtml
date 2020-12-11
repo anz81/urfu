@@ -1,0 +1,145 @@
+﻿@model Urfu.Its.Web.Models.MUPTmersViewModel
+
+@{
+    ViewBag.Title = "Редактирование нагрузки";
+}
+<h3>Редактирование нагрузки</h3>
+<hr />
+<h4>Модуль: @Model.MUP.Module.title</h4>
+<h4>Дисциплина: @Model.Discipline.title</h4>
+
+
+
+@using (Html.BeginForm())
+{
+    @Html.HiddenFor(model => model.Discipline.uid)
+    @Html.HiddenFor(model => model.Discipline.pkey)
+    @Html.HiddenFor(model => model.MUP.ModuleId)
+
+    @Html.AntiForgeryToken()
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-horizontal">
+
+        <div class="form-group">
+
+            <div style="float:left; padding-left:15px">
+
+                <h4>@Html.DisplayNameFor(m => m.Tmers1)</h4>
+                <table class="table table-hover table-striped table-bordered table-condensed" >
+                    <tr>
+                        <th>
+                        </th>
+                        <th>
+                            Название
+                        </th>
+                    </tr>
+                    @for (var i = 0; i < Model.Tmers1.Count; i++)
+                    {
+                        if (Model.Tmers1[i].TmerId == null)
+                        {
+                            <tr><td/><td>&nbsp;</td></tr>
+                        }
+                        else
+                        {
+                        @Html.HiddenFor(model => model.Tmers1[i].TmerId)
+                        <tr>
+                            <td style="text-align: center">
+                                @Html.CheckBoxFor(model => model.Tmers1[i].Checked)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(model => model.Tmers1[i].Title)
+                            </td>
+                        </tr>
+                        }
+                    }
+                </table>
+            </div>
+
+            <div style="float:left; padding-left:15px">
+                <h4>@Html.DisplayNameFor(m => m.Tmers2)</h4>
+
+                <table class="table table-striped table-hover table-bordered table-condensed" >
+                    <tr>
+                        <th>
+                        </th>
+                        <th>
+                            Название
+                        </th>
+                    </tr>
+                    @for (var i = 0; i < Model.Tmers2.Count; i++)
+                    {
+                        if (Model.Tmers2[i].TmerId == null)
+                        {
+                            <tr><td /><td>&nbsp;</td></tr>
+                        }
+                        else
+                        {
+                        @Html.HiddenFor(model => model.Tmers2[i].TmerId)
+                        <tr>
+                            <td style="text-align: center">
+                                @Html.CheckBoxFor(model => model.Tmers2[i].Checked)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(model => model.Tmers2[i].Title)
+                            </td>
+                        </tr>
+                            }
+                    }
+                        
+                </table>
+            </div>
+
+            <div style="float:left; padding-left:15px; height:inherit ">
+                <h4>@Html.DisplayNameFor(m => m.Tmers3)</h4>
+
+                <table class="table table-striped table-hover table-bordered table-condensed">
+                    <tr>
+                        <th>
+                        </th>
+                        <th>
+                            Название
+                        </th>
+                    </tr>
+                    @for (var i = 0; i < Model.Tmers3.Count; i++)
+                    {
+                        if (Model.Tmers3[i].TmerId == null)
+                        {
+                            <tr><td /><td>&nbsp;</td></tr>
+                        }
+                        else
+                        {
+                        @Html.HiddenFor(model => model.Tmers3[i].TmerId)
+                        <tr>
+                            <td style="text-align: center">
+                                @Html.CheckBoxFor(model => model.Tmers3[i].Checked)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(model => model.Tmers3[i].Title)
+                            </td>
+                        </tr>
+                        }
+                    }
+                </table>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Сохранить" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div >
+    @if (Model.MUPDiscipline == null)
+    {
+        @Html.ActionLink("Вернуться к списку", "Disciplines", new { moduleId = Model.MUP.ModuleId })
+    }
+    else
+    {
+        @Html.ActionLink("Вернуться к списку", "Tmers", new { id = Model.MUPDiscipline.Id })
+    }
+</div>

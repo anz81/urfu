@@ -1,0 +1,204 @@
+﻿@model Urfu.Its.Web.Models.SyncModel
+
+@{
+    ViewBag.Title = "Синхронизация данных";
+}
+
+<h2>Синхронизация данных</h2>
+
+<li>@Html.ActionLink("Синхронизация направлений", "Directions", "Sync")</li>
+<li>@Html.ActionLink("Синхронизация модулей", "Modules", "Sync")</li>
+<li>@Html.ActionLink("Синхронизация персонала (групп, студентов и персон)", "People", "Sync")</li>
+@*<li>@Html.ActionLink("Генерация тестовых вариантов", "GenerateTestVariants", "Sync")</li>*@
+<li>
+    Синхронизация рейтинга
+    @using (Html.BeginForm("Rating", "Sync", FormMethod.Post, new { id = "rating form" }))
+    {
+        @Html.AntiForgeryToken()
+        <div>
+            Год
+        </div>
+        <div>
+            @Html.TextBox("Year", 2014)
+        </div>
+        <div>
+            Курс
+        </div>
+        <div>
+            @Html.TextBox("Class", 2)
+        </div>
+        <div>
+            Семестр
+        </div>
+        <div>
+            @Html.TextBox("Term", 1)
+        </div>
+        <div>
+            <div class="checkbox">
+                <label>@Html.CheckBox("WithCoefficients", true)&nbsp;Учет уровней</label>
+            </div>
+        </div>
+        <div>
+            <input type="submit" value="Запуск" class="btn btn-default" />
+        </div>
+    }
+</li>
+<li>@Html.ActionLink("Синхронизация средного балла", "RatingAvg", "Sync")</li>
+<li>@Html.ActionLink("Синхронизация учебных планов студентов", "StudentPlan", "Sync")</li>
+<li>@Html.ActionLink("Синхронизация всех учебных планов студентов", "SyncStudentPlans", "Sync")</li>
+<li>@Html.ActionLink("Синхронизация выбора студента", "Selection", "Sync")</li>
+<li>@Html.ActionLink("Синхронизация преподавателей", "SyncTeachers", "Sync")</li>
+<li>@Html.ActionLink("Синхронизация РОПов", "SyncROPs", "Sync")</li>
+<li>@Html.ActionLink("Синхронизация рейтинга абитуриентов", "SyncEntrants", "Sync")</li>
+<li>@Html.ActionLink("Синхронизация рейтинга ИЯ", "SyncForeignLanguageRating", "Sync")</li>
+<li>@Html.ActionLink("Синхронизация соглашений", "SyncModuleAgreements", "Sync")</li>
+<li>@Html.ActionLink("Синхронизация траекторий", "SyncTrajectories", "Sync")</li>
+<li>@Html.ActionLink("Синхронизация контрольных мероприятий", "SyncTmers", "Sync")</li>
+<li>@Html.ActionLink("Создание ОП (образовательных программ) текущего года", "CreatePrograms", "Sync")</li>
+Создание версий ОП (образовательных программ)
+@using (Html.BeginForm("CreatePrograms", "Sync", FormMethod.Get, new { id = "CreatePrograms form" }))
+{
+    <div>
+        Год
+    </div>
+    <div>
+        @Html.TextBox("year", DateTime.Now.Year)
+    </div>
+    <div>
+        <input type="submit" value="Запуск" class="btn btn-default" />
+    </div>
+}
+<br>
+
+
+Синхронизация нагрузок
+@using (Html.BeginForm("SyncApploads", "Sync", FormMethod.Get, new { id = "apploads form" }))
+{
+    <div>
+        Год
+    </div>
+    <div>
+        @Html.TextBox("Year", 2015)
+    </div>
+    <div>
+        Семестр
+    </div>
+    <div>
+        @Html.TextBox("Term", 1)
+    </div>
+    <div>
+        <input type="submit" value="Запуск" class="btn btn-default" />
+    </div>
+}
+<br>
+Синхронизация должников по ФК
+@using (Html.BeginForm("SyncDebtors", "Sync", FormMethod.Get, new { id = "debtors form" }))
+{
+    <div>
+        Модуль
+    </div>
+    <div>
+        @Html.DropDownList("moduleTitle", new List<SelectListItem>()
+        {
+            new SelectListItem() {Text = "Физическая культура и спорт",Value = "Физическая культура и спорт"},
+        })
+    </div>
+    <div>
+        Год
+    </div>
+    <div>
+        @Html.TextBox("Year", "")
+    </div>
+    <div>
+        Семестр
+    </div>
+    <div>
+        @Html.DropDownList("moduleTitle", new List<SelectListItem>()
+        {
+            new SelectListItem() {Text = "Все",Value = ""},
+            new SelectListItem() {Text = "Прочий",Value = "Прочий"},
+            new SelectListItem() {Text = "Осенний",Value = "Осенний"},
+            new SelectListItem() {Text = "Весенний",Value = "Весенний"},
+        })
+    </div>
+    <div>
+        <input type="submit" value="Запуск" class="btn btn-default" />
+    </div>
+}
+<br>
+<li>@Html.ActionLink("Отправка всех зачислений в РУНП", "SendAdmissionsToRunp", "Sync")</li>
+Синхронизация исторических групп
+@using (Html.BeginForm("GroupHistories", "Sync", FormMethod.Post, new { id = "grouphistories form" }))
+{
+    <div>
+        Год
+    </div>
+    <div>
+        @Html.TextBox("Year", DateTime.Now.Year)
+    </div>
+    <div>
+        <input type="submit" value="Запуск" class="btn btn-default" />
+    </div>
+}
+@*
+<li id="testSelectionController">Сгенерировать тестовые выборы</li>
+<li id="testPostSelectionController">Тест выбора</li>*@
+
+@Html.DisplayTextFor(m=>m.Message)
+@if (Model.ModuleSynInProgress)
+{
+    <p>Синхронизация модулей запущена @Model.ModulesSyncStarted</p>
+}
+<div>
+    Синхронизация подразделения
+</div>
+@using (Html.BeginForm("SyncDivision", "Sync", FormMethod.Get, new { id = "SyncDivision form" }))
+{
+    <div>
+        uuid
+    </div>
+    <div>
+        @Html.TextBox("id", "undifa18ggl5g0000jn134fnnnm25pgk")
+    </div>
+    <div>
+        <input type="submit" value="Запуск" class="btn btn-default" />
+    </div>
+}
+
+
+
+@section scripts
+{
+    <script>
+        $(document).ready(function() {
+            $("#testSelectionController").click(function() {
+                $.ajax({
+                    url: "/Sync/GenerateTestSelections",
+                    type: "POST",
+                    success: function () { alert("success"); },
+                    failure: function (errMsg) {
+                        alert(errMsg);
+                    },
+                });
+            });
+        });
+
+        $(document).ready(function () {
+            $("#testPostSelectionController").click(function () {
+                $.ajax({
+                    url: "/api/StudentSelectionChanged",
+                    type: "POST",
+                    data: JSON.stringify([{ "studentPersonId": "studen18ggl5g0000kgm63e6gr2n5uog", "selectedVariantId": 7, "priorities": [{ "variantContentId": 237, "proprity": 1 }] }, { "studentPersonId": "studen18ggl5g0000k1r485obsanip04", "selectedVariantId": 3, "priorities": [{ "variantContentId": 236, "proprity": 1 }, { "variantContentId": 237, "proprity": 2 }] }, { "studentPersonId": "studen18ggl5g0000k1jdoen9kmhc5vo", "selectedVariantId": 2, "priorities": [{ "variantContentId": 234, "proprity": 2 }, { "variantContentId": 235, "proprity": 4 }, { "variantContentId": 236, "proprity": 3 }, { "variantContentId": 237, "proprity": 3 }] }]),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) { alert(data); },
+                    failure: function (errMsg) {
+                        alert(errMsg);
+                    },
+                    beforeSend: function (xhr) { xhr.setRequestHeader("Authorization", "Basic " + btoa("lks" + ":" + "lks123")); }
+                });
+            });
+        });
+    </script>
+}
+

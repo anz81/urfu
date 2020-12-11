@@ -1,0 +1,100 @@
+﻿@model IEnumerable<Urfu.Its.Web.DataContext.Module>
+
+
+<h2>@ViewBag.Title</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.title)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.shortTitle)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.coordinator)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.type)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.competence)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.testUnits)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.priority)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.state)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.approvedDate)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.comment)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.file)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.specialities)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.number)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.title)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.shortTitle)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.coordinator)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.type)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.competence)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.testUnits)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.priority)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.state)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.approvedDate)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.comment)
+        </td>
+        <td>
+            <a href="@Html.DisplayFor(modelItem => item.file)">@Html.DisplayFor(modelItem => item.file)</a>
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.specialities)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.number)
+        </td>
+        <td>
+            @*@Html.ActionLink("Edit", "Edit", new { id=item.uuid }) |
+            @Html.ActionLink("Details", "Details", new { id=item.uuid }) |
+            @Html.ActionLink("Delete", "Delete", new { id = item.uuid })|
+            @Html.ActionLink("Дисциплины", "DisciplinesByModule", "Modules", new { moduleId = item.uuid }, null)*@
+        </td>
+    </tr>
+}
+
+</table>

@@ -1,0 +1,411 @@
+﻿@model Urfu.Its.Web.DataContext.MUPSubgroup
+@{
+    ViewBag.Title = "Редактирование студентов подгруппы " + Model.Name + (Model.Removed ? " (удалено)" : "");
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        var subgroupId = @Model.Id;
+        var lastFilter;
+        Ext.onReady(function() {
+            Ext.tip.QuickTipManager.init();
+            var hideStudentsStoreName = 'HideNotactiveStudentsMUP';
+
+            var store = Ext.create("Ext.data.Store",
+            {
+                idProperty: 'Id',
+                fields: [
+                    "Id", "GroupName", "Surname", "Name", "PatronymicName", { name: "Included", type: 'bool' },
+                    "AnotherGroup",
+                ],
+                autoLoad: true,
+                remoteSort:
+                    true,
+                remoteFilter:
+                    true,
+                proxy:
+                {
+                    type: 'ajax',
+                    url: '/MUPSubgroup/StudentsAjax',
+                    extraParams: {
+                        id: @Model.Id,
+                        hideStudents: sessionStorage.getItem(hideStudentsStoreName) || false
+                    },
+                    reader:
+                    {
+                        type: 'json',
+                        rootProperty:
+                            'data',
+                        totalProperty:
+                            'total'
+                    }
+                },
+                listeners: {
+                    update: function(self, record, operation, modifiedFieldNames, details, eOpts) {
+                        if (operation !== Ext.data.Model.EDIT) {
+                            //self.sourcerejectChanges();
+                            return;
+                        }
+                        if (modifiedFieldNames.length !== 1 || modifiedFieldNames[0] !== 'Included') {
+                            return;
+                        }
+
+                    }
+                }
+            });
+
+            function studentsMembership(include, similarsubgroup) {
+                var title = include ? "Зачисление" : "Удаление зачислений";
+                Ext.MessageBox.wait(title);
+                setTimeout(store.each(function(record, index) {
+                        if (!record.get('AnotherGroup')) {
+                            record.set("Included", include);
+                        }
+                    }),
+                    0);
+                Ext.Ajax.request({
+                    url: '/MUPSubgroup/StudentsMembership',
+                    method: 'POST',
+                    params: {
+                        include: include,
+                        subgroupId: subgroupId,
+                        filter: JSON.stringify(lastFilter),
+                        similarsubgroup: similarsubgroup || false
+                    },
+                    success: function(response) {
+                        var data = Ext.decode(response.responseText);
+                        if (response.status !== 200 || data.reload)
+                            window.location.reload();
+                        Ext.MessageBox.hide();
+                        if (data.msg && data.msg.length > 0) {
+                            Ext.MessageBox.show({
+                                title: 'Информационное сообщение',
+                                msg: data.msg,
+                                buttons: Ext.MessageBox.OK,
+                                icon: Ext.MessageBox.INFO // иконка мб {ERROR,INFO,QUESTION,WARNING}
+                                //width:300,                       // есть еще minWidth
+                                //closable:false,                  // признак наличия икнки закрытия окна
+                            });
+                        }
+                        store.commitChanges();
+                    },
+                    complete: function(response) {
+                        Ext.MessageBox.hide();
+                    }
+                });
+            }
+
+            function checkMemberships() {
+                Ext.Ajax.request({
+                    url: '/MUPSubgroup/CheckMemberships',
+                    params: {
+                        subgroupId: subgroupId
+                    },
+                    success: function (response) {
+                        var data = Ext.decode(response.responseText);
+                        if (data.msg && data.msg.length > 0) {
+                            Ext.MessageBox.show({
+                                title: 'Информационное сообщение',
+                                msg: 'Удалить студентов из подгрупп по  ' + data.msg + '?',
+                                buttons: Ext.MessageBox.YESNO,
+                                fn: function (button) {
+                                    if (button == 'yes') {                                        
+                                        studentsMembership(included = false, withanothersubgroup = true)
+                                    }
+                                    else if(button == 'no'){
+                                        studentsMembership(false)      
+                                    }
+                                }
+                            }) 
+                        }
+                        else studentsMembership(false);
+                    },
+                    failure: function (response) {
+                        Ext.MessageBox.alert('', 'Ошибка запроса');
+                    }
+                })                   
+            }
+
+            var filtersWnd = Ext.create('Ext.window.Window',
+            {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "Группа", itemId: "GroupName" },
+                    { fieldLabel: "Фамилия", itemId: "Surname" },
+                    { fieldLabel: "Имя", itemId: "Name" },
+                    { fieldLabel: "Отчество", itemId: "PatronymicName" },
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function() {
+                            lastFilter = [
+                                { property: 'Surname', value: filtersWnd.getComponent("Surname").getValue() },
+                                { property: 'GroupName', value: filtersWnd.getComponent("GroupName").getValue() },
+                                { property: 'Name', value: filtersWnd.getComponent("Name").getValue() },
+                                { property: 'PatronymicName',value: filtersWnd.getComponent("PatronymicName").getValue() }
+
+                            ];
+                            store.filter(lastFilter);
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function() { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+            {
+                region: 'center',
+                store: store,
+                loadMask: true,
+                dockedItems: [
+                    {
+                        xtype: 'toolbar',
+                        dock: 'top',
+                        items: [
+                            {
+                                xtype: 'button',
+                                text: "Список подгрупп",
+                                handler: function () { window.location = "/MUPSubgroup/Index?focus=@Model.Id&competitionGroupId=@Model.Meta.CompetitionGroupId"; }
+                            },'-',
+                            {
+                                xtype: 'button',
+                                text: 'Фильтры...',
+                                handler: function () { filtersWnd.show(); }
+                            },
+                            {
+                                xtype: 'button',
+                                text: "Отменить фильтры",
+                                handler: function () {
+                                    store.clearFilter();
+                                    lastFilter = [];
+                                }
+                            }, '-',
+                            {
+                                xtype: 'button',
+                                text: "Скрыть\\показать включенных студентов",
+                                handler: function () {
+                                    window.showIncluded = !window.showIncluded;
+                                    if (window.showIncluded) {
+                                        store.filter('Included', true);
+                                        lastFilter.Included = true;
+                                    } else {
+                                        store.clearFilter();
+                                        lastFilter = [];
+                                    }
+                                }
+                            },//'-',
+                            {
+                                xtype: 'button',
+                                text: "Зачислить оставшихся",
+                                hidden: true,
+                                handler: function () {
+                                    studentsMembership(true);
+                                }
+                            },
+                            {
+                                xtype: 'button',
+                                text: "Удалить зачисления",
+                                hidden: true,
+                                handler: function () {
+                                    //studentsMembership(false);
+                                    checkMemberships();
+                                }
+                            },
+                            {
+                                xtype: 'button',
+                                text: "Экспорт в Excel",
+                                hidden: true,
+                                handler: function () {
+                                    window.location = "/MUPSubgroup/DownloadSubgroupReport?subgroupId=@Model.Id";
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        xtype: 'toolbar',
+                        dock: 'top',
+                        items: [
+                            {
+                                xtype: 'checkbox',
+                                boxLabel: 'Скрыть неактивных студентов',
+                                value: sessionStorage.getItem(hideStudentsStoreName) || false,
+                                listeners: {
+                                    change: function (t, newValue, oldValue, eOpts) {
+                                        store.getProxy().setExtraParam('hideStudents', newValue);
+                                        sessionStorage.setItem(hideStudentsStoreName, newValue);
+                                        console.log('alert', newValue);
+                                        store.reload();
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                columns: [
+                    { xtype: 'rownumberer', width: 50 },
+                    {
+                        header: 'Группа',
+                        dataIndex: 'GroupName',
+                        width: 150,
+                        renderer: Ext.util.Format.htmlEncode
+                    },
+                    {
+                        header: 'Фамилия',
+                        dataIndex: 'Surname',
+                        width: 200,
+                        renderer: Ext.util.Format.htmlEncode
+                    },
+                    {
+                        header: 'Имя',
+                        dataIndex: 'Name',
+                        width: 200,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Отчество',
+                        dataIndex: 'PatronymicName',
+                        width: 200,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Статус',
+                        dataIndex: 'Status',
+                        width: 150,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'В подгруппе',
+                        dataIndex: 'Included',
+                        width: 150,
+                        xtype: 'checkcolumn',
+                        disabled: '@Model.Removed' == 'True',
+                        listeners: {
+                            beforecheckchange: function(column, recordIndex) {
+                                var record = store.getAt(recordIndex);
+
+                                var included = record.get('Included');
+                                var studentId = record.get('Id');
+                                var subgroupId = @Model.Id;
+
+                                Ext.Ajax.request({
+                                    url: '/MUPSubgroup/StudentMembership',
+                                    method: 'POST',
+                                    params: {
+                                        include: !included,
+                                        studentId: studentId,
+                                        subgroupId: subgroupId
+                                    },
+                                    success: function(response) {
+                                        var data = Ext.decode(response.responseText);
+                                        if (response.status === 200)
+                                            record.commit();
+                                        else
+                                            record.reject();
+                                        if (data.msg && data.msg.length > 0) {
+                                            Ext.MessageBox.show({
+                                                title: 'Информационное сообщение',
+                                                msg: data.msg,
+                                                buttons: Ext.MessageBox.OK,
+                                                icon: Ext.MessageBox.INFO // иконка мб {ERROR,INFO,QUESTION,WARNING}
+                                                //width:300,                       // есть еще minWidth
+                                                //closable:false,                  // признак наличия икнки закрытия окна
+                                            });
+                                        }
+                                        if (data.rmer && data.subgroupId) {
+                                            Ext.MessageBox.show({
+                                                title: 'Информационное сообщение',
+                                                msg: 'Удалить данного студента из подгруппы по ' + data.rmer + '?',
+                                                buttons: Ext.MessageBox.YESNO,
+                                                fn: function (button) {
+                                                    if (button == 'yes') {
+                                                        Ext.Ajax.request({
+                                                            url: '/MUPSubgroup/StudentMembership',
+                                                            params: {
+                                                                include: !included,
+                                                                studentId: studentId,
+                                                                subgroupId: data.subgroupId,
+                                                            },
+                                                            success: function (response) {                                                               
+                                                                var data = Ext.decode(response.responseText);                                                                    
+                                                                if (data.msg.length ==0) 
+                                                                    Ext.MessageBox.alert('Информация', 'Студент удален из подгруппы');
+                                                            },
+                                                            failure: function (response) {
+                                                                Ext.MessageBox.alert('Ошибка', 'Не удалось удалить студента из подгруппы');
+                                                            }
+
+                                                        })
+                                                    }
+                                                },
+                                                icon: Ext.MessageBox.QUESTION
+                                            })
+                                        }
+
+                                    }
+                                });
+                            }
+                        }
+                    },
+                    {
+                        header: 'Зачислен в подгруппу',
+                        align: 'center',
+                        dataIndex: 'AnotherGroup',
+                        renderer: Ext.util.Format.htmlEncode,
+                        width: 600
+                    }
+                ],
+                selModel: {
+                    selType: 'cellmodel'
+                },
+                plugins: [
+                    Ext.create('Ext.grid.plugin.CellEditing',
+                    {
+                        clicksToEdit: 1,
+                        listeners: {
+                            beforeedit:function(editor, ctx, options) {
+                                var record = ctx.record;
+                                if (ctx.field === 'Score' && !record.get('Included'))
+                                    return false;
+                                return true;
+                            },
+                            edit: function(editor, ctx, options) {
+                                var record = ctx.record;
+
+                                if (ctx.field !== 'Score')
+                                    return true;
+
+                                if (record.get('AnotherGroup') !== null) {
+                                    record.reject();
+                                    return false;
+                                }
+                                var studentId = record.get("Id");
+                                var subgroupId = @Model.Id;
+                            }
+                        }
+                    })
+                ]
+            });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+    </script>
+}

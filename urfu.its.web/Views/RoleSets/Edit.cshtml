@@ -1,0 +1,47 @@
+﻿@model Urfu.Its.Web.Models.SelectUserRolesViewModel
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+<h2>Роли набора @Html.DisplayFor(model => model.UserName)</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <h4>RoleSet</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => model.FirstName)
+                @Html.HiddenFor(model => model.UserName)
+
+        <h4>Выберите роли набора</h4>
+        <br />
+        <hr />
+
+        <table class="table table-striped table-hover table-bordered table-condensed">
+            <tr>
+                <th>
+
+                </th>
+                <th>
+                    Роль
+                </th>
+            </tr>
+            @Html.EditorFor(model => model.Roles)
+        </table>
+        <br />
+        <hr />
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>

@@ -1,0 +1,178 @@
+﻿@model Urfu.Its.Web.DataContext.MUPCompetitionGroup
+@{
+    ViewBag.Title = String.Format("Количество подгрупп для конкурсной группы {0}, {1} семестр, {2}", Model.Name,Model.Semester.Name.ToLower(),Model.Year);
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+    var filterName = "MUPMetaSubgroupsFilters";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+    Ext.onReady(function () {
+        Ext.tip.QuickTipManager.init();
+
+
+        var prevSettings = {};
+        try {
+            var prevSettingString = JSON.parse(localStorage.getItem("@filterName") || "[]");
+
+            for (var i = 0; i < prevSettingString.length; i++) {
+                prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+            }
+        } catch (err) {
+
+        }
+
+        var store = Ext.create("Ext.data.BufferedStore",
+            {
+                idProperty: 'Id',
+                fields: ["Id",  "title", "discipline", "tmer", "admission", "count"],
+                autoLoad: true,
+                pageSize: 300,
+                remoteSort: true,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '/MUPSubgroupMeta/Index?competitionGroupId='+@Model.Id,
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        }
+                    }
+            });
+
+
+        var filtersWnd = null;
+
+        var setFilters = function () {
+            var settings = [
+                { property: 'title', value: filtersWnd.getComponent("title").getValue() },
+                { property: 'discipline', value: filtersWnd.getComponent("discipline").getValue() },
+                { property: 'count', value: filtersWnd.getComponent("count").getValue() }
+            ];
+            store.setFilters(settings);
+            localStorage.setItem("@filterName", JSON.stringify(settings));
+        };
+        filtersWnd = Ext.create('Ext.window.Window', {
+            title: "Фильтры",
+            closeAction: 'hide',
+            resizable: false,
+            autoHeight: true,
+            bodyPadding: 6,
+            defaults: {
+                xtype: 'textfield',
+                width: 500
+            },
+            items: [
+                { fieldLabel: "Модуль", itemId: "title", value: prevSettings["title"] },
+                { fieldLabel: "Дисциплина", itemId: "discipline", value: prevSettings["discipline"] },
+                { fieldLabel: "Количество", itemId: "count", value: prevSettings["count"] }
+            ],
+            buttons: [
+                {
+                    text: "OK",
+                    handler: function () {
+                        setFilters();
+                        filtersWnd.hide();
+                    }
+                },
+                {
+                    text: "Отмена",
+                    handler: function () { filtersWnd.hide(); }
+                }
+            ]
+        });
+        setFilters();
+        var tpl = '<a href="/MUPSubgroupMeta/Edit?id={Id}&competitionGroupId=@Model.Id">Редактировать</a> ';
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: store,
+                    loadMask: true,
+                    tbar: [
+                        {
+                            xtype: 'button',
+                            text: 'Фильтры...',
+                            handler: function () { filtersWnd.show(); }
+                        },
+                        {
+                            xtype: 'button',
+                            text: "Отменить фильтры",
+                            handler: function() {
+                                store.clearFilter();
+                                localStorage.setItem("@filterName", "[]");
+                            }
+                        },
+                        {
+                            xtype: 'button',
+                            text: "Подгруппы",
+                            handler: function () { window.location = "/MUPSubgroup/Index?competitionGroupId=@Model.Id"; }
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        {
+                            header: 'Модуль',
+                            dataIndex: 'title',
+                            width: 300,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Дисциплина',
+                            dataIndex: 'discipline',
+                            width: 200,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Нагрузка',
+                            align: 'center',
+                            dataIndex: 'tmer',
+                            renderer: Ext.util.Format.htmlEncode,
+                            width: 180
+                        },
+                        {
+                            header: 'Зачислено',
+                            align: 'center',
+                            dataIndex: 'admission',
+                            renderer: Ext.util.Format.htmlEncode,
+                            width: 180
+                        },
+                        {
+                            header: 'Количество групп',
+                            align: 'center',
+                            dataIndex: 'count',
+                            renderer: Ext.util.Format.htmlEncode,
+                            width: 180
+                        },
+                       //{
+                       //     xtype: 'templatecolumn',
+                       //     tpl: tpl,
+                       //     sortable: false,
+                       //     width: 470
+                       // }
+                    ]
+                });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+            gridPanel.getStore().on('load', function (store, records, options) {
+                var focus = '@ViewBag.Focus';
+                if (focus && focus.length > 0) {
+
+                    var focusRow = store.findExact('Id', parseInt(focus));
+                    if (focusRow >= 0) {
+                        var rowData = store.getAt(focusRow);
+                        gridPanel.getView().focusRow(rowData);
+                        gridPanel.getSelectionModel().select(rowData);
+                    }
+                }
+                return false;
+            });
+        });
+    </script>
+}

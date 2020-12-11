@@ -1,0 +1,276 @@
+﻿
+@{
+    ViewBag.Title = "Пользователи";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            Ext.tip.QuickTipManager.init();
+
+            var store = Ext.create("Ext.data.BufferedStore",
+                {
+                    idProperty: 'UserName',
+                    fields: ["Id", "UserName", "FirstName", "LastName", "Patronymic", "AdName", "Email", "Divisions", "AllDirections", "Directions", "AllMinors", "Minors","RoleSets"],
+                    autoLoad: true,
+                    pageSize: 6000,
+                    remoteSort: true,
+                    remoteFilter: true,
+                    proxy: {
+                        type: 'ajax',
+                        url: '/Account/Index',
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        }
+                    }
+                });
+
+            var filtersWnd = Ext.create('Ext.window.Window', {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "Имя пользователя", itemId: "UserNameField" },
+                    { fieldLabel: "Имя", itemId: "FirstNameField" },
+                    { fieldLabel: "Фамилия", itemId: "LastNameField" },
+                    { fieldLabel: "Отчество", itemId: "PatronymicField" },
+                    { fieldLabel: "Логин в ActiveDirectory", itemId: "AdNameField" },
+                    { fieldLabel: "Email", itemId: "EmailField" }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function () {
+                            store.filter([
+                                { property: 'UserName', value: filtersWnd.getComponent("UserNameField").getValue() },
+                                { property: 'FirstName', value: filtersWnd.getComponent("FirstNameField").getValue() },
+                                { property: 'LastName', value: filtersWnd.getComponent("LastNameField").getValue() },
+                                { property: 'Patronymic', value: filtersWnd.getComponent("PatronymicField").getValue() },
+                                { property: 'AdName', value: filtersWnd.getComponent("AdNameField").getValue() },
+                                { property: 'Email', value: filtersWnd.getComponent("EmailField").getValue() }
+                            ]);
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+            var tpl = '<a href="/Account/Edit/{Id}">Свойство</a>\
+                | <a href="/Account/UserRoles/{Id}">Роли</a> | <a href="/Account/UserDirections/{Id}">Направления</a> | <a href="/Account/UserMinors/{Id}">Майноры</a>\
+                | <a href="/Account/UserDivisions/{Id}">Институты</a> | <a href="/Account/Delete/{Id}">Удалить</a> | <a href="/Account/Impersonate/{Id}">Войти</a>';
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: store,
+                    loadMask: true,
+                    tbar: [
+                        {
+                            xtype: 'button',
+                            text: 'Фильтры...',
+                            handler: function () { filtersWnd.show(); }
+                        },
+                        {
+                            xtype: 'button',
+                            text: "Отменить фильтры",
+                            handler: function () { store.clearFilter(); }
+                        },
+                        {   
+                            xtype: 'button',
+                            text: "Экспорт в Excel",
+                            handler: function () { window.location = "/Account/DownloadReport"; }
+                        }
+                    ],
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        {
+                            header: 'Имя пользователя',
+                            dataIndex: 'UserName',
+                            width: 170,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Фамилия',
+                            dataIndex: 'LastName',
+                            width: 140,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Имя',
+                            dataIndex: 'FirstName',
+                            width: 140,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                        {
+                            header: 'Отчество',
+                            dataIndex: 'Patronymic',
+                            width: 140,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Логин в ActiveDirectory',
+                            align: 'center',
+                            dataIndex: 'AdName',
+                            width: 210
+                        },
+                        {
+                            header: 'Email',
+                            dataIndex: 'Email',
+                            renderer: Ext.util.Format.htmlEncode,
+                            width: 180
+                        },
+                        {
+                            header: 'Роли',
+                            dataIndex: 'RoleSets',
+                            renderer: Urfu.renders.htmlEncodeWithToolTip,
+                            width: 180
+                        },
+                       {
+                           dataIndex: 'Directions',
+                           header: 'Направления',
+                           width: 180,
+                           renderer: function (value, p, record) {
+                               value = value.join(", ");
+                               if (record.data.AllDirections)
+                                   value = 'Все';
+                               p.tdAttr = 'data-qtip="' + Ext.String.htmlEncode(value) + '"';
+                               return value;
+                           }
+                       },
+                       {
+                           dataIndex: 'Minors',
+                           header: 'Майноры',
+                           width: 180,
+                           renderer: function (value, p, record) {
+                               if (record.data.AllMinors)
+                                   return 'Все';
+                               return value;
+                           }
+                       },
+                       {
+                           dataIndex: 'Divisions',
+                           header: 'Подразделения',
+                           width: 180,
+                           renderer: function (value, p, record) {
+                               if (record.data.AllDirections)
+                                   return 'Все';
+                               return value;
+                           }
+                       },
+                       {
+                           xtype: 'templatecolumn',
+                           tpl: tpl,
+                           sortable: false,
+                           width: 570
+                       }
+                    ]
+                });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+            gridPanel.getStore().on('load', function (store, records, options) {
+                var focus = '@ViewBag.Focus';
+                if (focus && focus.length > 0) {
+                    
+                    var focusRow = store.findExact('Id', focus);
+                    if (focusRow > 0) {
+                        var rowData = store.getAt(focusRow);
+                        gridPanel.getView().focusRow(rowData);
+                        gridPanel.getSelectionModel().select(rowData);
+                    }
+                }
+                return false;
+            });
+        });
+    </script>
+}
+
+
+
+@*@model IEnumerable<Urfu.Its.Web.Models.EditUserViewModel>
+
+    @{
+        ViewBag.Title = "Index";
+    }
+
+    <h2>Index</h2>
+
+    <p>
+        @Html.ActionLink("Новый пользователь", "Register")
+    </p>
+    <table class="table">
+        <tr>
+            <th>@{ int rowNum = 1;}</th>
+            <th>
+                @Html.DisplayNameFor(model => model.UserName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FirstName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Patronymic)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AdName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+            <th></th>
+        </tr>
+
+    @foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.Raw(rowNum++)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UserName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FirstName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Patronymic)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AdName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.ActionLink("Свойства", "Edit", new {id = item.UserName}) |
+                @Html.ActionLink("Роли", "UserRoles", new {id = item.UserName}) |
+                @Html.ActionLink("Направления", "UserDirections", new {id = item.UserName})|
+                @Html.ActionLink("Институты", "UserDivisions", new {id = item.UserName}) |
+                @Html.ActionLink("Удалить", "Delete", new {id = item.UserName})|
+                @Html.ActionLink("Войти", "Impersonate", new {id = item.UserName})
+            </td>
+        </tr>
+    }
+
+    </table>*@

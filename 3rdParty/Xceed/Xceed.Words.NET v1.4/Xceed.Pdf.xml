@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Xceed.Pdf</name>
+    </assembly>
+    <members>
+        <member name="T:Xceed.Pdf.FeatureID">
+            <summary>
+            Contains each feature identifier requiring special 
+            licensing requirements permissions to execute.
+            </summary>
+        </member>
+        <member name="F:Xceed.Pdf.FeatureID.NoFeatureSpecified">
+            <summary>
+            No feature was specified.
+            </summary>
+        </member>
+        <member name="P:Xceed.Pdf.Licenser.LicenseKey">
+            <summary>
+            Gets or sets the license key used to license this product.
+            </summary>
+            <value>A string value representing the license key used to license this product.</value>
+        </member>
+        <member name="M:Xceed.Pdf.Licenser.VerifyLicense">
+            <summary>
+            Verifies that the license is valid for a specific product.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Xceed.Pdf.Licenser.VerifyLicense(Xceed.Pdf.FeatureID)">
+            <summary>
+            Verifies that the license is valid for a specific feature ID.
+            Use this method to inform user of newer versions is available 
+            that unlocks that feature if current key version does not unlock it.
+            </summary>
+            <param name="featureId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Xceed.Pdf.Licenser.VerifyLicenseDesignMode">
+            <summary>
+            Verifies that the license is valid for a specific product at design time.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Xceed.Pdf.Licenser.VerifyLicenseDesignMode(Xceed.Pdf.FeatureID)">
+            <summary>
+            Verifies that the license is valid for a specific product at design time.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Xceed.Pdf.Licenser.License">
+            <summary>
+            Returns the Xceed license created by the LicenseKey assignment.
+            </summary>
+        </member>
+        <member name="M:Xceed.Pdf.PDFLicense.CreateLicense(System.String,System.Type)">
+            <summary>
+            Create xceed specific component license here.
+            </summary>
+            <param name="licenseKey"></param>
+            <param name="licenserType"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Xceed.Pdf.PDFLicense.AllowedVersions">
+            <summary>
+            All the version number supported by this version of the product.
+            </summary>
+            <remarks>
+            The versions should be in descending order beginning with the
+            less restrictive up to the more restrictive.
+            </remarks>
+        </member>
+        <member name="P:Xceed.Pdf.PDFLicense.LicenseeType">
+            <summary>
+            The type of the class or control that is licensed by this class (or, more
+            exactly, a class derived from this one).
+            </summary>
+            <remarks>
+            If more than one class is licensed by the XceedLicense class, the LicenseeType
+            can simply be typeof( Licenser ).
+            </remarks>
+        </member>
+        <member name="M:Xceed.Utils.Licensing.XceedLicense.Initialize(System.String,System.Type)">
+            <summary>
+            Must be called after instantiation to initialize and verify the license parameters 
+            </summary>
+            <param name="licenseKey"></param>
+            <param name="licenserType"></param>
+        </member>
+        <member name="P:Xceed.Utils.Licensing.XceedLicense.IsFromRegistry">
+            <summary>
+            True if the license was read from the registry
+            </summary>
+        </member>
+        <member name="M:Xceed.Utils.Licensing.XceedLicense.GetLicenseKeyFromRegistry">
+            <summary>
+            Retrieves the license from the registry. Useful when there is no license set on a developer's machine.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Xceed.Utils.Licensing.XceedLicense.ValidateLicenseKey(Xceed.Utils.Licensing.XceedLicenseManager@,System.String@,System.Boolean,System.Boolean)">
+            <summary>
+            Validates a license key \
+            if there is no license key in the registry 
+              on a developer's machine -> trial is beginning
+              not on a developer's machine -> 
+            </summary>
+        </member>
+        <member name="F:Xceed.Utils.Licensing.XceedLicense.m_daysLeft">
+            <summary>
+            Days left until trial expires
+            </summary>
+        </member>
+        <member name="F:Xceed.Utils.Licensing.XceedLicense.m_isFromRegistry">
+            <summary>
+            True if the license was read from the registry
+            </summary>
+        </member>
+        <member name="F:Xceed.Utils.Licensing.XceedLicense.m_performedFeratureAnalysis">
+            <summary>
+            Remembers all previously used feature analysis 
+            </summary>
+        </member>
+    </members>
+</doc>

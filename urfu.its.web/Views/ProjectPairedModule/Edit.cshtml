@@ -1,0 +1,264 @@
+﻿@*@model Urfu.Its.Web.DataContext.Module*@
+@model Urfu.Its.Web.Models.ProjectEditViewModel
+@{
+    ViewBag.Title = "Редактирование модуля";
+}
+<h2>@ViewBag.Title</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Module.uuid)
+        @Html.HiddenFor(model => model.moduleUUId)
+        @Html.HiddenFor(model => model.Module.title)
+        <div>
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.Module.title)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Module.title)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Module.shortTitle)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Module.shortTitle)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Module.coordinator)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Module.coordinator)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Module.type)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Module.type)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Module.competence)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Module.competence)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Module.testUnits)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Module.testUnits)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Module.priority)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Module.priority)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Module.state)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Module.state)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Module.approvedDate)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Module.approvedDate)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Module.comment)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Module.comment)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Module.file)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Module.file)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.Module.specialities)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.Module.specialities)
+                </dd>
+            </dl>
+        </div>
+
+        <hr />
+
+        @if (ViewBag.CanEdit)
+        {
+            <div class="form-group">
+                @Html.LabelFor(model => model.Module.Project.Tech, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownListFor(model => model.techid, Model.TechSelector, htmlAttributes: new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.showInLc, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.showInLc, new { htmlAttributes = new { @class = "checkbox" } })
+                    @Html.ValidationMessageFor(model => model.showInLc, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="form-group">
+                @Html.LabelFor(model => model.Module.Project.Tech, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DisplayFor(model => model.tech , new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.showInLc, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DisplayFor(model => model.showInLc, new { htmlAttributes = new { @class = "checkbox" } })
+                </div>
+            </div>
+        }
+        <h4>Периоды</h4>
+        @if (ViewBag.CanLimitEdit)
+        {
+            <table class="table table-nonfluid">
+                <thead>
+                    <tr>
+                        <th width="150px">Год</th>
+                        <th width="150px">Семестр</th>
+                        <th width="200px">Выбрать до</th>
+                        <th width="100px"></th>
+                    </tr>
+                </thead>
+                <tbody id="periodsBlock">
+                    @for (var i = 0; i < Model.periods.Count; i++)
+                    {
+                        var p = Model.periods[i];
+                        <tr>
+                            @Html.HiddenFor(m => m.periods[i].id)
+                            @Html.HiddenFor(m => m.periods[i].isDeleted)
+                            <td>
+                                @Html.EditorFor(m => m.periods[i].year, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(m => m.periods[i].year, "", new { @class = "text-danger" })
+                            </td>
+                            <td>@Html.DropDownListFor(m => m.periods[i].semesterId, p.Selector, htmlAttributes: new { @class = "form-control" })</td>
+                            <td>@Html.EditorFor(m => m.periods[i].selectionDeadline, new { htmlAttributes = new { @class = "form-control datecontrol", type = "date" } })</td>
+                            
+                            
+
+                            <td><input type="button" value="Удалить" onclick="delPeriodClick(this, @i)" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <a class="addPeriod">Добавить период</a>
+        }
+        else
+        {
+            <table class="table table-nonfluid">
+                <thead>
+                    <tr>
+                        <th width="150px">Год</th>
+                        <th width="150px">Семестр</th>
+                        <th width="200px">Выбрать до</th>
+
+                    </tr>
+                </thead>
+                <tbody id="periodsBlock">
+                    @for (var i = 0; i < Model.periods.Count; i++)
+                    {
+                        var p = Model.periods[i];
+                        <tr>
+                            @Html.HiddenFor(m => m.periods[i].id)
+                            @Html.HiddenFor(m => m.periods[i].isDeleted)
+                            <td>
+                                @Html.DisplayFor(m => m.periods[i].year, new { htmlAttributes = new { @class = "form-control" } })
+                            </td>
+                            <td>
+                                @Html.DisplayFor(m => m.periods[i].semesterName, new { htmlAttributes = new { @class = "form-control" } })
+                            </td>
+                            <td>
+                                @Html.DisplayFor(m => m.periods[i].selectionDeadline, new { htmlAttributes = new { @class = "form-control datecontrol", type = "date" } })
+                            </td>
+                            
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        <hr />
+
+        @if (ViewBag.CanEdit || ViewBag.CanLimitEdit)
+        {
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Сохранить" class="btn btn-default" />
+                </div>
+            </div>
+        }
+    </div>
+}
+<div>
+    @Html.ActionLink("Вернуться к списку", "Index", new { focus = Model.moduleUUId })
+</div>
+
+@section Scripts 
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+<script>
+    if (!Modernizr.inputtypes.date) {
+    $(function() {
+        $("input[type='date']")
+            .datepicker({ dateFormat: 'yy-mm-dd' });
+
+        });
+    }
+
+    $(function () {
+        var i = @Model.periods.Count;
+       $('.addPeriod').click(function ()
+       {
+            var html2Add =
+ "<tr>" +
+   "<input data-val='true' data-val-number='The field id must be a number.' data-val-required='The id field is required.' id='periods_" + i + "__id' name='periods[" + i + "].id' type='hidden' value='" + (-i) + "'>"+
+ "<input data-val='true' id='periods_" + i + "__isDeleted' name='periods[" + i + "].isDeleted' type='hidden' value='False' />" +
+ "<td><input class='form-control text-box single-line' data-val='true' data-val-number='The field year must be a number.' data-val-required='The year field is required.' id='periods_" + i + "__year' name='periods[" + i + "].year' size='50' type='number' /></td>" +
+ "<td><select id='periods_" + i + "__semesterId' name='periods[" + i + "].semesterId' class='form-control'>" +
+ "<option value='0'>Прочий</option>"+
+ "<option value='1'>Осенний</option>"+
+ "<option value='2'>Весенний</option>"+
+ "</select></td>" +
+ "<td><input class='form-control datecontrol text-box single-line' data-val='true' data-val-date='The field SelectionDeadline must be a date.' id='periods_" + i + "__selectionDeadline' name='periods[" + i + "].selectionDeadline' type='date' value='' /></td>" +
+ "<td><input type='button' value='Удалить' onclick='delPeriodClick(this, " + i + ")'/></td>" +
+ "</tr>";
+           $('#periodsBlock').append(html2Add);
+            i++;
+
+           $("input[type='date']")
+                .datepicker({ dateFormat: 'yy-mm-dd' })
+                .get(0)
+                .setAttribute("type", "text");
+
+        })
+
+        delPeriodClick = function (button, i)
+        {
+            $(button.parentNode.parentNode).hide();
+            $('#periods_' + i + '__isDeleted').attr("value", true);
+            $('#periods_' + i + '__year').attr("value", 0);
+        }
+
+    })
+</script>
+
+
+}

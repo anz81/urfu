@@ -1,0 +1,230 @@
+﻿@{
+    ViewBag.Title = "Справочник. Виды профессиональной деятельности";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+
+@section scripts
+{
+    <script type="text/javascript">
+
+       Ext.onReady(function () {
+           Ext.tip.QuickTipManager.init();
+
+           var store = Ext.create('Ext.data.Store', {
+               autoLoad: true,
+               proxy: {
+                   type: 'ajax',
+                   url: window.location.pathname,
+                   reader: {
+                       type: 'json',
+                       rootProperty: 'data',
+                       totalProperty: 'total'
+                   }
+               }
+           });
+
+           var gridPanel = Ext.create('Ext.grid.Panel', {
+               region: 'center',
+               store: store,
+               columnLines: true,
+               plugins: 'gridfilters',
+               tbar: [
+                   {
+                       xtype: 'button',
+                       text: 'Добавить',
+                       hidden: '@ViewBag.CanEdit' == 'False',
+                       handler: function() {
+                           createRecordWindow().show();
+                       }
+                   }
+               ],
+             columns: [
+                   { xtype: 'rownumberer', header: '№', width: 60 },
+                   {
+                       header: 'Код',
+                       width: 100,
+                       dataIndex: 'Code',
+                       filter: {
+                           type: 'string',
+                           itemDefaults: {
+                               emptyText: 'Искать...'
+                           }
+                       }
+                   },
+                   {
+                       text: 'Название',
+                       width: 700,
+                       dataIndex: 'Title',
+                       filter: {
+                           type: 'string',
+                           itemDefaults: {
+                               emptyText: 'Искать...'
+                           }
+                       }
+                    },
+                    {
+                      xtype: 'actioncolumn',
+                      resizable: false,
+                      sortable: false,
+                      width: 70,
+                      hidden: '@ViewBag.CanEdit' == 'False',
+                       items: [
+                                {
+                                    icon: '@Url.Content("/Content/Images/edit.png")',
+                                    iconCls: 'icon-padding',
+                                    tooltip: 'Редактировать',
+                                    handler: function(grid, rowIndex, colIndex, item, e, record) {
+                                        createRecordWindow(record).show();
+                                    }
+                                },
+                                {
+                                    icon: '@Url.Content("/Content/Images/remove.png")',
+                                    tooltip: 'Удалить',
+                                    iconCls: 'icon-padding',
+                                    handler: function(grid, rowIndex, colIndex, item, e, record) {
+                                        Ext.MessageBox.show({
+                                            title: 'Удаление',
+                                            msg: 'Вы действительно хотите удалить запись?',
+                                            buttons: Ext.MessageBox.YESNO,
+                                            fn: function(button) {
+                                                if ('yes' == button) {
+                                                    Ext.Ajax.request({
+                                                        method: 'GET',
+                                                        url: '@Url.Action("Delete")',
+                                                        params: { code: record.get('Code') },
+                                                        success: function(response) {
+                                                            var r = Ext.decode(response.responseText);
+                                                            if (!r.success)
+                                                                Ext.MessageBox.alert('', r.message);
+                                                            else {
+                                                                store.reload();
+                                                                Ext.MessageBox.alert('', 'Запись удалена');
+                                                            }
+                                                        },
+                                                        failure: function(xhr) {
+                                                            Ext.MessageBox.show({
+                                                                msg: xhr.responseText
+                                                            })
+
+                                                        }
+                                                    });
+                                                }
+                                            },
+                                            icon: Ext.MessageBox.QUESTION
+                                        })
+                                    }
+                                }
+                            ]
+                        }
+               ]
+           });
+
+           var codeTest = /\d{2}\.\d{3,}/;
+           Ext.apply(Ext.form.field.VTypes,
+               {
+                   code: function(val, field) {
+                       return codeTest.test(val);
+                   },
+                   codeText: 'Неверный формат',
+               });
+
+           function createRecordWindow(record) {
+                return Ext.create('Ext.window.Window',
+                    {
+                        title: record ? 'Редактирование записи' : 'Добавление записи',
+                        closeAction: 'hide',
+                        closeToolText: 'Закрыть окно',
+                        resizable: false,
+                        bodyPadding: 6,
+                        viewModel: {
+                            data: Ext.apply({}, record ? record.data : {}),
+                        },
+                        items: {
+                            xtype: 'form',
+                            layout: { type: 'vbox', align: 'stretch' },
+                            defaults: {
+                            //    xtype: 'textfield',
+                               labelWidth: 100,
+                               width: 450
+                            },
+                            items: [
+                                {
+                                    xtype: 'textfield',
+                                    fieldLabel: 'Код',
+                                    bind: '{Code}',
+                                    name: 'Code',
+                                    readOnly: record,
+                                    focusable:!record,
+                                    allowBlank: false,
+                                    vtype: 'code',
+                                    listeners: {
+                                        blur: function (field) {
+                                            if (store.getDataSource().find('Code',field.value)) {
+                                                Ext.MessageBox.alert('Ошибка', 'Существует область профессиональной деятельности с кодом ' + field.value);
+                                                record ? field.setValue(record.get('Code')) : field.setValue('');
+                                            }
+                                        }
+                                    }
+
+                                },
+                                {
+                                    xtype: 'textarea',
+                                    fieldLabel: 'Название',
+                                    bind: '{Title}',
+                                    name: 'Title',
+                                    allowBlank: false
+                                }
+                            ],
+                            buttons: [
+                                {
+
+                                    text: "Сохранить",
+                                    formBind: true,
+                                    handler: function() {
+
+                                        var window = this.up('window');
+                                        var form = window.down('form');
+
+                                        if (!form.isValid()) {
+                                            Ext.Msg.alert('Ошибка', 'Заполнены не все поля');
+                                            return;
+                                        }
+
+                                        form.submit({
+                                            url: record ? '@Url.Action("Edit")' : '@Url.Action("Create")',
+                                            success: function(form, action) {
+                                                var r = action.result;
+                                                if (!r.success) {
+                                                    Ext.MessageBox.alert('', r.message);
+                                                } else {
+                                                    Ext.MessageBox.alert('', 'Информация сохранена.');
+                                                    store.reload();
+                                                    window.close();
+                                                }
+                                            },
+                                            failure: function(form, action) {
+                                                Ext.MessageBox.alert('',
+                                                    'Информация не сохранена. ' + action.result.message);
+                                            }
+                                        });
+                                    }
+                                },
+                                {
+                                    text: "Отмена",
+                                    handler: function() { this.up('window').close(); }
+                                }
+                            ]
+                        }
+                    })
+            }
+
+           var items = [
+               gridPanel
+           ];
+
+           Urfu.createViewport('border', items);
+
+       });
+    </script>
+}

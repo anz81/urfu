@@ -1,0 +1,1 @@
+vdocs --command UpdateTemplate --documentType BasicCharacteristicOP -t "..\..\..\..\Urfu.Its.VersionedDocs\Templates\OHOP.docx" -f %*

@@ -1,0 +1,2 @@
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web.LoadTests\obj\Debug\Urfu.Its.Web.LoadTests.csprojAssemblyReference.cache
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web.LoadTests\obj\Debug\Urfu.Its.Web.LoadTests.csproj.CoreCompileInputs.cache

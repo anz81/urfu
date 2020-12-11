@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="Properties\AssemblyInfo.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="MSTest.TestFramework" Version="2.1.2" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Ext.Utilities\Ext.Utilities.csproj">
+			<Project>{5BF5CA97-BEDC-429E-B079-87A0084BFCC9}</Project>
+			<Name>Ext.Utilities</Name>
+		</ProjectReference>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Properties\" />
+	</ItemGroup>
+</Project>

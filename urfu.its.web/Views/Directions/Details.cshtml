@@ -1,0 +1,66 @@
+﻿@model Urfu.Its.Web.DataContext.Direction
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Direction</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.okso)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.okso)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.title)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.title)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ministerialCode)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ministerialCode)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ugnTitle)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ugnTitle)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.standard)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.standard)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.qualifications)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.qualifications)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.uid }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

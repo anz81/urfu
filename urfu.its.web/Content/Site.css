@@ -1,0 +1,56 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding: 15px;
+}
+.search-icon {
+    background-image: url(../Content/Images/search.png);
+    background-repeat: no-repeat;
+}
+button.an-icon {
+    background-image: url(../Content/Images/search.png);
+    background-repeat: no-repeat;
+}
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+.table-nonfluid {
+   width: auto !important;
+}
+
+input.error {
+    background-color: #F2DEDE !important;
+}
+
+input.modified {
+    background-color: #FCF8E3 !important;
+}
+
+input.saved {
+    background-color: #DFF0D8 !important;
+}
+
+.contrast-text {
+    color: white !important;
+    font-size: 16px;
+}
+
+@media screen and (min-width:768px) and (max-width:991px) {
+    body {
+        margin-top:125px;
+    }
+}
+@media screen and (min-width:992px) and (max-width:1199px) {
+    body {
+        margin-top:50px;
+    }
+}
+

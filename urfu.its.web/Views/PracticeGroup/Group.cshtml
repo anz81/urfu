@@ -1,0 +1,478 @@
+﻿@model Urfu.Its.Web.Model.Models.Practice.GroupViewModel
+
+@{
+    ViewBag.Title = "Группа " + Model.GroupName + ", " + Model.Title.Title;
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+<style>
+    .x-progress-default .x-progress-text-back {
+        line-height: 17px
+    }
+
+    .x-progress-default .x-progress-text {
+        line-height: 17px
+    }
+      .letter-admission-doc .x-grid-cell-inner {
+        background-color: #B6DFDC;
+        border-top-color: #b3e798;
+        border-top-style: solid;
+        border-bottom-color: #b3e798;
+        border-bottom-style: solid;
+    }
+    .admission-doc .x-grid-cell-inner {
+        border-top-color: #b3e798;
+        border-top-style: solid;
+        border-bottom-color: #b3e798;
+        border-bottom-style: solid;
+        background-color: #b3e798
+    }
+</style>
+
+@{
+    <div class="container-fluid">
+        <script type="text/javascript">
+
+            var disciplineUID = '@Model.DisciplineUid';
+            var year = @Model.Year;
+            var semesterID = '@Model.SemesterID';
+            Ext.Ajax.setTimeout(60000);
+            var practiceref = '&groupID=@Model.GroupHistoryId&year=@Model.Year&semesterID=@Model.SemesterID&disciplineUID=@Model.DisciplineUid';
+
+            var localStorageName = "PracticeGroupFilters";
+
+            var columnsToShowName = 'columnsToShowPracticeGroupStudents';
+            var columnsToShow = [];
+
+            Ext.onReady(function () {
+                Ext.tip.QuickTipManager.init();
+                Ext.state.Manager.setProvider(Ext.create('Ext.state.CookieProvider'));
+
+                var store = Ext.create("Ext.data.Store", {
+                    idProperty: 'StudentID',
+                    autoLoad: false,
+                    proxy: {
+                        type: 'ajax',
+                        url: '@Url.Action("GroupAjax")',
+                        extraParams: {
+                            groupId: '@Model.GroupId',
+                            disciplineId: '@Model.DisciplineUid',
+                            year: @Model.Year,
+                            semesterId: @Model.SemesterID,
+                            hideStudents: sessionStorage.getItem('hideStudents') || false
+                        },
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        },
+                        timeout: 60000
+                    }
+                });
+
+
+                Ext.define('PracticeProgressBar', {
+                    extend: 'Ext.ProgressBar',
+                    alias: 'widget.practiceProgressBar',
+                    //baseCls: null,
+                    defaultListenerScope: true,
+                    updateText: function (text) {
+                        var me = this;
+                        if (this.rendered) {
+                            var widgetColumn = this.getWidgetColumn();
+                            var record = this.getWidgetRecord();
+                            var text = widgetColumn && widgetColumn.textDataIndex;
+                            if (record && record.get(text)) {
+                                text = record.get(text);
+                            }
+                            else {
+                                text = Math.round(this.getValue() * 100) + '%';
+                            }
+                        }
+                        return this.callParent(arguments);
+                    }
+                });
+
+                Ext.define('PrcaticeProgressColumn', {
+                    extend: 'Ext.grid.column.Widget',
+                    alias: 'widget.practiceProgressColumn',
+                    defaultListenerScope: true,
+                    onAfterRenderCustom: function (progressBar, eOpts) {
+                        progressBar.updateText(progressBar.text);
+                    },
+
+                    widget: {
+                        xtype: 'practiceProgressBar',
+                        height: '17px',
+                        defaultListenerScope: true,
+                        listeners: {
+                            afterrender: 'onAfterRenderCustom'
+                        }
+                    }
+                });
+
+                var prevSettings = {};
+                try {
+                    var prevSettingString = JSON.parse(localStorage.getItem(localStorageName) || "[]");
+
+                    for (var i = 0; i < prevSettingString.length; i++) {
+                        prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                    }
+
+                    columnsToShow = JSON.parse(localStorage.getItem(columnsToShowName)) || [];
+
+                } catch (err) {
+
+                }
+
+                var filtersWnd = null;
+                function loadStore() {
+                    store.proxy.setUrl('@Url.Action("GroupAjax")' +
+                        '?filter=' +
+                        encodeURIComponent(localStorage.getItem(localStorageName)));
+                    store.load();
+                }
+                var setFilters = function () {                    
+                    var settings = [
+                        { property: 'Name', value: filtersWnd.getComponent("Name").getValue() },
+                        { property: 'Variant', value: filtersWnd.getComponent("Variant").getValue()}
+                    ];
+                    localStorage.setItem(localStorageName, JSON.stringify(settings));
+                    loadStore();
+                };
+                filtersWnd = Ext.create('Ext.window.Window',
+                    {
+                        title: "Фильтры",
+                        closeAction: 'hide',
+                        resizable: false,
+                        autoHeight: true,
+                        bodyPadding: 6,
+                        defaults: {
+                            xtype: 'textfield',
+                            width: 500,
+                            labelWidth: 130
+                        },
+                        items: [
+                            { fieldLabel: "ФИО студента", itemId: "Name", value: prevSettings["Name"] },
+                            { fieldLabel: "Траектория образовательной программы", itemId: "Variant", value: prevSettings["Variant"] },
+                        ],
+                        buttons: [
+                            {
+                                text: "OK",
+                                handler: function () {
+                                    setFilters();
+                                    filtersWnd.hide();
+                                }
+                            },
+                            {
+                                text: "Отмена",
+                                handler: function () { filtersWnd.hide(); }
+                            }
+                        ]
+                    });
+                setFilters();
+                var gridPanel = Ext.create('Ext.grid.Panel',
+                    {
+                        region: 'center',
+                        store: store,
+                        loadMask: true,
+                        columnLines: true,
+                        enableLocking: true,
+                        id: 'GroupPracticeGrid',
+                        stateful: true,
+                        stateId: 'statefulgrid',
+                        viewConfig: {
+                            markDirty: false
+                        },
+                        tbar: [
+                            {
+                                xtype: 'button',
+                                text: "Руководители, темы",
+                                handler: function () {
+                                    window.location = "/Practice/Index?focus=@Model.DisciplineUid@Model.GroupHistoryId@Model.SemesterID";
+                                }
+                            }, '-',
+                            {
+                                xtype: 'button',
+                                text: "Фильтры",
+                                handler: function () {
+                                    filtersWnd.show();
+                                }
+                            },
+                            {
+                                xtype: 'button',
+                                text: "Отменить фильтры",
+                                handler: function () {
+                                    settings = [];
+                                    filtersWnd.getComponent("Name").setValue('');
+                                    filtersWnd.getComponent("Variant").setValue('');
+                                    setFilters();
+                                }
+                            }, '-',
+                            {
+                                xtype: 'checkbox',
+                                boxLabel: 'Скрыть неактивных студентов',
+                                itemId: 'HideNotactiveStudents',
+                                value: sessionStorage.getItem('hideStudents') || false,
+                                listeners: {
+                                    change: function (t, newValue, oldValue, eOpts) {
+                                        store.getProxy().setExtraParam('hideStudents', newValue);
+                                        sessionStorage.setItem('hideStudents', newValue);
+                                        console.log('alert', newValue);
+                                        setFilters();
+                                    }
+                                }
+                            },
+                        ],
+
+                        viewConfig: {
+                            getRowClass: function (record) {                           
+                                if (record.get('RejectionLetter')) {
+                                    if (record.get('DocHasNoStatus'))
+                                        return 'letter-admission-doc'
+                                    else
+                                        return 'highlight'
+                                }
+                                else if (record.get('DocHasNoStatus'))
+                                    return 'admission-doc'
+                                else
+                                    '';
+                            },
+                            markDirty: true
+                        },
+                        columns: [{
+                            xtype: 'rownumberer',
+                            width: 50,
+                            locked: true,
+                            scrollable: false
+                        }, {
+                            header: 'Студент',
+                            dataIndex: 'Name',
+                            width: 250,
+                            locked: true,
+                            scrollable: false,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            header: 'Статус',
+                            dataIndex: 'StudentStatus',
+                            width: 110,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                       }, {
+                            header: 'Вид возмещения затрат',
+                            dataIndex: 'StudentCompensation',
+                            width: 140,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+
+                        },{
+                            header: 'Номер',
+                            dataIndex: 'PersonalNumber',
+                            width: 110,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            header: 'Сроки практики',
+                            align: 'left',
+                            dataIndex: 'PracticeDateInfo',
+                            width: 190,
+                            renderer: function (value, metaData) {
+                                var tooltippvalue = Ext.String.htmlEncode(value +' '+ 'Совпадает со сроком группы: ' + metaData.record.data.EqualsGroupDates);
+                                metaData.tdAttr = 'data-qtip="' + Ext.String.htmlEncode(tooltippvalue) + '"';
+                                return value;
+                            }
+                            },{
+                                header: 'Срок сдачи отчета',
+                                align: 'left',
+                                dataIndex: 'ReportDatesInfo',
+                                width: 190,
+                                renderer: function (value, metaData) {
+                                   var tooltippvalue = Ext.String.htmlEncode(value +' '+ 'Совпадает со сроком группы: ' + metaData.record.data.EqualsGroupReportDates);
+                                    metaData.tdAttr = 'data-qtip="' + Ext.String.htmlEncode(tooltippvalue) + '"';
+                                    return value;
+                                }
+                            },
+                            {
+                            header: 'Руководитель практики от УрФУ',
+                            dataIndex: 'Teacher',
+                            width: 200,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            xtype: 'checkcolumn',
+                            header: 'С выездом',
+                            dataIndex: 'IsExternal',
+                            width: 90,
+                            disabled: true,
+                            disabledCls: 'x-item-enabled'
+                        }, {
+                            header: 'Сроки выезда руководителя от УрФУ',
+                            dataIndex: 'ExternalDateInfo',
+                            width: 200,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            header: 'Соруководитель УрФУ',
+                            dataIndex: 'Teacher2',
+                            width: 160,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            header: 'Подразделение УрФУ',
+                            dataIndex: 'Subdivision',
+                            width: 150,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            header: 'Статус',
+                            dataIndex: 'AdmissionStatus',
+                            width: 90,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            header: 'Предприятие',
+                            dataIndex: 'CompanyName',
+                            width: 200,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            header: 'Статус',
+                            dataIndex: 'AdmissionCompanyStatus',
+                            width: 90,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            xtype: 'practiceProgressColumn',
+                            header: 'Документы, % заполняемости',
+                            dataIndex: 'PercentComplete',
+                            textDataIndex: 'PercentCompleteText',
+                            width: 150,
+                            
+                            //widget: {
+                            //    xtype: 'progressbarwidget',
+                            //    textTpl: '{value:percent}',
+                            //    style: { 'margin': '1px' }
+                            //}
+                            }, {
+                                xtype: 'practiceProgressColumn',
+                                header: 'Документы (согласованные), % заполняемости',
+                                dataIndex: 'PercentCompleteAdmDoc',
+                                textDataIndex: 'PercentCompleteeAdmDocText',
+                                width: 164,
+                            }, {
+                            xtype: 'actioncolumn',
+                            region: 'center',
+                            sortable: false,
+                            width: 50,
+                            items: [{
+                                icon: '@Url.Content("~/Content/Images/edit.png")',
+                                iconCls: 'icon-padding',
+                                text: 'Редактировать',
+                                tooltip: 'Редактировать',
+                                handler: function (grid, rowIndex, colIndex) {
+                                    var rec = grid.getStore().getAt(rowIndex);
+                                    var link ="@Url.Action("Practice")?Id=" + rec.get('PracticeID') + "&studentID=" + rec.get('StudentID') + practiceref;
+                                    window.open(link, '_blank');
+
+                                }
+                            }]
+                        }, {
+                            xtype: 'checkcolumn',
+                            text: 'Целевой прием',
+                            dataIndex: 'IsTarget',
+                            disabled: true,
+                            hidden: '@Model.UserIsInRole' != 'True'
+                        }, {
+                            header: 'Номер договора',
+                            dataIndex: 'ContractNumber',
+                            width: 120,
+                            hidden: '@Model.UserIsInRole' != 'True',
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }, {
+                            xtype: 'checkcolumn',
+                            text: 'Есть договор',
+                            dataIndex: 'ExistContract',
+                            listeners: {
+                                checkchange: function (grid, rowIndex, checked, eOpts) {
+                                    var rec = gridPanel.getStore().getAt(rowIndex);
+
+                                    var removeChecked = function () {
+                                        gridPanel.getStore().getAt(rowIndex).set({ ExistContract: !checked });
+                                        Ext.getCmp('GroupPracticeGrid').getView().refresh();
+                                    };
+
+                                    var request = function () {
+                                        Ext.Ajax.request({
+                                            url: '@Url.Action("SetExistContract")',
+                                            params: {
+                                                practiceId: rec.get('PracticeID'),
+                                                isChecked: checked
+                                            },
+                                            success: function (response) {
+                                                if (response.responseText != "") {
+                                                    var data = Ext.decode(response.responseText);
+                                                    if (data.success) {
+                                                    }
+                                                    else {
+                                                        removeChecked();
+                                                        Ext.MessageBox.show({
+                                                            title: 'Ошибка',
+                                                            msg: data.message,
+                                                            buttons: Ext.MessageBox.OK
+                                                        });
+                                                    }
+                                                }
+                                            },
+                                            failure: function (response) {
+                                                Ext.MessageBox.show({
+                                                    title: 'Ошибка',
+                                                    msg: 'Неизвестная ошибка',
+                                                    buttons: Ext.MessageBox.OK
+                                                });
+                                            }
+                                        });
+                                    };
+
+                                    // проверка на наличие роли у пользователя
+                                    // несколько по-тупому 
+                                    Ext.Ajax.request({
+                                        url: '@Url.Action("CheckConfirmRole")',
+                                        success: function (response) {
+                                            if (response.responseText == "") {
+                                                request();
+                                            }
+                                            else {
+                                                removeChecked();
+                                                Ext.MessageBox.alert('Ошибка', "У вас нет прав редактировать это поле");
+                                            }
+                                        },
+                                        failure: function (response) {
+                                        }
+                                    });
+                                }
+                            }
+                        }, {
+                            header: 'Траектория образовательной программы',
+                            dataIndex: 'Variant',
+                            width: 400,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        }]
+                    });
+
+                var items = [
+                    gridPanel
+                ];
+
+                Urfu.createViewport('border', items);
+
+                hideColumns(gridPanel, columnsToShow);
+
+                gridPanel.on('columnschanged', function (ct, e) {
+                    if (ct.gridVisibleColumns === null || ct.gridVisibleColumns === undefined)
+                        return;
+                    columnsToShow = ct.gridVisibleColumns.map(function (c) { return c.dataIndex; });
+                    localStorage.setItem(columnsToShowName, JSON.stringify(columnsToShow));
+                });
+
+            });
+
+            
+            function hideColumns(gridPanel, columnsToShow) {
+                if (columnsToShow.length > 0) {
+                    gridPanel.columns.filter(column => !column.locked && !columnsToShow.includes(column.dataIndex)).forEach(column => column.setHidden(true));
+                }
+            };
+        </script>
+    </div>
+}
+

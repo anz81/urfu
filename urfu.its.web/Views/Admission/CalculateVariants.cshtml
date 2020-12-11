@@ -1,0 +1,76 @@
+﻿@model Urfu.Its.Web.DataContext.EduProgram
+
+@{
+    ViewBag.Title = "Расчёт зачислений в варианты версии ОП";
+}
+
+<h2>@ViewBag.Title</h2>
+
+
+@if (ViewBag.AnyPrepared)
+{
+    <div class="alert alert">
+        Существуют решения по студентам из этой программы. Эти решения будут перезаписаны.
+    </div>
+}
+@if (ViewBag.AnyPublished)
+{
+    <div class="alert alert-warning">
+        Существуют решения, отправленные в ЛКС
+    </div>
+}
+@if (ViewBag.AnyWithoutRating)
+{
+    <div class="alert alert-warning">
+        Существуют студенты без рейтинга
+    </div>
+}
+
+@if (ViewBag.VariantsWithoutLimits)
+{
+    <div class="alert alert-warning">
+        Не по всем траекториям установлены лимиты
+    </div>
+}
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.DirectionAndName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DirectionAndName)
+        </dd>
+    </dl>
+    @using (Html.BeginForm("CalculateVariantAdmissions", "Admission", new { programId = Model.Id }, FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+
+
+            <dl class="dl-horizontal">
+                <dt>
+                    Курс
+                </dt>
+
+                <dd>
+                    @Html.ListBox("classes", new[] {new SelectListItem() {Value = "1", Text = "1 курс"}, new SelectListItem() {Value = "2", Text = "2 курс"}, new SelectListItem() {Value = "3", Text = "3 курс"}, new SelectListItem() {Value = "4", Text = "4 курс"},})
+                </dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>
+                    Без выбора в ЛК
+                </dt>
+
+                <dd>
+                    @Html.CheckBox("admitIgnorers")
+                </dd>
+            </dl>
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Рассчитать" class="btn btn-default"/>
+            </div>
+        </div>
+    }
+</div>

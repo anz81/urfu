@@ -1,0 +1,168 @@
+﻿
+@{
+    ViewBag.Title = "Файлы";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@{
+    <div class="form-horizontal">
+        <script type="text/javascript">
+            var lastFilter = [];
+            Ext.onReady(function () {
+                Ext.tip.QuickTipManager.init();
+                
+                var store = Ext.create("Ext.data.Store",
+                    {
+                        autoLoad: true,
+                        pageSize: 25,
+                        remoteSort: true,
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: '/Files/Index',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data',
+                                totalProperty: 'total'
+                            }
+                        }
+                    });
+
+                var tpl = '<a href="@Url.Action("Download")?path={fullPath}&fileName={fileName}">{fileName}</a>';
+
+                var filePanel = Ext.create('Ext.window.Window',
+                    {
+                        title: "Документ",
+                        closeAction: 'hide',
+                        scrollable: true,
+                        resizable: true,
+                        bodyPadding: 6,
+                        fileUpload: true,
+                        items: [
+                            Ext.create('Ext.form.Panel',
+                                {
+                                    title: '',
+                                    id: 'fileUploadFileTest',
+                                    fileUpload: true,
+                                    items: [
+                                        {
+                                            xtype: 'filefield',
+                                            fieldLabel: 'Документ',
+                                            emptyText: 'Выбрать документ',
+                                            name: 'document-path',
+                                            buttonText: 'Загрузить',
+                                            width: 600,
+                                            multiple: false
+                                        }
+                                    ],
+                                    buttons: [
+                                        {
+
+                                            text: "Сохранить",
+                                            handler: function () {
+                                                var form = Ext.getCmp('fileUploadFileTest');
+                                                form.getForm().submit({
+                                                    method: 'POST',
+                                                    url: '@Url.Action("Upload")',
+                                                    success: function (response) {
+                                                        store.reload();
+                                                        filePanel.hide();
+                                                    },
+                                                    failure: function (response) {
+                                                        Ext.MessageBox.alert('Ошибка');
+                                                    }
+                                                });
+                                            }
+                                        },
+                                        {
+                                            text: "Отмена",
+                                            handler: function () {
+                                                filePanel.hide();
+                                            }
+                                        }
+                                    ]
+
+                                })
+                        ]
+                    });
+
+                var gridPanel = Ext.create('Ext.grid.Panel',
+                    {
+                        region: 'center',
+                        store: store,
+                        loadMask: true,
+                        columnLines: true,
+                        tbar: [
+                            {
+                                xtype: 'button',
+                                text: "Загрузить",
+                                handler: function () {
+                                    filePanel.show();
+                                }
+                            }
+                        ],
+                        columns: [
+                            { xtype: 'rownumberer', width: 50 },
+                            {
+                                header: 'Файл',
+                                xtype: 'templatecolumn',
+                                sortable: false,
+                                tpl: tpl,
+                                width: 500
+                            },
+                            {
+                                xtype: 'actioncolumn',
+                                region: 'center',
+                                sortable: false,
+                                width: 70,
+                                items: [
+                                    {
+                                        icon: '@Url.Content("~/Content/Images/remove.png")',
+                                        iconCls: 'icon-padding',
+                                        text: 'Удалить',
+                                        tooltip: 'Удалить',
+                                        handler: function (grid, rowIndex, colIndex) {
+
+                                                var request = function () {
+                                                    var rec = grid.getStore().getAt(rowIndex);
+                                                    Ext.Ajax.request({
+                                                            url: '@Url.Action("Delete")',
+                                                            params: {
+                                                                path: rec.get("fullPath")
+                                                            },
+                                                            success: function (response) {
+                                                                store.reload();
+                                                            },
+                                                            failure: function (response) {
+                                                                Ext.MessageBox.alert('Ошибка');
+                                                            }
+                                                        });
+                                                }
+                                                Ext.MessageBox.show({
+                                                    title: 'Информационное сообщение',
+                                                    msg: "Удалить документ?",
+                                                    buttons: Ext.MessageBox.YESNO,
+                                                    fn: function (btn) {
+                                                        if (btn === 'yes') {
+                                                            request();
+                                                        }
+                                                    }
+                                                });
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+
+                    });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+
+            });
+        </script>
+    </div>
+}

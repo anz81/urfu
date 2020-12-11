@@ -1,0 +1,397 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            Ext.tip.QuickTipManager.init();
+
+            function parseJson(json) {
+                var data = JSON.parse(json.replace(/&quot;/g, '"'));
+                return data;
+            }
+
+            var dataStatuses = parseJson('@ViewBag.Statuses');
+            var statusStore = Ext.create("Ext.data.Store",
+                {
+                    data: dataStatuses,
+                });
+
+            var dataStudentStatuses = parseJson('@ViewBag.StudentStatuses');
+            var studentStatusStore = Ext.create("Ext.data.Store",
+                {
+                    data: dataStudentStatuses,
+                });
+
+            var store = Ext.create("Ext.data.BufferedStore",
+                {
+                    fields: ["Id", "GroupName", "Surname", "Name", "PatronymicName", "Rating", "IsTarget", "IsInternational", "Compensation", "Priority", "Status", "PersonalNumber", "StudentStatus", "Status", "AnotherAdmission", "VariantId"],
+                    autoLoad: true,
+                    pageSize: 300,
+                    remoteSort: true,
+                    remoteFilter: true,
+                    proxy: {
+                        type: 'ajax',
+                        url: window.location.pathname,
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        }
+                    }
+                });
+
+            var filtersWnd = Ext.create('Ext.window.Window', {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "Название группы", itemId: "GroupNameField" },
+                    { fieldLabel: "Фамилия", itemId: "SurnameField" },
+                    { fieldLabel: "Имя", itemId: "NameField" },
+                    {
+                        fieldLabel: "Статус",
+                        itemId: "StudentStatus",
+                        xtype: "combobox",
+                        store: studentStatusStore,
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'remote',
+                        width: 300
+                    },
+                    {
+                        fieldLabel: "Состояние",
+                        itemId: "Status",
+                        xtype: "combobox",
+                        store: statusStore,
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'remote',
+                        width: 300
+                    },
+                    { fieldLabel: "Номер", itemId: "PersonalNumber" },
+                    { fieldLabel: "Отчество", itemId: "PatronymicNameField" },
+                    {
+                        xtype: 'radiogroup',
+                        fieldLabel: 'Целевой',
+                        itemId: "IsTargetField",
+                        //value: prevSettings["IsTarget"],
+                        items: [
+                        {
+                            boxLabel: 'Любой',
+                            name: 'IsTargetField',
+                            inputValue: ''
+
+                        }, {
+                            boxLabel: 'Да',
+                            name: 'IsTargetField',
+                            inputValue: 'true'
+                        }, {
+                            boxLabel: 'Нет',
+                            name: 'IsTargetField',
+                            inputValue: 'false'
+                        }]
+                    },
+                    {
+                        xtype: 'radiogroup',
+                        fieldLabel: 'Иностранный',
+                        itemId: "IsInternationalField",
+                        //value: prevSettings["IsInternational"],
+                        items: [
+                        {
+                            boxLabel: 'Любой',
+                            name: 'IsInternationalField',
+                            inputValue: ''
+
+                        }, {
+                            boxLabel: 'Да',
+                            name: 'IsInternationalField',
+                            inputValue: 'true'
+                        }, {
+                            boxLabel: 'Нет',
+                            name: 'IsInternationalField',
+                            inputValue: 'false'
+                        }]
+                    }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function () {
+                            store.filter([
+                                { property: 'GroupName', value: filtersWnd.getComponent("GroupNameField").getValue() },
+                                { property: 'Surname', value: filtersWnd.getComponent("SurnameField").getValue() },
+                                { property: 'Name', value: filtersWnd.getComponent("NameField").getValue() },
+                                { property: 'StudentStatus', value: filtersWnd.getComponent("StudentStatus").getValue() },
+                                { property: 'Status', value: filtersWnd.getComponent("Status").getValue() },
+                                { property: 'PersonalNumber', value: filtersWnd.getComponent("PersonalNumber").getValue() },
+                                { property: 'PatronymicName', value: filtersWnd.getComponent("PatronymicNameField").getValue() },
+                                { property: 'IsTarget', value: filtersWnd.getComponent("IsTargetField").getValue().IsTargetField },
+                                { property: 'IsInternational', value: filtersWnd.getComponent("IsInternationalField").getValue().IsInternationalField }
+                            ]);
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+            var selRecord = [];
+            var gridPanel = null;
+
+            function setAdmissionStatus(rec, status) {
+
+                Ext.Ajax.request({
+                    url: "/Admission/SetVariantAdmissionStatus",
+                    params: { studentId: rec.map(function (l) { return l.get("Id"); }), variantId: @ViewBag.VariantId, status: status },
+                    success: function (response) {
+                        var data = Ext.decode(response.responseText);
+                        if (data.reload)
+                            location.reload();
+
+                        if (data.errors && data.errors.length > 0) {
+                            for (var i = 0; i < data.errors.length; i++) {
+                                Ext.MessageBox.alert('Ошибка', data.errors[i], function()
+                                {
+                                    //action to complete when user clicks ok.
+                                });
+                            }
+                        }
+
+                        for(var i in rec) {
+                            var index = -1;
+                            if (data.notChangedIds)
+                                index = data.notChangedIds.indexOf(rec[i].data.Id);
+                            if (index > -1) {
+                                data.notChangedIds.splice(index, 1);
+                                //rec.splice(i, 1);
+                                //i = i-1;
+                                //continue;
+                            } else {
+                                rec[i].set("Status", status);
+                                rec[i].set("AnotherAdmission", null);
+                                rec[i].set("Published", false);
+                            }
+                        }
+                        statusChanged(rec);
+                        gridPanel.getView().refresh();
+                    }
+                });
+            }
+
+            var indeterminateButton = Ext.create('Ext.Button', {
+                xtype: 'button',
+                disabled: true,
+                text: 'Нет решения',
+                handler: function () { setAdmissionStatus(selRecord, 0); }
+            });
+
+            var admittedButton = Ext.create('Ext.Button', {
+                xtype: 'button',
+                disabled: true,
+                text: 'Зачислен',
+                handler: function () { setAdmissionStatus(selRecord, 1); }
+            });
+
+            var deniedButton = Ext.create('Ext.Button', {
+                xtype: 'button',
+                disabled: true,
+                text: 'Не зачислен',
+                handler: function () { setAdmissionStatus(selRecord, 2); }
+            });
+
+            var sendButton = Ext.create('Ext.Button', {
+                xtype: 'button',
+                disabled: true,
+                text: 'Отправить в ЛК',
+                handler: function () {
+                    setTimeout(function() {
+                        selRecord.forEach(function(el, index, array) {
+                            el.set("Published", true);
+                        });
+                    },0);
+
+                    Ext.Ajax.request({
+                        url: "/Admission/PublishVariantAdmission",
+                        params: { studentId: selRecord.map(function (l) { return l.get("Id"); }), variantId: @ViewBag.VariantId },
+                        success: function (response) {
+                            Ext.toast({ html: "Сообщение отправлено", align: 't' });
+                            gridPanel.getView().refresh();
+                        }
+                    });
+
+                }
+            });
+
+            function statusChanged(rec) {
+                if (rec == null)
+                    return;
+
+                for (var i in rec) {
+                    var anotherAdmission = rec[i].get("AnotherAdmission");
+                    var status = rec[i].get("Status");
+                    indeterminateButton.setDisabled(status == 0);
+                    admittedButton.setDisabled(status == 1);
+                    deniedButton.setDisabled(status == 2);
+                    sendButton.enable();
+                }
+
+            }
+
+            gridPanel = Ext.create('Ext.grid.Panel',
+            {
+                multiSelect: true,
+                region: 'center',
+                store: store,
+                loadMask: true,
+                columnLines: true,
+                listeners: {
+                    selectionchange: function (el, records) {
+                        selRecord = records.slice();
+                        statusChanged(selRecord);
+                    }
+                },
+                tbar: [
+                    {
+                        xtype: 'box',
+                        autoEl: {tag: 'a', href: '@Url.Action("Variants",new {focus=ViewBag.VariantId})', html: 'Возврат на список'}
+                    },
+                            '-',
+                            {
+                                xtype: 'button',
+                                text: 'Фильтры...',
+                                handler: function () { filtersWnd.show(); }
+                            },
+                            {
+                                xtype: 'button',
+                                text: "Отменить фильтры",
+                                handler: function () { store.clearFilter(); }
+                            },
+                            '-',
+                            indeterminateButton,
+                            admittedButton,
+                            deniedButton,
+                            '-',
+                            sendButton
+                ],
+                viewConfig: {
+                    getRowClass: function(record) {
+                        return !record.get('Published')
+                            ? 'highlight'
+                            : '';
+                    },
+                    markDirty:false
+                },
+                columns: [
+                    { xtype: 'rownumberer', width: 50 },
+                    {
+                        header: 'Название группы',
+                        dataIndex: 'GroupName',
+                        width: 160,
+                        renderer: Ext.util.Format.htmlEncode
+                    },
+                    {
+                        header: 'Фамилия',
+                        dataIndex: 'Surname',
+                        width: 200,
+                        renderer: function (value, metaData, record) {
+                            return '<a href="/PersonalInfo/Student?studentId='+record.data.Id+'">'+value+'</a>';
+                        }
+                    },
+                    {
+                        header: 'Имя',
+                        dataIndex: 'Name',
+                        width: 200,
+                        renderer: Urfu.renders.htmlEncode
+                    },
+                    {
+                        header: 'Отчество',
+                        dataIndex: 'PatronymicName',
+                        width: 200,
+                        renderer: Ext.util.Format.htmlEncode
+                    },
+                    {
+                        header: 'Статус',
+                        dataIndex: 'StudentStatus',
+                        width: 200,
+                        renderer: Ext.util.Format.htmlEncode
+                    },
+                    {
+                        header: 'Личный номер студента',
+                        dataIndex: 'PersonalNumber',
+                        width: 120,
+                        renderer: Ext.util.Format.htmlEncode
+                    },
+                    {
+                        header: 'Рейтинг',
+                        dataIndex: 'Rating',
+                        width: 90
+                    },
+                    {
+                        header: 'Целевой',
+                        dataIndex: 'IsTarget',
+                        width: 100,
+                        align: 'center',
+                        renderer: function (val) { return val ? 'Да' : "Нет" }
+                    },
+                    {
+                        header: 'Иностранный студент',
+                        dataIndex: 'IsInternational',
+                        width: 200,
+                        align: 'center',
+                        renderer: function (val) { return val ? 'Да' : "Нет" }
+                    },
+                    {
+                        header: 'Вид возмещения затрат',
+                        align: 'center',
+                        dataIndex: 'Compensation',
+                        width: 210,
+                        renderer: Urfu.renders.htmlEncode
+                    },
+                    {
+                        header: 'Приоритет в ЛК',
+                        dataIndex: 'Priority',
+                        align: 'center',
+                        width: 150
+                    },
+                    {
+                        header: 'Состояние',
+                        width: 150,
+                        dataIndex: 'Status',
+                        sortable: true,
+
+                        renderer: function(val) {
+                            return val == 0 ? "Нет решения" : val == 1 ? "Зачислен" : "Не зачислен";
+                        }
+                    },
+                    {
+                        header: 'Другое',
+                        dataIndex: 'AnotherAdmission',
+                        width: 400,
+                        sortable: true,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    }
+                ]
+            });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+    </script>
+}
+

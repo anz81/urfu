@@ -1,0 +1,384 @@
+﻿@{
+    ViewBag.Title = "Подгруппы версии ОП "+ ViewBag.programInfo;
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function() {
+            Ext.tip.QuickTipManager.init();
+            Ext.override(Ext.data.proxy.Ajax, { timeout: 60000 });
+
+            var store = Ext.create("Ext.data.Store",
+            {
+                idProperty: 'Id',
+                fields: ["Id", "GroupName", "Term", "Year", "ModuleTitle", "Name", "subgroupType", "Limit", "count"],
+                autoLoad: true,
+                remoteSort: true,
+                groupField: 'ModuleTitle',
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '/Subgroup/Index?programId=' + @ViewBag.programId,
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    }
+                }
+            });
+
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("SubgroupsFilters") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+
+            }
+
+            var filtersWnd = null;
+            var setFilters = function() {
+                var settings = [
+                    { property: 'GroupName', value: filtersWnd.getComponent("GroupName").getValue() },
+                    { property: 'Term', value: filtersWnd.getComponent("Term").getValue() },
+                    { property: 'Year', value: filtersWnd.getComponent("Year").getValue() },
+                    { property: 'ModuleTitle', value: filtersWnd.getComponent("ModuleTitle").getValue() },
+                    { property: 'Name', value: filtersWnd.getComponent("Name").getValue() },
+                    { property: 'subgroupType', value: filtersWnd.getComponent("subgroupType").getValue() },
+                    { property: 'Limit', value: filtersWnd.getComponent("Limit").getValue() },
+                    { property: 'count', value: filtersWnd.getComponent("count").getValue() }
+                ];
+                store.setFilters(settings);
+                localStorage.setItem("SubgroupsFilters", JSON.stringify(settings));
+            }
+            filtersWnd = Ext.create('Ext.window.Window',
+            {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "Группа", itemId: "GroupName", value: prevSettings["GroupName"]},
+                    { fieldLabel: "Семестр", itemId: "Term", value: prevSettings["Term"] },
+                    { fieldLabel: "Год", itemId: "Year", value: prevSettings["Year"]},
+                    { fieldLabel: "Модуль", itemId: "ModuleTitle", value: prevSettings["ModuleTitle"] },
+                    { fieldLabel: "Индекс", itemId: "Name", value: prevSettings["Name"] },
+                    { fieldLabel: "Тип подгруппы", itemId: "subgroupType", value: prevSettings["subgroupType"]},
+                    { fieldLabel: "Лимит", itemId: "Limit", value: prevSettings["Limit"]},
+                    { fieldLabel: "Студенты", itemId: "count", value: prevSettings["count"]}
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function() {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function() { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+            setFilters();
+            var tpl = '<a href="/Subgroup/Students?id={Id}">Студенты</a>\
+                | <a href="/Subgroup/Edit?id={Id}">Редактировать</a> ';
+            var grouping = Ext.create('Ext.grid.feature.Grouping',
+                { ftype: 'grouping', collapsible: true, startCollapsed: true });
+            var gridPanel = Ext.create('Ext.grid.Panel',
+            {
+                region: 'center',
+                store: store,
+                loadMask: true,
+                features: [grouping],
+                tbar: [
+                    {
+                        xtype: 'button',
+                        text: 'Фильтры...',
+                        handler: function() { filtersWnd.show(); }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Отменить фильтры",
+                        handler: function() {
+                            store.clearFilter();
+                            localStorage.setItem("SubgroupsFilters", "[]");
+                        }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Количество подгрупп",
+                        handler: function() { window.location = "/MetaSubgroups/Index?programId=@ViewBag.programId"; }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Создать подгруппы",
+                        handler: function() { window.location = "/Subgroup/Create?programId=@ViewBag.programId"; }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Развернуть\\Свернуть группировку",
+                        handler: function() {
+                            window.groupsCollapsed = !window.groupsCollapsed;
+                            if (window.groupsCollapsed)
+                                grouping.expandAll();
+                            else
+                                grouping.collapseAll();
+                        }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Распределить студентов",
+                        handler: function() {
+                            window.location = "/Subgroup/FillGroupsWithStudents?programId=@ViewBag.programId";
+                        }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Удалить",
+                        handler: function() {
+                            var objects = gridPanel.getSelectionModel().getSelection();
+                            if (objects.length === 0)
+                                return;
+                            Ext.MessageBox.confirm('Удаление подгрупп',
+                                'Удалить подгруппы и зачисления студентов в них (' + objects.length + ' шт.) ?',
+                                function(btn) {
+                                    if (btn === 'yes') {
+                                        var refresh = function() {
+                                            window.location = "/Subgroup/Index?programId=@ViewBag.programId";
+                                        };
+                                        Ext.Ajax.request({
+                                            url: '/Subgroup/Delete',
+                                            success: refresh,
+                                            failure: refresh,
+                                            params: { ids: objects.map(function(obj) { return obj.data.Id }) }
+                                        });
+                                    }
+                                });
+
+                        }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Копировать",
+                        handler: function() {
+                            var objects = gridPanel.getSelectionModel().getSelection();
+                            if (objects.length !== 2) {
+                                Ext.MessageBox.alert("Копирование зачислений студентов", 'Выберите две подгруппы');
+                                return;
+                            }
+
+                            var o0 = objects[0].data;
+                            var o1 = objects[1].data;
+
+                            if ((!!o0.count) === (!!o1.count)) {
+                                Ext.MessageBox.alert("Копирование зачислений студентов",
+                                    'Одна из подгрупп должна быть пустой, в другую должны быть зачислены студенты');
+                                return;
+                            }
+
+
+                            var src = null;
+                            var dst = null;
+                            if (o0.count === 0)
+                                dst = o0;
+                            if (o1.count === 0)
+                                dst = o1;
+                            if (o0.count !== 0)
+                                src = o0;
+                            if (o1.count !== 0)
+                                src = o1;
+
+                            window.location = "/Subgroup/SimpleCopyMembership?srcId=" + src.Id + "&dstId=" + dst.Id;
+
+                            //Following is the deep-copy mechanics, curently use simple one
+//                            if (objects.length !== 1) {
+//                                Ext.MessageBox.alert("Копирвоание зачислений студентов", 'Выберите одну подгруппу');
+//                                return;
+//                            }
+//                            var data = objects[0].data;
+//
+//
+//                            var copyWnd = Ext.create('Ext.window.Window', {
+//                                title: "Копирвоание зачислений студентов",
+//                                autoHeight: true,
+//                                resizable: false,
+//                                width: 700,
+//                                bodyPadding: 6,
+//                                layout: 'anchor',
+//                                defaults: {
+//                                    xtype: 'textfield',
+//                                    readOnly: true,
+//                                    anchor: '100%'
+//                                },
+//                                items: [
+//                                    { fieldLabel: "Группа", itemId: "GroupNameField", value: data.GroupName },
+//                                    { fieldLabel: "Модуль", itemId: "ModuleField", value: data.ModuleTitle },
+//                                    { fieldLabel: "Дисциплина", itemId: "DiscipineNameField", value: data.Name.split('\\')[1] },
+//                                    {
+//                                        itemId: "DiscipineNameCombobox",
+//                                        xtype: 'combobox',
+//                                        header: "Дисциплина",
+//                                        store: Ext.create('Ext.data.Store', {
+//                                            autoLoad: true,
+//                                            fields: ['name','id'],proxy: {
+//                                                type: 'ajax',
+//                                                url: '/Subgroup/Disciplines?programId=@ViewBag.programId',
+//                                                reader: {
+//                                                    type: 'json',
+//                                                    root: 'data'
+//                                                }
+//                                            }
+//                                        }),
+//                                        displayField: 'name',
+//                                        value: data.Name.split('\\')[1],
+//                                        valueField: 'id',
+//                                        mode: 'local',
+//                                        editable: false,
+//                                        readOnly: false,
+//                                        disableKeyFilter: false
+//                                    },
+//                                    { fieldLabel: "Исходный семестр", itemId: "SourceField", xtype: "numberfield", value: data.Term },
+//                                    { fieldLabel: "Целевой семестр", itemId: "TargetField", xtype: "numberfield", readOnly: false, value: parseInt(data.Term)+1 }
+//                                ],
+//                                buttons: [
+//                                    {
+//                                        text: "OK",
+//                                        handler: function() {
+//                                            window.location = "/Subgroup/CopyMembership?programId=@ViewBag.programId&subgroupId="+data.Id+"&targetTerm="+copyWnd.getComponent("TargetField").getValue()+"&disciplineId="+copyWnd.getComponent("DiscipineNameCombobox").getValue() ;
+//                                        }
+//                                    },
+//                                    {
+//                                        text: "Отмена",
+//                                        handler: function() { copyWnd.close(); }
+//                                    }
+//                                ]
+//                            });
+//
+//                            copyWnd.show();
+                        }
+                    },
+                ],
+                columns: [
+                    { xtype: 'rownumberer', width: 50 },
+                    {
+                        header: 'Группа',
+                        dataIndex: 'GroupName',
+                        width: 150, /*
+                        layout: 'anchor',
+                        items: [
+                        {
+                            xtype: 'textfield',
+                            anchor: '100%',
+                            margin: '3px'
+                        }],*/
+                        renderer: Ext.util.Format.htmlEncode
+                    },
+                    {
+                        header: 'Семестр',
+                        dataIndex: 'Term',
+                        width: 100,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Год',
+                        dataIndex: 'Year',
+                        width: 100,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Модуль',
+                        dataIndex: 'ModuleTitle',
+                        width: 300,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Индекс',
+                        dataIndex: 'Name',
+                        width: 300,
+                        renderer: function(value, metaData, record, rowIdx, colIdx, store) {
+                            metaData.tdAttr = 'data-qtip="' + value + '"';
+                            return value;
+                        }
+                    },
+                    {
+                        header: 'Нагрузка',
+                        align: 'center',
+                        dataIndex: 'subgroupType',
+                        renderer: Ext.util.Format.htmlEncode,
+                        width: 180
+                    },
+                    {
+                        header: 'Лимит',
+                        align: 'center',
+                        dataIndex: 'Limit',
+                        renderer: Ext.util.Format.htmlEncode,
+                        width: 120
+                    },
+                    {
+                        header: 'Студенты',
+                        align: 'center',
+                        dataIndex: 'count',
+                        renderer: Ext.util.Format.htmlEncode,
+                        width: 120
+                    },
+                    {
+                        xtype: 'templatecolumn',
+                        tpl: tpl,
+                        sortable: false,
+                        width: 270
+                    }
+                ],
+                selModel: {
+                    selType: 'checkboxmodel' /*,
+                    showHeaderCheckbox: true,
+                    mode: 'SIMPLE'*/
+                }
+            });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+
+
+            gridPanel.getStore().on('load',
+                function(store, records, options) {
+                    var focus = '@ViewBag.Focus';
+                    if (focus && focus.length > 0) {
+
+                        var focusRow = store.findExact('Id', parseInt(focus));
+                        if (focusRow >= 0) {
+                            var rowData = store.getAt(focusRow);
+                            var gv = gridPanel.getView();
+
+                            var groupingFeature = gridPanel.getView().features[0];
+
+                            groupingFeature.expand(rowData.data['ModuleTitle'], true);
+
+                            gv.focusRow(rowData);
+                            gridPanel.getSelectionModel().select(rowData);
+                        }
+                        return false;
+                    }
+                });
+
+            var alertString = '@ViewBag.Message';
+            if (alertString.length > 0)
+                Ext.MessageBox.alert('Копирование зачислений студентов', alertString);
+
+        });
+    </script>
+}

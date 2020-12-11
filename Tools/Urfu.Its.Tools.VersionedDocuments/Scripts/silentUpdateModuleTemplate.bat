@@ -1,0 +1,1 @@
+vdocs --command UpdateTemplate --documentType ModuleWorkingProgram -t "..\..\..\..\Urfu.Its.VersionedDocs\Templates\MWP.docx" -f %*

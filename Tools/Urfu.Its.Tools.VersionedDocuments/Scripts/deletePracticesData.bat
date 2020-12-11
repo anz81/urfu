@@ -1,0 +1,1 @@
+vdocs --command deleteData --documentType PracticesWorkingProgram %*

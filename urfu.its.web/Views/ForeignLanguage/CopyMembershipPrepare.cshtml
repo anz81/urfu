@@ -1,0 +1,170 @@
+﻿@model Urfu.Its.Web.Controllers.ForeignLanguageCompetitionGroupMembershipsCopyVm
+@{
+    ViewBag.Title = "Копирование зачислений конкурсных групп";
+}
+
+<h2>@ViewBag.Title</h2>
+<div style="border: 1px;">
+    Копировать из 
+    
+    <div class="alert-info">
+        @Model.A.Name (@Model.A.Year @Model.A.Semester.Name зачислено студентов @Model.ACount)
+    </div>
+    в 
+    <div class="alert-info">
+        @Model.B.Name (@Model.B.Year @Model.B.Semester.Name зачислено студентов @Model.BCount)
+    </div>
+</div>
+
+<br />
+<div>
+    Общие модули
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    модули
+                </th>
+                <th>
+                    @Model.A.Name (@Model.A.Year @Model.A.Semester.Name)
+                </th>
+                <th>
+                    @Model.B.Name (@Model.B.Year @Model.B.Semester.Name)
+                </th>
+            </tr>
+        </thead>
+        @foreach (var s in Model.CommonSections)
+        {
+            <tr>
+                <td>
+                    @s.Module.title
+                </td>
+                <td>
+                    @Model.AAdmissions[s]
+                </td>
+                <td>
+                    @Model.BAdmissions[s]
+                </td>
+            </tr>
+        }
+        
+
+        @foreach (var s in Model.ExceptSections)
+        {
+            <tr>
+                <td>
+                    @s.Module.title
+                </td>
+                <td>
+                    @Model.AAdmissions[s]
+                </td>
+                <td class="alert-warning">
+                    Нет в конкурсной группе
+                </td>
+            </tr>
+        }
+        
+
+        @foreach (var s in Model.NewSections)
+        {
+            <tr>
+                <td>
+                    @s.Module.title
+                </td>
+                <td class="alert-warning">
+                    Нет в конкурсной группе
+                </td>
+                <td>
+                    @Model.BAdmissions[s]
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+<br />
+<div>
+    Общие группы
+
+    <table class="table">
+        @foreach (var s in Model.CommonGroups)
+        {
+            <tr>
+                <td>
+                    @s.Name
+                </td>
+            </tr>
+        }
+    </table>
+    
+    @if (!Model.CommonGroups.Any())
+    {
+        <div class="alert-warning">
+            Нет общих групп! Копирование бессмысленно.
+        </div>
+    }
+</div>
+
+@if (Model.ExceptGroups.Any())
+{
+    <br />
+    <div>
+        Группы, которые есть только в источнике зачислений
+
+        <table class="table">
+            @foreach (var s in Model.ExceptGroups)
+            {
+                <tr>
+                    <td>
+                        @s.Name
+                    </td>
+                </tr>
+
+            }
+        </table>
+
+
+        <div class="alert-warning">
+            Не все учебные группы есть в целевой конкурсной группе
+        </div>
+    </div>
+    <br />
+}
+
+
+@if (Model.NewGroups.Any())
+{
+    <br />
+    <div>
+        Группы, которые есть только в новой конкурсной группе
+
+        <table class="table">
+            @foreach (var s in Model.NewGroups)
+            {
+                <tr>
+                    <td>
+                        @s.Name
+                    </td>
+                </tr>
+            }
+        </table>
+
+
+        <div class="alert-info">
+            В конкурсной группе есть новые группы, в которые не будут скопированы зачисления
+        </div>
+    </div>
+    <br />
+}
+
+@using (Html.BeginForm("CopyMembership", "ForeignLanguage", new { src = Model.A.Id, dst = Model.B.Id }, FormMethod.Post, new { id = "execform" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Выполнить копирование" class="btn btn-default" />
+        </div>
+    </div>
+}
+

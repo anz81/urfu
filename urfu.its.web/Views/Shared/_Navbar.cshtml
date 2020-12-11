@@ -1,0 +1,244 @@
+﻿<div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            @Html.ActionLink(" ", "Index", "Home", new {area = ""}, new {@class = "navbar-brand glyphicon glyphicon-home"})
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.VariantsView))
+                {
+                    <li>@Html.ActionLink("Версии ОП", "Index", "EduPrograms", null, new {@class = "contrast-text"})</li>
+                    <li>@Html.ActionLink("Траектории ОП", "Index", "Variant", null, new {@class = "contrast-text"})</li>
+                    @*<li>@Html.ActionLink("Лимиты", "Directions", "Limits",new {@class = "contrast-text"})</li>*@
+                }
+                @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.StudentAdmission))
+                {
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle contrast-text" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Зачисление<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("На траектории", "Variants", "Admission")</li>
+                            <li>@Html.ActionLink("На модули", "Modules", "Admission")</li>
+                            <li>@Html.ActionLink("Расчёт зачислений на траектории", "VariantsAuto", "Admission")</li>@*
+                                <li>@Html.ActionLink("Отчёт по зачислению на траектории", "VariantsReport", "Admission")</li>
+                                <li>@Html.ActionLink("Отчёт по зачислению на модули", "ModulesReport", "Admission")</li>*@
+                            <li>@Html.ActionLink("Отчёты", "ProgramsForReports", "Admission")</li>
+                        </ul>
+                    </li>
+                }
+
+                @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.MinorView) || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.Admin) 
+                    || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.SectionFKManager) || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.ForeignLanguageManager)
+                    || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.PracticeManager) || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.PracticeView)
+                    || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.WorkingProgramView) || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.WorkingProgramManager) 
+                    || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.NsiView) || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.MUPManager))
+                {
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle contrast-text" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Модули<span class="caret"></span></a>
+                        <ul class="dropdown-menu multi-level">
+
+                            @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.MinorView))
+                            {
+                                <li class="dropdown-submenu">
+                                    <a tabindex="-1" href="@Url.Action("Index", "Minors")">Майноры</a>
+                                    <ul class="dropdown-menu">
+                                        <li>@Html.ActionLink("Майноры", "Index", "Minors")</li>
+                                        <li>@Html.ActionLink("Зачисления", "Minors", "Admission2")</li>
+                                        <li>@Html.ActionLink("Отчеты", "MinorsReport", "Admission2")</li>
+                                        <li>@Html.ActionLink("Создание подгрупп", "Index", "MinorSubgroupMeta")</li>
+                                        <li>@Html.ActionLink("Ведомости по подгруппам", "Index", "MinorSubgroup")</li>
+
+                                    </ul>
+                                </li>
+                            }
+                            @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.SectionFKManager))
+                            {
+                                <li class="dropdown-submenu">
+                                    <a tabindex="-1" href="@Url.Action("Index", "SectionFK")">Секции ФК</a>
+                                    <ul class="dropdown-menu">
+                                        <li>@Html.ActionLink("Секции ФК", "Index", "SectionFK")</li>
+                                        <li>@Html.ActionLink("Места проведения", "Index", "FirstTrainingPlaceFKs")</li>
+                                        <li class="dropdown-submenu">
+                                            <a tabindex="-1" href="@Url.Action("Report", "SectionFKAdmission")">Отчеты</a>
+                                            <ul class="dropdown-menu">
+                                                <li>@Html.ActionLink("По зачисленным студентам", "Report", "SectionFKAdmission")</li>
+                                                <li>@Html.ActionLink("Сводный", "SynopticReport", "SectionFKAdmission")</li>
+                                            </ul>
+                                        </li>
+                                        <li>@Html.ActionLink("Конкурсные группы", "CompetitionGroups", "SectionFK")</li>
+                                    </ul>
+                                </li>
+                            }
+                            @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.ForeignLanguageManager))
+                            {
+                                <li class="dropdown-submenu">
+                                    <a tabindex="-1" href="@Url.Action("Index", "ForeignLanguage")">Иностранный язык</a>
+                                    <ul class="dropdown-menu">
+                                        <li>@Html.ActionLink("Модули ИЯ", "Index", "ForeignLanguage")</li>
+                                        <li>@Html.ActionLink("Отчёты", "Report", "ForeignLanguageAdmission")</li>
+                                        <li>@Html.ActionLink("Конкурсные группы", "CompetitionGroups", "ForeignLanguage")</li>
+                                    </ul>
+                                </li>
+                            }
+                            @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.PracticeView) || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.PracticeManager))
+                            {
+                                <li class="dropdown-submenu">
+                                    <a tabindex="-1" href="@Url.Action("Index", "Practice")">Практики</a>
+                                    <ul class="dropdown-menu">
+                                        <li>@Html.ActionLink("Руководители, темы", "Index", "Practice")</li>
+                                        <li>@Html.ActionLink("Приказы по практикам", "Index", "PracticeOrders")</li>
+                                        <li class="dropdown-submenu">
+                                            <a tabindex="-1" href="@Url.Action("", "")">Отчеты</a>
+                                            <ul class="dropdown-menu">
+                                                <li>@Html.ActionLink("По показателям", "Indicators", "PracticeReport")</li>
+                                                <li>@Html.ActionLink("По студентам", "Students", "PracticeReport")</li>
+                                            </ul>
+                                        </li>
+                                        <li class="dropdown-submenu">
+                                            <a tabindex="-1" href="@Url.Action("", "")">Справочники</a>
+                                            <ul class="dropdown-menu">
+                                                <li>@Html.ActionLink("Предприятия по договору", "Index", "PracticeCompanies")</li>
+                                                @*<li>@Html.ActionLink("Типы практик", "", "")</li>*@
+                                                @*<li>@Html.ActionLink("Формы собственности", "Index", "OwnershipTypes")</li>*@
+                                                <li>@Html.ActionLink("Страны", "Index", "Locations")</li>
+                                                <li>@Html.ActionLink("Регионы", "Regions", "Locations")</li>
+                                                <li>@Html.ActionLink("Города", "Cities", "Locations")</li>
+                                                <li>@Html.ActionLink("Номера приказов", "Numbers", "PracticeOrders")</li>
+                                                <li>@Html.ActionLink("Доверенности", "Index", "LettersOfAttorney")</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                            @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.WorkingProgramView) || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.WorkingProgramManager))
+                            {
+                                <li class="dropdown-submenu">
+                                    <a tabindex="-1">Рабочие программы модулей/дисциплин</a>
+                                    <ul class="dropdown-menu">
+                                        <li>@Html.ActionLink("Рабочие программы модулей/дисциплин", "Index", "Modules")</li>
+                                        <li>@Html.ActionLink("Список версий РП", "ModuleWorkingPrograms", "Document")</li>
+                                        <li class="dropdown-submenu">
+                                            <a tabindex="-1" href="#">Справочники</a>
+                                            <ul class="dropdown-menu">
+                                                <li>@Html.ActionLink("Компетенции", "Index", "Competence")</li>
+                                                <li>@Html.ActionLink("Группы компетенций", "Index", "CompetenceGroups")</li>
+                                                <!--<li>@Html.ActionLink("Результаты обучения", "Index", "EduResult")</li>-->
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                            @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.ProjectView) || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.ProjectManager)
+                                || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.ProjectCurator) || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.ProjectROP))
+                            {
+                                <li class="dropdown-submenu">
+                                    <a tabindex="-1">Проектное обучение</a>
+                                    <ul class="dropdown-menu">
+                                        <li>@Html.ActionLink("Проекты", "Index", "Project")</li>
+                                        <li>@Html.ActionLink("Проектные группы", "CompetitionGroups", "Project")</li>
+                                        @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.ProjectManager) || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.ProjectROP))
+                                        {
+                                            <li>@Html.ActionLink("Группы с парными модулями", "Index", "ProjectPairedModule")</li>
+                                        }
+                                        <li class="dropdown-submenu">
+                                            <a tabindex="-1" href="#">Отчеты</a>
+                                            <ul class="dropdown-menu">
+                                                <li>@Html.ActionLink("По проектам", "Projects", "ProjectReport")</li>
+                                                <li>@Html.ActionLink("По студентам", "Students", "ProjectReport")</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                            @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.WorkingProgramView) || User.IsInRole(Urfu.Its.Web.Models.ItsRoles.WorkingProgramManager))
+                            {
+                                <li class="dropdown-submenu">
+                                    <a tabindex="-1">ОХОП</a>
+                                    <ul class="dropdown-menu">
+                                        <li>@Html.ActionLink("ОХОП", "Index", "BasicCharacteristicOP")</li>
+                                        <li>@Html.ActionLink("Версии ОХОП", "Versions", "BasicCharacteristicOP")</li>
+                                        <li>@Html.ActionLink("Паспорт компетенций", "Index", "CompetencePassport")</li>
+                                        <li>@Html.ActionLink("Аннотация модулей", "Index", "ModuleAnnotations")</li>
+                                        <li class="dropdown-submenu">
+                                            <a tabindex="-1" href="#">Справочники</a>
+                                            <ul class="dropdown-menu">
+                                                <li>@Html.ActionLink("Сроки обучения", "Index", "TrainingDuration")</li>
+                                                <li>@Html.ActionLink("Области образования", "Index", "AreaEducation")</li>
+                                                <li>@Html.ActionLink("Приказы для ФГОС ВО 3++", "Index", "DirectionOrders")</li>
+                                                <li>@Html.ActionLink("Приказы Минтруда России", "Index", "ProfOrders")</li>
+                                                <li>@Html.ActionLink("Профессиональные стандарты", "Index", "ProfStandards")</li>
+                                                <li>@Html.ActionLink("Области профессиональной деятельности", "Index", "ProfActivityArea")</li>
+                                                <li>@Html.ActionLink("Виды профессиональной деятельности", "Index", "ProfActivityKind")</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                            @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.MUPManager))
+                            {
+                                <li class="dropdown-submenu">
+                                    <a tabindex="-1">МУП</a>
+                                    <ul class="dropdown-menu">
+                                        <li>@Html.ActionLink("Связи Модуль-МУПы", "Index", "MUPDisciplinesConnection")</li>
+                                        <li>@Html.ActionLink("Конкурсные группы", "Index", "MUPCompetitionGroups")</li>
+                                        <li class="dropdown-submenu">
+                                            <a tabindex="-1" href="@Url.Action("Report", "MUPAdmission")">Отчеты</a>
+                                            <ul class="dropdown-menu">
+                                                <li>@Html.ActionLink("По зачисленным студентам", "Report", "MUPAdmission")</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                            @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.RatingCoefficientEdit))
+                            {
+                                <li class="dropdown-submenu">
+                                    <a tabindex="-1">Коэффициенты для расчета рейтинга</a>
+                                    <ul class="dropdown-menu">
+                                        <li>@Html.ActionLink("Коэффициенты", "Index", "RatingCoefficients")</li>
+                                    </ul>
+                                </li>
+                            }
+
+                        </ul>
+                    </li>
+                }
+
+                @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.NsiView))
+                {
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle contrast-text" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Справочники<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Направления", "Index", "Directions")</li>
+                            <li>@Html.ActionLink("Дисциплины", "Index", "Disciplines")</li>
+                            <li>@Html.ActionLink("Учебные планы", "Index", "Plans")</li>
+                            <li>@Html.ActionLink("Персоны", "Index", "Persons")</li>
+                            <li>@Html.ActionLink("Группы", "Index", "Groups")</li>
+                            <li>@Html.ActionLink("Студенты", "Index", "Students")</li>
+                            <li>@Html.ActionLink("Преподаватели", "Index", "Teachers")</li>
+                        </ul>
+                    </li>
+                }
+                @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.Admin))
+                {
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle contrast-text" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Администрирование<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Синхронизация", "Index", "Sync")</li>
+                            <li>@Html.ActionLink("Регистрация пользователя", "Register", "Account")</li>
+                            <li>@Html.ActionLink("Пользователи", "Index", "Account")</li>
+                            <li>@Html.ActionLink("Активные пользователи", "Sessions", "Account")</li>
+                            <li>@Html.ActionLink("Отчёты автозачислений", "AutoAdmissionReports", "Admission2")</li>
+                            <li>@Html.ActionLink("Лог", "Index", "Log")</li>
+                        </ul>
+                    </li>
+                }
+            </ul>
+            @Html.Partial("_LoginPartial")
+        </div>
+    </div>
+</div>

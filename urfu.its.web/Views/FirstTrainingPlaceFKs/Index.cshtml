@@ -1,0 +1,143 @@
+﻿@{
+    ViewBag.Title = "Места проведения занятий физической культурой";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function() {
+            Ext.tip.QuickTipManager.init();
+
+            var store = Ext.create("Ext.data.BufferedStore",
+            {
+                fields: ["Id", "Address", "Description"],
+                autoLoad: true,
+                pageSize: 300,
+                remoteSort: true,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '/FirstTrainingPlaceFKs/Index',
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    }
+                }
+            });
+
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("FirstPlacesFilters") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+
+            }
+            
+            var filtersWnd = null;
+            var setFilters = function() {
+                var settings = [
+                    { property: 'Address', value: filtersWnd.getComponent("AddressField").getValue() },
+                    { property: 'Description', value: filtersWnd.getComponent("DescriptionField").getValue() }
+                ];
+                store.setFilters(settings);
+                localStorage.setItem("FirstPlacesFilters", JSON.stringify(settings));
+            };
+
+            filtersWnd = Ext.create('Ext.window.Window', {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "Адрес", itemId: "AddressField", value: prevSettings["Address"] },
+                    { fieldLabel: "Описание", itemId: "DescriptionField", value: prevSettings["Description"] }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function() {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function() { filtersWnd.hide(); }
+                    }
+                ]
+            });
+            setFilters();
+
+
+            var tpl = '<a href="/FirstTrainingPlaceFKs/Edit?id={Id}">Редактировать</a> \
+                | <a href="/FirstTrainingPlaceFKs/Delete?id={Id}">Удалить</a>';
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+            {
+                region: 'center',
+                store: store,
+                loadMask: true,
+                tbar: [
+                    {
+                        xtype: 'button',
+                        text: 'Фильтры...',
+                        handler: function() { filtersWnd.show(); }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Отменить фильтры",
+                        handler: function() {
+                            store.clearFilter();
+                            localStorage.setItem("FirstPlacesFilters", "[]");
+                        }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Создать место",
+                        handler: function () { window.location = "/FirstTrainingPlaceFKs/Create"; }
+                    }
+                ],
+                columns: [
+                    { xtype: 'rownumberer', width: 50 },
+                    {
+                        header: 'Описание',
+                        dataIndex: 'Description',
+                        width: 310,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Адрес',
+                        dataIndex: 'Address',
+                        width: 310,
+                        renderer: Ext.util.Format.htmlEncode
+                    },
+                    {
+                        xtype: 'templatecolumn',
+                        tpl: tpl,
+                        sortable: false,
+                        width: 300
+                    }
+                ]
+            });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+
+        });
+    </script>
+}
+
+

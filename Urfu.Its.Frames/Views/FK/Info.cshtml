@@ -1,0 +1,28 @@
+﻿@model Urfu.Its.Frames.Controllers.SectionFKInfoVM
+
+<a href="@(Model.File)"><div class="wordIcon" /> Информация о секции (Скачать)</a>
+<table class="table table-bordered ">
+    <tr>
+        <td>
+            <b>Места проведения</b>
+        </td>
+        <td>
+            @foreach (var p in Model.Places)
+            {
+                <p> @p.Description, @p.Address </p>
+            }
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>
+            <b>Преподаватели</b>
+        </td>
+        <td>
+            @foreach (var p in Model.Teachers)
+            {
+                <p> @p.Post @p.FirstName @p.MiddleName @p.LastName</p>
+            }
+        </td>
+    </tr>
+</table>

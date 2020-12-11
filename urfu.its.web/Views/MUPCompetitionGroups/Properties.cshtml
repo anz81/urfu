@@ -1,0 +1,464 @@
+﻿@model Urfu.Its.Web.DataContext.MUPCompetitionGroup
+@{
+    ViewBag.Title = Model.ToString();
+
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+<script type="text/javascript">
+    var trainingPlaceCounter = 0;
+    var teachersCounter = 0;
+    
+    Ext.onReady(function () {
+
+        Ext.tip.QuickTipManager.init();
+        function gettoken() {
+            var token = '@Html.AntiForgeryToken()';
+            token = $(token).val();
+            return token;
+        }
+        var filterName = "MUPPropertiesFilters"
+        function parseJson(json) {
+            var data = JSON.parse(json.replace(/&quot;/g, '"'));
+            return data;
+        }
+
+        var store = Ext.create("Ext.data.Store",
+        {
+            idProperty: 'Id',
+            autoLoad: true,
+            remoteSort: true,
+            remoteFilter: true,
+            proxy: {
+                type: 'ajax',
+                url: '@Url.Action("Properties",new {competitionGroupId = Model.Id})',
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data'
+                }
+            }
+        });
+
+        var prevSettings = {};
+        try {
+            var prevSettingString = JSON.parse(localStorage.getItem(filterName) || "[]");
+
+            for (var i = 0; i < prevSettingString.length; i++) {
+                prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+            }
+        } catch (err) {
+
+        }
+
+        var filtersWnd = null;
+        var setFilters = function () {
+            var settings = [
+                { property: 'title', value: filtersWnd.getComponent("NameField").getValue() }
+            ];
+            store.setFilters(settings);
+            localStorage.setItem(filterName, JSON.stringify(settings));
+        };
+
+        filtersWnd = Ext.create('Ext.window.Window', {
+            title: "Фильтры",
+            closeAction: 'hide',
+            resizable: false,
+            autoHeight: true,
+            bodyPadding: 6,
+            defaults: {
+                xtype: 'textfield',
+                width: 500
+            },
+            items: [
+                { fieldLabel: "Название", itemId: "NameField", value: prevSettings["Name"] }
+            ],
+            buttons: [
+                {
+                    text: "OK",
+                    handler: function () {
+                        setFilters();
+                        filtersWnd.hide();
+                    }
+                },
+                {
+                    text: "Отмена",
+                    handler: function () { filtersWnd.hide(); }
+                }
+            ]
+        });
+        setFilters();
+
+        teachersPanel = {}; trainingPlacePanel = {};
+        var teacherStore = Ext.create("Ext.data.BufferedStore",
+        {
+            idProperty: 'Id',
+            autoLoad: false,
+            pageSize: 300,
+            remoteSort: true,
+            remoteFilter: true,
+            proxy: {
+                type: 'ajax',
+                url: '@Url.Action("PropertyTeachers")',
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    totalProperty: 'total'
+                }
+            },
+            listeners: {
+                'load': function () {
+
+                    if (teachersCounter >= 1 && teachersPanel.isMasked()) teachersPanel.unmask();
+                    else {
+                        teachersCounter++;
+                    }
+
+                }
+            }
+        });
+        var selectedTeacherStore = Ext.create("Ext.data.Store",
+        {
+            idProperty: 'Id',
+            autoLoad: false,
+            pageSize: 300,
+            remoteSort: true,
+            remoteFilter: true,
+            proxy: {
+                type: 'ajax',
+                url: '@Url.Action("PropertyTeachers")',
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    totalProperty: 'total'
+                }
+            },
+            filters: { selected: true },
+            listeners: {
+                'load': function () {
+
+                    if (teachersCounter >= 1 && teachersPanel.isMasked()) teachersPanel.unmask();
+                    else {
+                        teachersCounter++;
+                    }
+
+                }
+            }
+        });
+     
+        var gridPanel = Ext.create('Ext.grid.Panel',
+        {
+            region: 'center',
+            store: store,
+            loadMask: true,
+            columnLines: true,
+            tbar: [
+                {
+                    xtype: 'button',
+                    text: 'Фильтры...',
+                    handler: function () { filtersWnd.show(); }
+                },
+                {
+                    xtype: 'button',
+                    text: "Отменить фильтры",
+                    handler: function () {
+                        store.clearFilter();
+                        localStorage.setItem(filterName, "[]");
+                    }
+                }
+            ],
+            plugins: [
+                    Ext.create('Ext.grid.plugin.CellEditing', {
+                        clicksToEdit: 1,
+                        listeners: {
+                            'beforeedit': function (e, editor) {
+
+                            }
+                        }
+                    })],
+            columns: [
+                { xtype: 'rownumberer', width: 50 },
+                {
+                    header: 'Наименование',
+                    dataIndex: 'title',
+                    width: 300,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                },
+                {
+                    header: 'Преподаватели',
+                    dataIndex: 'teachers',
+                    width: 300,
+                    renderer: Urfu.renders.htmlEncodeWithToolTip
+                }, {
+                    xtype: 'numbercolumn',
+                    text: 'Коэффициент',
+                    format: '0.00',
+                    dataIndex: 'coefficient',
+                    width: 150
+                },
+                {
+                    xtype: 'actioncolumn',
+                    hidden: true,
+                    region: 'center',
+                    width: 50,
+                    defaults: {
+                        metadata: {
+                            attr: 'style="padding-left:10px;width:auto;"'
+                        }
+                    },
+                    items: [
+                    {
+                        icon: '@Url.Content("~/Content/Images/teacher_blue.png")',
+                        iconCls: 'icon-padding',
+                        tooltip: 'Назначение преподавателя',
+                        handler: function (grid, rowIndex, colIndex) {
+                            if ('@ViewBag.CanEdit' == 'True') {
+                                var rec = grid.getStore().getAt(rowIndex);
+                                teachersPanel.getComponent('Id').setValue(rec.get('Id'));
+                                teacherStore.proxy.setUrl('@Url.Action("PropertyTeachers")?propertyId=' + rec.get('Id'));
+                                teacherStore.load();
+
+                                selectedTeacherStore.proxy.setUrl('@Url.Action("PropertyTeachers")?propertyId=' + rec.get('Id'));
+                                selectedTeacherStore.filter({ property: 'selected', value: true });
+                                selectedTeacherStore.load();
+                                teachersCounter = 0;
+                                teachersPanel.show();
+                                teachersPanel.mask('Загрузка');
+                            }
+                            else {
+                                Ext.MessageBox.alert('Ошибка', "У вас нет прав вносить изменения");
+                            }
+                        }
+                    }
+                    ]
+                }
+            ]
+
+        });
+       
+        var keyUpEvent = function (textField) {
+            var store = this.up('tablepanel').store;
+       
+            store.filter({
+                property: textField.datapropName,
+                value: this.value,
+            });
+            store.reload();
+            
+        };
+
+        teachersPanel = Ext.create('Ext.window.Window',
+            {
+                title: "Преподаватели",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: false,
+                bodyPadding: 6,
+                height: 600,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 600,
+
+                },
+                items: [
+                      {
+                          xtype: 'hidden',
+                          itemId: 'Id',
+                      },
+                    {
+                        xtype: 'grid',
+                        id: 'teachersGrid',
+                        store: teacherStore,
+                        loadMask: true,
+                        columnLines: true,
+                        height: 300,
+                        listeners: {
+                        },
+                        columns: [
+                            { xtype: 'checkcolumn', text: '', dataIndex: 'selected', width: 50, sortable: false },                            
+                            { xtype: 'rownumberer', width: 60 },
+                            {
+                                header: 'Фамилия',
+                                dataIndex: 'LastName',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip,
+                                items: {
+                                    xtype: 'textfield',
+                                    flex: 1,
+                                    datapropName: 'LastName',
+                                    margin: 2,
+                                    enableKeyEvents: true,
+                                    listeners: {
+                                        keyup: keyUpEvent,
+                                        buffer: 500
+                                    }
+                                }
+                            },
+                            {
+                                header: 'Имя',
+                                dataIndex: 'FirstName',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip,
+                                items: {
+                                    xtype: 'textfield',
+                                    flex: 1,
+                                    datapropName: 'FirstName',
+                                    margin: 2,
+                                    enableKeyEvents: true,
+                                    listeners: {
+                                        keyup: keyUpEvent,
+                                        buffer: 500
+                                    }
+                                }
+
+                            },
+                            {
+                                header: 'Отчество',
+                                dataIndex: 'Patronymic',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip,
+                                items: {
+                                    xtype: 'textfield',
+                                    flex: 1,
+                                    datapropName: 'Patronymic',
+                                    margin: 2,
+                                    enableKeyEvents: true,
+                                    listeners: {
+                                        keyup: keyUpEvent,
+                                        buffer: 500
+                                    }
+                                }
+                            }
+                        ]
+
+                    },
+                    {
+                        xtype: 'grid',
+                        id: 'selectedTeachersGrid',
+                        store: selectedTeacherStore,
+                        title: 'Выбранные преподаватели',
+                        loadMask: true,
+                        columnLines: true,
+                        dataBuffered: true,
+                        height: 200,
+                        listeners: {
+                        },
+                        columns: [
+                            { xtype: 'checkcolumn', text: '', dataIndex: 'selected', width: 50, sortable: false },
+                            { xtype: 'rownumberer', width: 60 },
+                            {
+                                header: 'Фамилия',
+                                dataIndex: 'LastName',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            },
+                            {
+                                header: 'Имя',
+                                dataIndex: 'FirstName',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+
+                            },
+                            {
+                                header: 'Отчество',
+                                dataIndex: 'Patronymic',
+                                width: 150,
+                                renderer: Urfu.renders.htmlEncodeWithToolTip
+                            }
+                        ]
+
+                    }
+                ],
+                buttons: [
+                    {
+                        text: "Сохранить",
+                        handler: function () {
+                            teachersPanel.mask('Сохранение..');
+                            var teachers = new Array();
+                            selectedTeachersGrid.store.data.items.forEach(function (item, i, arr) {
+
+                                teachers[i] = {
+                                    id: item.data.userId,
+                                    selected: item.data.selected
+                                };
+                            });
+                            Ext.Ajax.request({
+                                method: 'POST',
+                                dataType: 'json',
+                                url: '@Url.Action("UpdateMUPPropertyTeachers")?propertyId=' + teachersPanel.getComponent("Id").getValue(),
+                                params: { teacherRows: JSON.stringify(teachers) },
+                                traditional: true,
+                                success: function (response) {
+                                    teachersPanel.unmask();
+                                    teachersPanel.hide();
+                                    store.reload();
+                                },
+                                failure: function (response) {
+                                    teachersPanel.unmask();
+                                    teachersPanel.hide();
+                                }
+                            });
+                           
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { teachersPanel.hide(); }
+                    }],
+                listeners: {
+                    'shown': function () {
+
+                    }
+                }
+            });
+        
+        teachersGrid = Ext.getCmp('teachersGrid');
+        selectedTeachersGrid = Ext.getCmp('selectedTeachersGrid');
+        var selectableCellClick = function (grid, td, columnIndex, record, tr, rowIndex, e, eOpts,selectedGrid) {
+            //remember to change - it must be column number (first has 0)
+            if (columnIndex == 0) {
+
+                if (record.data.selected) {
+                    $(td).children('div').children('div').addClass('x-grid-checkcolumn-checked');
+                    var clone = record.clone();
+                    clone.commit();
+                    if (grid.store.$className !== 'Ext.data.BufferedStore') {
+                        record.commit();
+                    }
+                    
+                    selectedGrid.store.add(clone); // добавляем в выбранных
+                    //record.commit();
+
+                }
+                else {
+                    if (grid.store.$className !== 'Ext.data.BufferedStore') record.reject();
+
+                }
+            }
+        };
+        var selectedCellClick = function (grid, td, columnIndex, record, tr, rowIndex, e, eOpts) {
+            //remember to change - it must be column number (first has 0)
+            if (columnIndex == 0) {
+                if (record.data.selected) {
+                    $(td).children('div').children('div').addClass('x-grid-checkcolumn-checked');
+                }
+                else {
+                    $(td).children('div').children('div').removeClass('x-grid-checkcolumn-checked');
+                }
+            }
+        };
+
+        teachersGrid.on('cellclick', function (grid, td, columnIndex, record, tr, rowIndex, e, eOpts) {
+            selectableCellClick(grid, td, columnIndex, record, tr, rowIndex, e, eOpts, selectedTeachersGrid);
+        });
+        
+        selectedTeachersGrid.on('cellclick', selectedCellClick);
+
+        var items = [
+            gridPanel
+        ];
+
+        Urfu.createViewport('border', items);
+
+    });
+</script>
+

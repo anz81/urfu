@@ -1,0 +1,39 @@
+﻿@model Urfu.Its.Frames.Controllers.StateVM
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>ListClaims</title>
+</head>
+<body>
+    <div>
+        Claims
+        @foreach (var c in Model.Principal.Claims)
+        {
+            <br>
+            @c.Type
+            <br>
+            @c.Value
+        }
+    </div>
+
+    <div>
+
+        Cookies
+        @foreach (var c in Model.Cookies)
+        {
+            <br>
+              @String.Format("Name [{0}] Domain [{1}] Path [{2}] shared [{3}]",c.Name,c.Domain, c.Path, c.Shareable)
+            <br>
+            @c.Value
+        }
+
+    </div>
+
+</body>
+</html>

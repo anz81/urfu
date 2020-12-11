@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="Properties\AssemblyInfo.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\TemplateEngine\TemplateEngine.csproj">
+			<Project>{F663A930-A496-4C5C-B123-F97831417AD8}</Project>
+			<Name>TemplateEngine</Name>
+		</ProjectReference>
+		<ProjectReference Include="..\Urfu.Its.Common\Urfu.Its.Common.csproj">
+			<Project>{428583d8-56b6-4283-bab1-a60a88f77e23}</Project>
+			<Name>Urfu.Its.Common</Name>
+		</ProjectReference>
+		<ProjectReference Include="..\Urfu.Its.Integration\Urfu.Its.Integration.csproj">
+			<Project>{14109828-d1b0-49c4-9910-56050de04fdc}</Project>
+			<Name>Urfu.Its.Integration</Name>
+		</ProjectReference>
+		<ProjectReference Include="..\Urfu.Its.Web.Model\Urfu.Its.Web.Model.csproj">
+			<Project>{0A35D37B-9127-4258-AAA6-88D9D3826D1F}</Project>
+			<Name>Urfu.Its.Web.Model</Name>
+		</ProjectReference>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Properties\" />
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.Windows.Compatibility" Version="3.1.1" />
+	</ItemGroup>
+</Project>

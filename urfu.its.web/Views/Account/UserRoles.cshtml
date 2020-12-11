@@ -1,0 +1,91 @@
+﻿@model Urfu.Its.Web.Models.SelectUserRolesViewModel
+
+@{
+    ViewBag.Title = "Роли пользователя";
+}
+
+
+<h2>Роли пользователя @Html.DisplayFor(model => model.UserName)</h2>
+<hr />
+<p id="roleSets"></p>
+<p id="appendRoleSets"></p>
+
+@using (Html.BeginForm("UserRoles", "Account", FormMethod.Post, new { encType = "multipart/form-data", name = "myform" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true)
+        <div class="form-group">
+            <div class="col-md-10">
+                @Html.HiddenFor(model => model.UserName)
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-10">
+                @Html.HiddenFor(model => model.FirstName)
+            </div>
+        </div>
+
+        <br />
+        <hr />
+
+        <table class="table table-striped table-hover table-bordered table-condensed">
+            <tr>
+                <th>
+
+                </th>
+                <th>
+                    Роль
+                </th>
+            </tr>
+            @Html.EditorFor(model => model.Roles)
+        </table>
+        <br />
+        <hr/>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Сохранить" class="btn btn-default" />
+                </div>
+            </div>
+</div>
+}
+
+
+
+@if (@Model != null)
+{
+    <script>
+        $(document).ready(function() {
+            $.ajax("/RoleSets/ForUser?id=@Model.UserName").done(function (data) {
+                if (data.length > 0) {
+                    $("#roleSets").append("<h4>Выбор одной роли</h4>");
+                    $("#appendRoleSets").append("<h4>Множественный выбор ролей</h4>");
+                }
+                for (var i = 0; i < data.length; i++) {
+                    var rs = data[i];
+                    if (rs.set) {
+                        $("#roleSets").append("<button class=\"btn-primary\" style=\"margin:2px;\" data-val=\"" + rs.Id + "\">" + rs.Name + "</buttton>");
+                    } else {
+                        $("#roleSets").append("<button class=\"btn\" style=\"margin:2px;\" data-val=\"" + rs.Id + "\">" + rs.Name + "</buttton>");
+                        $("#appendRoleSets").append("<button class=\"btn\" style=\"margin:2px;\" data-val=\"" + rs.Id + "\">" + rs.Name + "</buttton>");
+                    }
+                }
+                $("#roleSets button").click(function () {
+                    var button = $(this);
+                    var rs = button.data("val");
+                    window.location = "/Account/ApplyRoleSet/@Model.UserName?set=" + rs;
+                });
+
+                $("#appendRoleSets button").click(function () {
+                    var button = $(this);
+                    var rs = button.data("val");
+                    window.location = "/Account/AppendRoleSet/@Model.UserName?set=" + rs;
+                });
+            });
+        });
+    </script>
+}
+    
+

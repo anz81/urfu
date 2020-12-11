@@ -1,0 +1,457 @@
+﻿@using Urfu.Its.Web.DataContext
+
+
+@model Urfu.Its.Frames.Controllers.ProjectVM
+
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Project</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link  type="text/css" rel="stylesheet" href="../../Content/StyleProject.css" />
+
+    @Styles.Render("~/Content/css")
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js"></script>
+    <script src="~/Scripts/toastr.js"></script>
+
+    <script>
+        function priorityChanged(moduleId, selector) {
+            toastr.options = {
+                "closeButton": false,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": false,
+                "positionClass": "toast-top-center",
+                "preventDuplicates": true,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            }
+            var priority = $("#priority" + moduleId + " option:selected").val();
+            var role = $("#role" + moduleId + " option:selected").val();
+
+            //var elements = document.getElementsByClassName('rad');
+            if (selector.name == "priority" && priority !== "") {
+                var elements = document.getElementsByName("priority");
+
+                var priorityselected = false;
+
+                [].forEach.call(elements,
+                    function(el) {
+                        if (el.id !== selector.id && el.options[el.selectedIndex].value == priority) {
+                            priorityselected = true;
+                            alert("Данный приоритет уже выбран!");
+                            $("#priority" + moduleId).prop('selectedIndex', 0);
+                            return;
+                        }
+                    });
+
+                if (priorityselected) {
+                    return;
+                }
+            }
+
+            if (priority == "" && role != "" || priority != "" && role == "") {
+                $("#alert" + moduleId)[0].style.cssText = "visibility: visible !important;";
+                return;
+            }
+
+            @{ string url = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, "/frm/project/update"); }
+
+
+            $.get("@url",
+                    {
+                        priority: priority,
+                        role: role,
+                        moduleId: moduleId,
+                        competitionGroupId: @Model.CompetitionGroupId,
+                        studentId: '@Model.StudentID',
+                        groupHistoryId: '@Model.GroupHistoryID'
+                    })
+                .done(function () {
+                    var maxPriority = @Model.MaxPriority;
+                    var modules = [];
+                    var used = [];
+
+                    @foreach(var m in Model.Modules)
+                    {
+                        @:modules.push('@m');
+
+                        @:var selected = $("#priority" + '@m' + " option:selected").text();
+                        @:used.push(selected);
+                    }
+
+                    modules.forEach(function (val, index, arr) {
+                        $("#priority" + val + " option:not(:selected)").remove(); // удалить все элементы списка, кроме выделенного
+
+                        // добавление "-" в список, если он не выбран
+                        var selected = $("#priority" + val + " option:selected").text();
+                        if (selected != "—")
+                            $("#priority" + val).prepend($("<option value=''>&mdash;</option > "));
+
+                        for (var i = 1; i <= maxPriority; i++) {
+                            var priority = i.toString();
+
+                            if (jQuery.inArray(priority, used) < 0) {
+                                $("#priority" + val).append($("<option>&mdash;</option>")
+                                    .attr("value", priority)
+                                    .text(priority));
+                            }
+                        }
+                    });
+
+                    $("#alert" + moduleId)[0].style.cssText = "visibility: collapse !important; position: absolute;";
+                    toastr.success("<h5>Ваш выбор принят</h5>");
+
+                    if (priority == "" || role == "") {
+                        $("#comment-" + moduleId).prop('disabled', true);
+                    }
+                    else {
+
+                        $("#comment-" + moduleId).prop('disabled', false);
+                    }
+                })
+                .fail(function(request,status) {
+                    try {
+                        alert(request.responseText||"Ошибка связи с сервером");
+                    } catch (e) {
+                        alert("Неизвестная ошибка");
+                    }
+
+                    $("#priority" + moduleId).prop('selectedIndex', 0);
+                    $("#role" + moduleId).prop('selectedIndex',0);
+                });
+        };
+
+
+    </script>
+</head>
+
+
+<body>
+    <div class="container-fluid">
+        <h4>@Model.DisciplineTitle</h4>
+        <h5>@Model.YearInfo</h5>
+        <h5>@Model.Semester семестр</h5>
+
+        <h4><b>Выберите приоритет и роль в проекте:</b></h4>
+
+        @using (Html.BeginForm("Project", "Project", FormMethod.Get))
+        {
+            @Html.HiddenFor(m => m.StudentID)
+            @Html.HiddenFor(m => m.GroupHistoryID)
+            @Html.HiddenFor(m => m.Year)
+            @Html.HiddenFor(m => m.SemesterId)
+            @Html.HiddenFor(m => m.DisciplineUUID)
+            @Html.HiddenFor(m => m.Level)
+
+            <div class="row search-padd">
+                <div class="col-sm-6">
+                    <div class="row">
+                        <div class="col search-nopadd">
+                            <input class="form-control form-control-lg form-control-borderless" type="search" name="search" value="@Model.Search"
+                                   placeholder="Поиск по предприятию, проекту, куратору">
+                        </div>
+                        <div>
+                            <button type="submit" value="Search" class="btn btn-xs">
+                                <img src="~/search.png" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        @if (Model.AdmissionProjectName != null)
+        {
+            if (Model.TeamProjectAddress != null)
+            {
+                <div class="font-project-deadline" style="margin-bottom:10px; background-color: #dff0d8; color: darkgreen !important;">
+                    Вы зачислены на проект "<u><b><a href="@Model.TeamProjectAddress" target="_parent" style="color: darkgreen !important;">@Model.AdmissionProjectName</a></b></u>"</div>
+            }
+            else
+            {
+                <div class="font-project-deadline" style="margin-bottom:10px; background-color: #dff0d8; color: darkgreen !important;">
+                    Вы зачислены на проект "<b>@Model.AdmissionProjectName</b>"</div>
+            }
+        }
+        <div>
+            <div class="panel-group">
+                @foreach (var m in Model.Companies)
+                {
+                    <div class="panel panel-default">
+                        <div class="panel-heading row fill-div">
+                            <a class="fill-href" data-toggle="collapse" href="#@m.hId">
+                                <div class="middle"><h4 class="panel-title" style="color:black;">@m.Name</h4></div>
+                            </a>
+                        </div>
+
+                        <div id="@m.hId" class="@m.Class">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-sm-10" style="font-weight:bold;">@m.Direction</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-10">@m.GetCompanyAddressDescription()</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-10"><a href="@m.Site">Сайт</a></div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-10">@m.GetPersonInChargeDescription()</div>
+                                </div>
+
+                                <div class="panel-group" id='event-holder'>
+                                    @foreach (var p in m.Projects)
+                                    {
+                                        <div class="panel panel-default">
+
+                                            <div class="panel-heading padd">
+                                                <div class="font-project-name"><b>@p.Name</b></div>
+                                                @if (p.SelectionDeadline != "")
+                                                {
+                                                    <div class="font-project-deadline">Выбрать до <b>@p.SelectionDeadline</b></div>
+                                                }
+                                                <ul class="hr">
+
+                                                    <li>
+                                                        @{
+                                                            string disabledselection = null;
+
+                                                            if (!p.IsActive)
+                                                            {
+                                                                disabledselection = "disabled";
+                                                            }
+
+                                                            <select @disabledselection class="custom-select rad" onchange="priorityChanged('@p.Id', this)" id="@string.Concat("priority", @p.Id)" autocomplete="off">
+                                                                <option value='' @(!p.Priority.HasValue ? "selected=\"selected\"" : "")>&mdash;</option>
+                                                                @for (int i = 1; i <= Model.MaxPriority; i++)
+                                                                {
+                                                                    if (!Model.UsedPriorities.Contains(i) || i == p.Priority)
+                                                                    {
+                                                                        <option value="@i" @(i == p.Priority ? "selected=\"selected\"" : "")>@i</option>
+                                                                    }
+                                                                }
+                                                            </select>
+                                                            <select @disabledselection class="custom-select rad roles-width" onchange="priorityChanged('@p.Id', this)" id="@string.Concat("role", @p.Id)" autocomplete="off">
+                                                                <option value='' @(p.Role == null ? "selected=\"selected\"" : "")>&mdash;</option>
+                                                                @foreach (var role in p.Roles)
+                                                                {
+                                                                    <option value="@role.Id" @(role.Id == p.Role?.Id ? "selected=\"selected\"" : "")>@role.Title</option>
+                                                                }
+                                                            </select>
+
+                                                        }
+                                                      
+                                                        <div class="ttp_lnk">
+                                                            <img src="~/explanation.png" title='@p.RolesInfo'/>
+                                                        </div>
+
+                                                    </li>
+                                                </ul>
+
+                                                <ul class="hr" style="visibility: collapse !important; position: absolute;" id="@string.Concat("alert", @p.Id)">
+                                                    <li class="alertstyle alert alert-danger" style="color: darkred !important;" role="alert">Не сохранено. Выберите приоритет и роль!</li>
+                                                </ul>
+
+                                                @if (p.Status.HasValue)
+                                                {
+                                                    if (p.Status == AdmissionStatus.Admitted)
+                                                    {
+                                                        <ul class="hr">
+                                                            <li class="alertstyle alert alert-success" style="color: darkgreen !important;" role="alert">@p.StatusName</li>
+                                                        </ul>
+                                                    }
+                                                    if (p.Status == AdmissionStatus.Denied)
+                                                    {
+                                                        <ul class="hr">
+                                                            <li class="alertstyle alert alert-danger" style="color: darkred !important;" role="alert">@p.StatusName</li>
+                                                        </ul>
+                                                    }
+                                                    if (p.Status == AdmissionStatus.Indeterminate)
+                                                    {
+                                                        <ul class="hr">
+                                                            <li class="alertstyle alert alert-info" style="color: #428bca !important;" role="alert">@p.StatusName</li>
+                                                        </ul>
+                                                    }
+                                                }
+
+                                                <ul class="hr">
+                                                    <li><b>Кураторы: </b></li>
+                                                    <li>@p.Curator</li>
+                                                </ul>
+                                                <ul class="hr">
+                                                    <li><b>Описание: </b></li>
+                                                    <li>@p.Description</li>
+                                                </ul>
+                                                <ul class="hr">
+                                                    <li><b>Цель: </b></li>
+                                                    <li>@p.Target</li>
+                                                </ul>
+
+                                                <ul class="hr">
+                                                    @{
+                                                        string disabled = null;
+                                                        {
+                                                            if (!p.IsActive || p.Role?.Id == null || p.Priority == null)
+                                                            {
+                                                                disabled = "disabled";
+                                                            }
+
+                                                        }
+                                                             <div class="form-group">
+                                                                 <li><b>  <label for="comment-@p.Id">Комментарий: </label></b></li>
+                                                                 <li>
+                                                                    <textarea @disabled class="form-control comment" id="comment-@p.Id" data-project-id="@p.Id" rows="3" maxlength="500" >@p.Comment</textarea>
+                                                                 
+                                                                 <div class="status"></div>
+                                                                 </li>
+                                                                 </div>
+                                                    }
+                                                </ul>
+                                            </div>
+
+                                            <div>Осталось мест @p.Limit</div>
+
+                                            <div>
+                                                @if (p.HasProjectDescription)
+                                                {
+                                                    <ul class="hr">
+                                                        <li>
+                                                            <a href="@Url.Action("GetProjectDescription", "Project", new { id = p.Id })">
+                                                                <button type="button" class="btn btn-zip btn-xs">
+                                                                    <img src="~/img_zip.png" />
+                                                                </button>
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a>@Html.ActionLink("Файлы проекта", "GetProjectDescription", new { id = p.Id })</a>
+                                                        </li>
+                                                    </ul>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
+
+<script>
+
+    function debounce(f, t) {
+        return function (args) {
+            var previousCall = this.lastCall;
+            this.lastCall = Date.now();
+            if (previousCall && ((this.lastCall - previousCall) <= t)) {
+                clearTimeout(this.lastCallTimer);
+            }
+            this.lastCallTimer = setTimeout(() => f(args), t);
+        }
+    }
+
+    jQuery(document).ready(function ($) {
+        function l_tooltip(target_items, name) {
+            $(target_items).each(function (i) {
+                $("body").append("<div class='" + name + "' id='" + name + i + "'><p>" + $(this).attr('title') + "</p></div>");
+                var tooltip = $("#" + name + i);
+                if ($(this).attr("title") != "" && $(this).attr("title") != "undefined") {
+                    $(this).removeAttr("title").mouseover(function () {
+                        tooltip.css({
+                            opacity: 1,
+                            display: "none"
+                        }).fadeIn(30);
+                    }).mousemove(function (kmouse) {
+                        tooltip.css({
+                            left: kmouse.pageX + 15,
+                            top: kmouse.pageY + 15
+                        });
+                    }).mouseout(function () {
+                        tooltip.fadeOut(10);
+                    });
+                }
+            });
+        }
+        l_tooltip(".ttp_lnk img", "tooltip");
+        var commentStatusTimerIdMap = {};
+        var eventHolder = document.getElementById("event-holder");
+      
+        var eventHandler = function (event) {
+            var projectId = event.target.getAttribute('data-project-id');
+            var elementId = "comment-" + projectId;
+          
+            if (projectId === null || event.target.id !== elementId)
+                return;
+            var comment = event.target.value;
+            $.ajax({
+                url: "/frm/project/savecomment",
+                data: {
+                    studentId:'@Model.StudentID',
+                    projectId: projectId,
+                    competitionGroupId: @Model.CompetitionGroupId,
+                    comment: comment
+                },
+                success: function () {
+                    var element = $(event.target).parent().find('.status').first();
+                    element.html("<div class=success><i class='material-icons success-icon'>done</i> Сохранено</div>");
+                    commentStatusTimerIdMap[projectId] = setTimeout(function() {
+                            element.html("");
+                        },
+                        3000);
+                },
+                error: function (xhr, status, error) {
+                    var dom_nodes = $($.parseHTML(xhr.responseText));
+                    alert( dom_nodes.filter('title').text());
+                }
+
+            });
+        };
+
+        var debouncedEventHandler = debounce(eventHandler, 800);
+        eventHolder.addEventListener("input", debouncedEventHandler);
+        eventHolder.addEventListener("input", (event => {
+            var projectId = event.target.getAttribute('data-project-id');
+            var elementId = "comment-" + projectId;
+          
+            if (projectId === null || event.target.id !== elementId)
+                return;
+
+            var commentStatusTimerId = commentStatusTimerIdMap[projectId];
+
+            if (commentStatusTimerId)
+                clearTimeout(commentStatusTimerId);
+            $(event.target).parent().find('.status').first().html("<div class='loading'/>");
+        }));
+
+
+    });
+</script>

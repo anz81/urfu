@@ -1,0 +1,328 @@
+﻿@model Urfu.Its.Web.Models.EditUserDivisionsViewModel
+
+@{
+    ViewBag.Title = "Институты для пользователя " + Model.UserFIO;
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true)
+
+
+        <script type="text/javascript">
+            changed = false;
+            baseCheckedIds = [];
+            checkedIds = [];
+
+            var treeStore = createTreeStore();
+            var treePanel = createTreePanelElement();
+            var saveButton = createSaveButtonElement();
+            var addDivisionComboBox = createComboBoxElement();
+
+            treeStore.addListener('load',
+                onTreeStoreLoaded.bind(null, treePanel)
+            );
+            treePanel.setStore(treeStore)
+
+
+            Ext.onReady(function () {
+             var panel= Ext.create('Ext.Panel', {
+                    width: '100%',
+                    minHeight: 800,
+                    layout: 'column',
+                    margin: "50 10 0 0",                  
+                    defaults: {
+                        margin: "0 10 0 0",
+                      
+                    },
+                    items: [
+                        {
+                            xtype: 'panel',
+                            columnWidth: .55,
+                            items: [treePanel, saveButton]
+                        }, {
+                            xtype: 'panel',                          
+                            title: 'Добавить подразделение',
+                            margin: "0 0 0 0",
+                            bodyPadding: "10 0 0 0",
+                            columnWidth: .45,                            
+                            layout: {
+                                type: 'hbox'
+                            },
+                            items: [
+                                addDivisionComboBox,
+                                {
+                                    xtype: 'button', text: 'Добавить',
+                                    handler: function () {                                        
+                                        if (Ext.getCmp('combobox1') != null) {                                            
+                                            var newNodes = Ext.getCmp('combobox1').getValueRecords();      
+                                            if (newNodes.length == 0)
+                                                return;                                                                                      
+                                            for (i = 0; i < newNodes.length; i++)
+                                              {
+                                                    treePanel.getRootNode().appendChild({
+                                                         text: newNodes[i].data.Name,
+                                                         nodeId: newNodes[i].data.InstituteId,
+                                                         leaf: true,
+                                                         checked: true
+                                                });                                        
+                                                checkedIds.push(newNodes[i].data.InstituteId);                                                                                            
+                                            }
+                                        }
+                                    }
+                                }                               
+                            ]
+                           
+                        }],
+                    renderTo: Ext.getBody()
+                });
+              
+            });
+
+            function save(success, failure) {
+                Ext.Ajax.request({
+                    method: 'POST',
+                    url: '@Url.Action("UserDivisions")',
+                    params: {
+                        userName: '@Model.UserName',
+                        checkedIds: checkedIds
+                    },
+                    success: function (response) {
+                        success(response)
+                    },
+                    failure: function (response) {
+                        failure(response)
+                    }
+                });
+                baseCheckedIds = checkedIds.slice(0);
+            }
+
+            function colExpTree() {
+                var treeView = treePanel.getComponent('treeView');
+                if (treeView == undefined) return;
+                if (treePanelCollapsed) treeView.collapseAll(treeView);
+                else treeView.expandAll(treeView);
+            }
+
+            function search() {
+                var settings = [
+                    {property: 'title', value: Ext.ComponentQuery.query('#Division')[0].getValue()},
+                ];
+
+                treePanel.mask();
+                treeStore.setFilters(settings);
+                treePanelCollapsed = false;
+
+                colExpTree();
+            }
+
+       
+            function onTreeStoreLoaded(treePanel, treeStore) {
+                if (treePanel.isMasked()) treePanel.unmask();
+                colExpTree();
+                treeStore.getRootNode().cascadeBy(function (node) {
+                    if (node.data.checked && node.data.children == null && !baseCheckedIds.includes(node.data.nodeId))
+                        baseCheckedIds.push(node.data.nodeId);
+                    else if (!node.data.checked && baseCheckedIds.includes(node.data.nodeId)) {
+                        var index = baseCheckedIds.indexOf(node.data.nodeId);
+                        baseCheckedIds.splice(index);
+                    }
+                    checkedIds = baseCheckedIds.slice(0);
+                })
+            }
+
+            function createTreeStore() {
+                return Ext.create("Ext.data.TreeStore",
+                    {
+                        autoLoad: true,
+                        remoteFilter: true,
+                        root: {
+                            text: 'Root',
+                            id: 'rootId',
+                            expanded: false
+                        },
+                        proxy: {
+                            type: 'ajax',
+                            url: '@Url.Action("UserDivisionsTree")?id=' + '@Model.Id',
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'children'
+                            }
+                        }                     
+                    });
+            }
+
+
+            function createTreePanelElement() {
+                return Ext.create('Ext.tree.Panel', {
+                    title: 'Подразделения для пользователя ' + '@Model.UserFIO',
+                    rootVisible: false,                 
+                    xtype: 'panel',                    
+                    tbar: [
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'Подразделение',
+                            itemId: 'Division',
+                            labelWidth: 110
+
+                        },
+                        {
+                            xtype: 'button',
+                            icon: '/Content/Images/search.png',
+                            handler: function () {
+
+                                if (changed) {
+                                    var saveDialog = Ext.create('Ext.window.Window',
+                                        {
+                                            title: "Уведомление",
+                                            closeAction: 'hide',
+                                            resizable: false,
+                                            autoHeight: true,
+                                            bodyStyle: "margin: 10px;",
+                                            bodyPadding: 6,
+                                            defaults: {
+                                                width: 400
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'label',
+                                                    text: 'Сохранить изменения?',
+                                                    margin: '0 0 20 0'
+                                                }
+                                            ],
+                                            buttons: [
+                                                {
+                                                    text: "Сохранить",
+                                                    handler: function () {
+
+                                                        changed = false;
+                                                        saveDialog.hide();
+                                                        save(function (response) {
+                                                        }, function (response) {
+                                                            Ext.MessageBox.show({title: 'Ошибка', msg: 'Произошла ошибка'})
+                                                        });
+                                                        search();
+                                                    }
+                                                },
+                                                {
+                                                    text: "Не сохранять",
+                                                    handler: function () {
+                                                        changed = false;
+                                                        checkedIds = baseCheckedIds.slice(0);
+                                                        saveDialog.hide();
+                                                        search();
+                                                    }
+                                                }
+                                            ]
+                                        }).show();
+                                }
+                                else {
+                                    search();
+                                }
+                            }
+                        }
+                    ],
+
+                    listeners: {
+                        checkchange: function (node, checked) {
+                            changed = true;
+                            if (checked) {
+                                node.cascadeBy(function (child) {
+                                    if (child.data.children == null && !checkedIds.includes(child.data.nodeId))
+                                        checkedIds.push(child.data.nodeId);
+                                });
+                            }
+                            else {
+                                node.cascadeBy(function (child) {
+                                    if (checkedIds.includes(child.data.nodeId)) {
+                                        var index = checkedIds.indexOf(child.data.nodeId);
+                                        checkedIds.splice(index, 1);
+                                    }
+                                })
+                            }
+                            checkchange_base(node, checked);
+                        },
+
+                        collapseAll: function (tree) {
+                            this.updateTreeView(tree, function (root) {
+                                root.cascadeBy(function (node) {
+                                    if (!node.isRoot() || tree.rootVisible) {
+                                        node.data.expanded = false;
+                                    }
+                                });
+                                return tree.rootVisible ? [root] : root.childNodes;
+                            });
+                        },
+
+                        expandAll: function (tree) {
+                            this.updateTreeView(tree, function (root) {
+                                var nodes = [];
+                                root.cascadeBy(function (node) {
+                                    if (!node.isRoot() || tree.rootVisible) {
+                                        node.data.expanded = true;
+                                        nodes.push(node);
+                                    }
+                                });
+                                return nodes;
+                            })
+                        }
+                    }
+                });
+            }
+
+            function createSaveButtonElement() {
+                  return Ext.create('Ext.Button', {
+                        text: 'Сохранить',
+                        height: 30,
+                        margin: '20 0 5 5',
+                        handler: function () {
+                            save(
+                                function (response) {
+                                    window.location = '@Url.Action("Index", new { focus = Model.UserName})'
+                                },
+                                function (response) {
+                                    Ext.MessageBox.show({title: 'Ошибка', msg: 'Произошла ошибка'})
+                                })
+                        }
+                  });
+            }
+
+            function createComboBoxElement() {  
+                var divisionStore = Ext.create('Ext.data.Store', {
+                    autoLoad: true,
+                    proxy: {
+                            type: 'ajax',
+                        url: '@Url.Action("GetDivisions")?userName=' + '@Model.UserName',                       
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
+                        },                 
+            });
+
+                return Ext.create('Ext.form.field.Tag', {                  
+                    store: divisionStore,
+                    width: "55%",
+                    minWidth: 200,
+                    margin: "0 10 0 0",
+                    queryMode: 'local',
+                    displayField: 'Name',
+                    valueField: 'InstituteId',
+                    anyMatch: true,
+                    filterPickList: true,
+                    id: 'combobox1',
+                    listeners: {
+                        'select': function (combo, record) {
+                            combo.inputEl.dom.value = '';
+                        }
+                    }                                    
+                });
+            }
+        </script>
+
+    </div>
+}
+

@@ -1,0 +1,36 @@
+﻿{
+  "type": "object",
+  "properties": {
+	"ObjectWithProperty": {
+	  "type": "object",	  
+	  "properties": {
+	    "Prop1": {
+	      "type": "string"
+	    } 
+	  }
+	},
+	"ObjectWithoutProperties": {
+	  "type": "object",	  
+	  "properties": {
+	    
+	  }
+	},             
+    "ObjectArray1": {
+      "type": "array",      
+      "items": {
+        "type": "object",        
+        "properties": {
+          "StringArray1": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "NumberProp1": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

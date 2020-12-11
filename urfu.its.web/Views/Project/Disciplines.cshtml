@@ -1,0 +1,52 @@
+﻿@model IEnumerable<Urfu.Its.Web.Models.ProjectDisciplineViewModel>
+
+<h2>@ViewBag.Title</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Discipline.title)
+        </th>
+        @*<th>
+            @Html.DisplayNameFor(model => model.Discipline.section)
+        </th>*@
+        <th>
+            @Html.DisplayNameFor(model => model.Discipline.testUnits)
+        </th>
+        <th></th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Discipline.title)
+            </td>
+            @*<td>
+                @Html.DisplayFor(modelItem => item.Discipline.section)
+            </td>*@
+            <td>
+                @Html.DisplayFor(modelItem => item.Discipline.testUnits)
+            </td>
+            <td>
+                @if (item.ProjectDiscipline == null )
+                {
+                    if (ViewBag.CanEdit)
+                    {
+                        @Html.ActionLink("Назначить аудиторную нагрузку, контрольные мероприятия и формы контроля", "EditTmers", new { projectId = ViewBag.ProjectId, disciplineId = item.Discipline.uid })
+                    }
+                }
+                else
+                {
+                    @Html.ActionLink("Редактировать аудиторную нагрузку, контрольные мероприятия и формы контроля", "Tmers", new { id = item.ProjectDiscipline.Id })
+                }
+               
+            </td>
+        </tr>
+    }
+</table>
+
+<div>
+    @Html.ActionLink("Вернуться к списку", "Index")
+</div>
+
+

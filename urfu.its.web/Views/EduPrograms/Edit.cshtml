@@ -1,0 +1,212 @@
+﻿@using Urfu.Its.Web.Models
+@model Urfu.Its.Web.DataContext.EduProgram
+
+@{
+    ViewBag.Title = "Редактирование образовательной программы";
+}
+
+<h2>@ViewBag.Title</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Программа</h4>
+        <hr/>
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.Id)
+        @Html.HiddenFor(model => model.profileId)
+        @Html.HiddenFor(model => model.familirizationType)
+        @Html.HiddenFor(model => model.familirizationCondition)
+@if (!User.IsInRole(ItsRoles.Admin))
+{
+        @Html.HiddenFor(model => model.divisionId)
+        @Html.HiddenFor(model => model.departmentId)
+        @Html.HiddenFor(model => model.chairId)
+}
+
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, new {@class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Name)
+                @Html.ValidationMessageFor(model => model.Name)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.HeadFullName, new {@class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.HeadFullName)
+                @Html.ValidationMessageFor(model => model.HeadFullName)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PlanNumber, new {@class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.DropDownList("PlanNumber", String.Empty)
+                @Html.ValidationMessageFor(model => model.PlanNumber)
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.PlanVersionNumber, new {@class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.DropDownList("PlanVersionNumber", String.Empty)
+                @Html.ValidationMessageFor(model => model.PlanVersionNumber)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.IsNetwork, new {@class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.IsNetwork)
+                @Html.ValidationMessageFor(model => model.IsNetwork)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.directionId, "Направление", new {@class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.DisplayFor(model => model.Direction.OksoAndTitle)
+                @Html.HiddenFor(model => model.directionId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Year, new {@class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.DisplayFor(model => model.Year)
+                @Html.HiddenFor(model => model.Year)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.qualification, new {@class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.DisplayFor(model => model.qualification)
+                @Html.HiddenFor(model => model.qualification)
+            </div>
+        </div>
+@if (!User.IsInRole(ItsRoles.Admin))
+{
+    <div class="form-group">
+        @Html.LabelFor(model => model.Division.shortTitle, new {@class = "control-label col-md-2"})
+        <div class="col-md-10">
+            @Html.DisplayFor(model => model.Division.shortTitle)
+        </div>
+    </div>
+}
+
+
+        @if (User.IsInRole(ItsRoles.Admin))
+        {
+            <div class="form-group">
+                @Html.LabelFor(model => model.chairId, new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownList("chairId", String.Empty)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.departmentId, new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownList("departmentId", String.Empty)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.divisionId, new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownList("divisionId", String.Empty)
+                </div>
+            </div>
+        }
+
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.profileId, "Профиль", new {@class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.DisplayFor(model => model.Profile.CODE)
+                @Html.HiddenFor(model => model.profileId)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.State, new {@class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.State)
+                @Html.ValidationMessageFor(model => model.State)
+            </div>
+        </div>
+
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.familirizationType)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.familirizationCondition)
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    @Html.DisplayFor(model => model.familirizationType)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.familirizationCondition)
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Сохранить" class="btn btn-default"/>
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("К списку", "Index", new { focus = Model.Id })
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document)
+            .ready(function() {
+                $("#PlanNumber")
+                    .change(function() {
+                        if ($("#PlanNumber").val() === '') {
+                            $("#PlanVersionNumber").empty();
+                            return;
+                        }
+                        var programsQuery = {};
+                        programsQuery.url = "/api/PlanVersions?programId=@Model.Id&eduplanNumber=" +
+                            $("#PlanNumber").val();
+                        programsQuery.type = "GET";
+                        programsQuery.datatype = "json";
+                        programsQuery.contentType = "application/json";
+                        programsQuery.success = function(programsList) {
+                            $("#PlanVersionNumber").empty();
+                            for (var i = 0; i < programsList.length; i++) {
+                                $("#PlanVersionNumber")
+                                    .append("<option value=" +
+                                        programsList[i].id +
+                                        ">" +
+                                        programsList[i].id +
+                                        "</option>");
+                            }
+                        };
+                        programsQuery.error = function() { alert("Ошибка получения списка версий плана"); };
+                        $.ajax(programsQuery);
+                    });
+            });
+    </script>
+}

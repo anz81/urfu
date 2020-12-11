@@ -1,0 +1,1001 @@
+﻿@using Newtonsoft.Json;
+
+@model Urfu.Its.Web.Model.Models.Practice.PracticeViewModel
+
+@{
+    ViewBag.Title = Model.PracticeInfo;
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+
+<style>
+    .no-padding .x-grid-cell-inner {
+        padding: 0
+    }
+
+    .x-form-item-default.x-item-disabled {
+        opacity: 1;
+    }
+
+    .x-item-disabled * {
+        color: rgb(90,90,97)
+    }
+
+    .x-mask {
+        background-image: none;
+        cursor: default;
+        background-color: transparent;
+        border-style: solid;
+        border-width: 1px;
+        border-color: transparent
+    }
+
+    .x-text-readonly .x-form-field {
+        color: #5d5757
+    }
+
+    .disabledcheckbox {
+        opacity: 0.5;
+    }
+
+</style>
+
+@section scripts
+{
+    <script src="~/Scripts/Practice/company.js"></script>
+    <script src="~/Scripts/Practice/document.js"></script>
+
+    <script>
+        Ext.onReady(function() {
+            Ext.Ajax.timeout = 60000
+            Ext.tip.QuickTipManager.init();
+
+            function gettoken() {
+                var token = '@Html.AntiForgeryToken()';
+                token = $(token).val();
+                return token;
+            }
+
+            Ext.define('Teacher',
+                {
+                    extend: 'Ext.data.Model',
+                    fields: [
+                        { name: 'Id', type: 'string' },
+                        { name: 'Name', type: 'string' }
+                    ]
+                });
+
+            Ext.define('Theme',
+                {
+                    extend: 'Ext.data.Model',
+                    fields: [
+                        { name: 'Id', type: 'int' },
+                        { name: 'Theme', type: 'string' }
+                    ]
+                });
+
+            Ext.define('Contract',
+                {
+                    extend: 'Ext.data.Model',
+                    fields: [
+                        { name: 'Id', type: 'int' },
+                        { name: 'Name', type: 'string' }
+                    ]
+                });
+
+            var teachers = Ext.create("Ext.data.Store",
+                {
+                    model: 'Teacher',
+                    data: @Html.Raw(Json.Encode(Model.Teachers.Select(t => new {Id = t.pkey, Name = t.BigName})))
+                });
+
+            var teachers2 = Ext.create("Ext.data.Store",
+                {
+                    model: 'Teacher',
+                    data: @Html.Raw(Json.Encode(Model.Teachers.Select(t => new {Id = t.pkey, Name = t.BigName})))
+                });
+            teachers2.insert(0, { Id: null, Name: 'Не указано' });
+
+            var themes = Ext.create("Ext.data.Store",
+                {
+                    model: 'Theme',
+                    data: @Html.Raw(Json.Encode(Model.Themes.Select(t => new {t.Id, t.Theme})))
+                    @*[
+                    @foreach (var t in Model.Themes)
+                    {
+                        @:{ Id: @t.Id , Theme: '@t.Theme' }
+                    }
+                ]*@
+                });
+
+            @*var contracts = Ext.create("Ext.data.Store", {
+                model: 'Contract',
+                data: @Html.Raw(Json.Encode(Model.Contracts.Select(c => new { Id = c.ContractId, Name = c.Contract.Company.Name }))),
+            });*@
+
+            Ext.define('Checkbox',
+                {
+                    extend: 'Ext.form.field.Checkbox',
+                    getSubmitValue: function() {
+                        return this.checked ? true : false;
+                    }
+                });
+
+            var equaldates = Ext.create('Ext.form.field.Checkbox',
+                {
+                    fieldLabel: 'Совпадает со сроком группы:',
+                    labelWidth: 170,
+                    width: 215,
+                    name: 'EqualsGroupDates',
+                    margin: '-5px 0 0 30px',
+                    disabled: true,
+                    disabledCls: 'disabledcheckbox',
+                    checked: @Model.EqualsGroupDates.ToString().ToLower()
+                });
+
+            var equalsreportdates = Ext.create('Ext.form.field.Checkbox',
+                {
+                    fieldLabel: 'Совпадает со сроком группы:',
+                    labelWidth: 170,
+                    width: 215,
+                    name: 'EqualsGroupReportDates',
+                    margin: '-5px 0 0 30px',
+                    disabled: true,
+                    disabledCls: 'disabledcheckbox',
+                    checked: @Model.EqualsGroupReportDates.ToString().ToLower()
+                    @*value:@Model.EqualsGroupReportDates.ToString().ToLower()*@
+                });
+
+            var formPractice = Ext.create('Ext.form.Panel',
+                {
+                    title: 'Информация о практике',
+                    collapsible: false,
+                    padding: '5px',
+                    bodyPadding: '10px',
+                    //border: false,
+                    //frame: true,
+                    defaults: {
+                        //    width: '100%',
+                        cls: 'field-margin'
+                    },
+                    items: [
+                        {
+                            xtype: 'hidden',
+                            name: '__RequestVerificationToken',
+                            value: gettoken()
+                        },
+                        {
+                            xtype: 'hidden',
+                            name: 'Id',
+                            value: '@Model.Id'
+                        },
+                        {
+                            xtype: 'fieldcontainer',
+                            itemId: 'datesContainer1',
+                            defaultType: 'datefield',
+                            layout: {
+                                type: 'hbox',
+                                padding: '5px'
+                            },
+                            items: [
+                                {
+                                    xtype: 'datefield',
+                                    fieldLabel: 'Сроки с',
+                                    labelWidth: 118,
+                                    name: 'StartDate',
+                                    width: 300,
+                                    format: 'd.m.Y',
+                                    startDay: 1,
+                                    value: '@string.Format("{0:dd.MM.yyyy}", Model.StartDate)',
+                                    listeners: {
+                                        blur: function(t) {
+                                            var finishdate = t.up().items.items[1].value;
+                                            t.setMaxValue(finishdate);
+                                        }
+                                    }
+                                },
+                                {
+                                    xtype: 'datefield',
+                                    margin: '0 0 0 50',
+                                    fieldLabel: 'по',
+                                    labelWidth: 25,
+                                    name: 'FinishDate',
+                                    width: 215,
+                                    format: 'd.m.Y',
+                                    startDay: 1,
+                                    value: '@string.Format("{0:dd.MM.yyyy}", Model.FinishDate)',
+                                    listeners: {
+                                        blur: function(t) {
+                                            var startdate = t.up().items.items[0].value;
+                                            t.setMinValue(startdate);
+                                        }
+                                    }
+                                }, equaldates
+                            ]
+                        },
+                        {
+                            xtype: 'fieldcontainer',
+                            itemId: 'reportdatesContainer',
+                            defaulType: 'datefield',
+                            layout: {
+                                type: 'hbox',
+                                padding: '5px'
+                            },
+                            items: [
+                                {
+                                    xtype: 'datefield',
+                                    fieldLabel: 'Срок сдачи отчета с',
+                                    labelWidth: 118,
+                                    name: 'ReportStartDate',
+                                    width: 300,
+                                    format: 'd.m.Y',
+                                    startDay: 1,
+                                    value: '@string.Format("{0:dd.MM.yyyy}", Model.ReportStartDate)',
+                                    listeners: {
+                                        blur: function(t) {
+                                            var startdate = t.up().up().down('#datesContainer1').items.items[0].value;
+                                            var reportenddate = t.up().items.items[1].value;
+                                            t.setMinValue(startdate);
+                                            t.setMaxValue(reportenddate);
+                                        }
+                                    }
+
+                                },
+                                {
+                                    xtype: 'datefield',
+                                    margin: '0 0 0 50',
+                                    fieldLabel: 'по',
+                                    labelWidth: 25,
+                                    name: 'ReportFinishDate',
+                                    width: 215,
+                                    format: 'd.m.Y',
+                                    startDay: 1,
+                                    value: '@string.Format("{0:dd.MM.yyyy}", Model.ReportFinishDate)',
+                                    listeners: {
+                                        blur: function(t) {
+                                            var reportstartdate = t.up().items.items[0].value;
+                                            var startdate = t.up().up().down('#datesContainer1').items.items[0].value;
+                                            if (reportstartdate == null && startdate != null)
+                                                t.setMinValue(startdate);
+                                            else
+                                                t.setMinValue(reportstartdate);
+
+                                        }
+                                    }
+                                }, equalsreportdates
+                            ]
+                        },
+                        {
+                            xtype: 'label',
+                            text: 'Для руководителя практики от УрФУ:',
+                            cls: 'field-margin x-form-item-label-default',
+                            margin: '0 0 5px 6px'
+                        }, new Checkbox({
+                            fieldLabel: 'с выездом',
+                            name: 'IsExternal',
+                            cls: 'field-margin',
+                            margin: '0 0 10px 6px',
+                            disabled: @Model.IsStationary.ToString().ToLower(),
+                            checked: @Model.IsExternal.ToString().ToLower()
+                        }),
+                        {
+                            xtype: 'fieldcontainer',
+                            itemId: 'datesContainer2',
+                            defaultType: 'datefield',
+                            disabled: @Model.IsStationary.ToString().ToLower(),
+                            layout: {
+                                type: 'hbox',
+                                align: 'stretch',
+                                padding: '5px'
+                            },
+                            items: [
+                                {
+                                    xtype: 'datefield',
+                                    fieldLabel: 'Выезд с',
+                                    labelWidth: 118,
+                                    name: 'ExternalStartDate',
+                                    width: 300,
+                                    format: 'd.m.Y',
+                                    startDay: 1,
+                                    value: '@string.Format("{0:dd.MM.yyyy}", Model.ExternalStartDate)'
+                                },
+                                {
+                                    xtype: 'datefield',
+                                    margin: '0 0 0 50',
+                                    fieldLabel: 'по',
+                                    labelWidth: 25,
+                                    name: 'ExternalFinishDate',
+                                    width: 215,
+                                    format: 'd.m.Y',
+                                    startDay: 1,
+                                    value: '@string.Format("{0:dd.MM.yyyy}", Model.ExternalFinishDate)'
+                                }
+                            ]
+                        }
+                    ],
+                    buttons:
+                    [
+                        {
+                            text: 'Сохранить',
+                            handler: function() {
+                                if ('@ViewBag.CanEdit' == 'False') {
+                                    Ext.MessageBox.alert('Ошибка', 'У вас нет прав вносить изменения');
+                                    return;
+                                }
+
+                                formPractice.getForm()
+                                    .submit({
+                                        url: '@Url.Action("PracticeEdit")',
+                                        success: function(form, action) {
+                                            if (action.result != null) {
+                                                if (action.result != null) {
+                                                    equaldates.setValue(action.result.TakeDatesfromGroup);
+                                                    equalsreportdates.setValue(action.result.TakeReportDatesfromGroup);
+                                                }
+                                            }
+                                            Ext.MessageBox.alert('Уведомление', 'Информация сохранена.');
+                                        },
+                                        failure: function(form, action) {
+                                            Ext.MessageBox.alert('Ошибка', 'Информация не сохранена. ' + action.result.message);
+                                        }
+                                    });
+                            }
+                        }
+                    ]
+                });
+
+            var setFormDisabled = function(form, disabled, ignore) {
+                form.items.items.forEach(function(element, index, array) {
+                    var isInIgnore = ignore.some(function(el, i, arr) {
+                        return el === element.itemId;
+                    });
+                    if (!isInIgnore)
+                        element.setDisabled(disabled);
+                });
+            }
+
+            var setContainerDates = function(items, containerId) {
+                if (items.length == 0) {
+                    // обработчик кнопки "Добавить"
+                    Ext.getCmp(containerId).items.items[0].items.items[3].setHandler(function() {
+                        addDatesContainer(containerId);
+                    });
+                } else {
+                    items.forEach(function(item, index, array) {
+                        if (index == 0) {
+                            // обработчик кнопки "Добавить"
+                            Ext.getCmp(containerId).items.items[0].items.items[3].setHandler(function() {
+                                addDatesContainer(containerId);
+                            });
+                        } else {
+                            // контейнейр для первой пары дат уже есть, для последующих надо добавлять
+                            addDatesContainer(containerId);
+                        }
+                        var count = Ext.getCmp(containerId).items.items.length;
+                        Ext.getCmp(containerId).items.items[count - 1].items.items[1].setValue(item.StartStr.replace(/\D/g, '/'));
+                        Ext.getCmp(containerId).items.items[count - 1].items.items[2].setValue(item.FinishStr.replace(/\D/g, '/'));
+                    });
+                }
+            };
+
+            var getDates = function(items) {
+                var dates = [];
+                items.forEach(function(item, index, array) {
+                    var start = item.items.items[1].rawValue;
+                    var finish = item.items.items[2].rawValue;
+                    dates.push(start);
+                    dates.push(finish);
+                });
+
+                var wrongDate = false;
+                var correctDates = [];
+                dates.forEach(function(item, index, array) {
+                    // обрабатываем пары дат (начало - конец), поэтому берем только четные индексы
+                    if (index % 2 === 0) {
+                        if ((item === "" && array[index + 1] !== "") || (item !== "" && array[index + 1] === "")) {
+                            wrongDate = true;
+                        }
+                        if (item !== "" && array[index + 1] !== "") {
+                            correctDates.push(item);
+                            correctDates.push(array[index + 1]);
+                        }
+                    }
+                });
+                return { wrong: wrongDate, dates: correctDates };
+            };
+
+            var datesContainerUrfuId = 'datesContainerUrfu';
+            var datesContainerUrfu = Ext.create('Ext.container.BigDatesContainer',
+                {
+                    requires: [
+                        'bigDatesContainer'
+                    ],
+                    id: datesContainerUrfuId,
+                    bind: {
+                        disabled: '{IsAdmitted}'
+                    },
+                    listeners: {
+                        beforerender: function(t, eOpts) {
+                            setContainerDates(formUrfu.viewModel.data.Dates, datesContainerUrfuId);
+                        }
+                    }
+                });
+
+            var formUrfu = Ext.create('Ext.form.Panel',
+                {
+                    title: 'Информация об УрФУ',
+                    collapsible: false,
+                    padding: '5px',
+                    bodyPadding: '10px',
+                    frame: false,
+
+                    viewModel: {
+                        data: @Html.Raw(Json.Encode(Model.Urfu)),
+                    },
+
+                    defaults: {
+                        width: '100%',
+                        cls: 'field-margin',
+                        labelWidth: 180
+                    },
+                    items: [
+                        {
+                            xtype: 'hidden',
+                            name: '__RequestVerificationToken',
+                            value: gettoken()
+                        },
+                        {
+                            xtype: 'hidden',
+                            name: 'PracticeId',
+                            bind: '{practiceId}'
+                        },
+                        {
+                            xtype: 'combobox',
+                            editable: false,
+                            store: teachers,
+                            queryMode: 'local',
+                            allowBlank: true,
+                            valueField: 'Id',
+                            displayField: 'Name',
+                            fieldLabel: 'Руководитель практики (от кафедры)',
+                            cls: 'field-margin',
+                            name: 'Teacher',
+                            itemId: 'TeacherCmbx',
+                            bind: {
+                                value: '{TeacherId}',
+                                disabled: '{IsAdmitted}'
+                            }
+                        },
+                        {
+                            xtype: 'combobox',
+                            editable: false,
+                            store: themes,
+                            queryMode: 'local',
+                            allowBlank: true,
+                            valueField: 'Id',
+                            displayField: 'Theme',
+                            fieldLabel: 'Тема',
+                            cls: 'field-margin',
+                            name: 'Theme',
+                            itemId: 'ThemeCmbx',
+                            bind: {
+                                value: '{ThemeId}',
+                                disabled: '{IsAdmitted}'
+                            }
+                        },
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'Уточненная тема',
+                            itemId: 'FinishTheme',
+                            cls: 'field-margin',
+                            name: 'FinishTheme',
+                            bind: '{FinishTheme}'
+                        },
+                        {
+                            xtype: 'combobox',
+                            editable: false,
+                            store: teachers2,
+                            queryMode: 'local',
+                            allowBlank: true,
+                            valueField: 'Id',
+                            displayField: 'Name',
+                            fieldLabel: 'Соруководитель практики (другое подразделение УрФУ)',
+                            cls: 'field-margin',
+                            name: 'Teacher2',
+                            bind: {
+                                value: '{TeacherId2}',
+                                disabled: '{IsAdmitted}'
+                            }
+                        },
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'Подразделение УрФУ',
+                            cls: 'field-margin',
+                            name: 'Subdivision',
+                            bind: {
+                                value: '{Subdivision}',
+                                disabled: '{IsAdmitted}'
+                            }
+                        },
+                        datesContainerUrfu,
+                        {
+                            xtype: 'radiogroup',
+                            fieldLabel: 'Статус',
+                            itemId: "StatusUrfuAdmission",
+                            cls: 'field-margin',
+                            layout: 'hbox',
+
+                            bind: {
+                                value: { StatusUrfuAdmission: '{Status}' }
+                            },
+                            items: [
+                                {
+                                    boxLabel: 'Согласовано',
+                                    name: 'StatusUrfuAdmission',
+                                    inputValue: '1',
+                                    margin: '0 20 0 0'
+                                },
+                                {
+                                    boxLabel: 'Отклонено',
+                                    name: 'StatusUrfuAdmission',
+                                    inputValue: '2',
+                                    margin: '0 20 0 0'
+                                },
+                                {
+                                    boxLabel: 'На формировании',
+                                    name: 'StatusUrfuAdmission',
+                                    inputValue: '0'
+                                }
+                            ],
+                            listeners: {
+                                change: function(t, newValue, oldValue, eOpts) {
+                                    // если выбран статус Отклонено
+                                    if (newValue["StatusUrfuAdmission"] === 2) {
+                                        formUrfu.getComponent('Reason').setDisabled(false);
+                                    } else {
+                                        // блокируем поле Причина отказа
+                                        formUrfu.getComponent('Reason').setDisabled(true);
+                                    }
+                                }
+
+                            }
+                        },
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'Причина отказа',
+                            itemId: 'Reason',
+                            cls: 'field-margin',
+                            name: 'Reason',
+                            itemId: 'Reason',
+                            bind: {
+                                value: '{Reason}',
+                                disabled: '{IsAdmitted}'
+                            }
+                        }
+                    ],
+                    buttons:
+                    [
+                        {
+                            text: 'Сохранить',
+                            handler: function() {
+
+                                if ('@ViewBag.CanEdit' == 'False') {
+                                    Ext.MessageBox.alert('Ошибка', 'У вас нет прав вносить изменения');
+                                    return;
+                                }
+
+                                var reason = formUrfu.getComponent('Reason').getValue();
+                                var status = formUrfu.getComponent('StatusUrfuAdmission').getValue();
+
+                                if (status.StatusUrfuAdmission == null) {
+                                    Ext.MessageBox.alert('Ошибка', 'Укажите статус заявки');
+                                    return;
+                                }
+
+                                if ((reason == undefined || reason.length == 0) && status.StatusUrfuAdmission == 2) {
+                                    Ext.MessageBox.alert('Ошибка', 'Укажите причину отказа');
+                                    return;
+                                }
+
+                                var teacher = formUrfu.getComponent('TeacherCmbx').getValue();
+                                var theme = formUrfu.getComponent('ThemeCmbx').getValue();
+
+                                if (status.StatusUrfuAdmission == 1 && (teacher == null || theme == null)) {
+                                    Ext.MessageBox.alert('Ошибка', 'Укажите руководителя практики и тему');
+                                    return;
+                                }
+
+                                var dates = getDates(formUrfu.getComponent(datesContainerUrfuId).items.items);
+                                if (dates.wrong) {
+                                    Ext.MessageBox.alert('Ошибка', 'Укажите даты полностью (даты и начала, и завершения практики)');
+                                    return;
+                                }
+
+                                setFormDisabled(formUrfu, false, []);
+                                formUrfu.getForm()
+                                    .submit({
+                                        url: '@Url.Action("PracticeAdmissionEdit")',
+                                        params: {
+                                            status: status.StatusUrfuAdmission,
+                                            dates: dates.dates
+                                        },
+                                        success: function(form, action) {
+                                            if (status.StatusUrfuAdmission == 1) {
+                                                formUrfu.viewModel.set('Reason', "");
+                                                setFormDisabled(formUrfu, true, ['StatusUrfuAdmission', 'FinishTheme']);
+                                            }
+                                            Ext.MessageBox.alert('Уведомление', 'Информация сохранена');
+                                            if (action.result != null) {
+                                                equaldates.setValue(action.result.TakeDatesfromGroup);
+                                                equalsreportdates.setValue(action.result.TakeReportDatesfromGroup);
+                                            }
+                                        },
+                                        failure: function(form, action) {
+                                            Ext.MessageBox.alert('Ошибка', 'Информация не сохранена. ' + action.result.message);
+                                        }
+                                    });
+                            }
+                        }
+                    ]
+                });
+
+            var formContract = Ext.create('Practice.view.ContractDsPanel',
+                {
+                    requires: [
+                        'contractDsPanel'
+                    ],
+
+                    viewModel: {
+                        data: {
+                            contract: @Html.Raw(Json.Encode(Model.ContractDs)),
+                        },
+                        stores: {
+                            dsContracts: {
+                                data: @Html.Raw(Json.Encode(Model.Contracts))
+                            }
+                        },
+                        formulas: {
+                            IsAdmitted: function(get) {
+                                var status = get('contract.status');
+                                return status === 1 ? true : false;
+                            }
+                        }
+                    },
+
+                    canEdit: '@ViewBag.CanEdit' === 'True',
+                    listeners: {
+                        select: 'select',
+                        save: '_saveDogovorDs',
+                        renderDates: '_renderDates'
+                    },
+
+                    select: function(form) {
+                        var contractId = form.viewModel.data.contract.contractId;
+                        var contract = form.viewModel.getStore('dsContracts').findRecord('contractId', contractId);
+                        if (contract) {
+                            form.loadRecord(contract);
+                            form.getViewModel().set('contract.fileId', contract.get('fileId'));
+                            form.getViewModel().set('contract.fileName', contract.get('fileName'));
+                            form.resetStatus(contract.get('status'));
+                        }
+                    },
+
+                    _renderDates: function(form) {
+                        setContainerDates(form.config.viewModel.data.contract.Dates, datesContainerDsId);
+                    },
+                    _saveDogovorDs: function(form) {
+                        if (!form.isValid()) return;
+                        var formValues = form.getValues();
+                        if (formValues.status === 2 && !formValues.reasonOfDeny) {
+                            Ext.Msg.alert('Ошибка', 'Укажите причину отклонения');
+                            return;
+                        }
+                        var dates = getDates(form.getComponent(datesContainerDsId).items.items);
+                        if (dates.wrong) {
+                            Ext.MessageBox.alert('Ошибка', 'Укажите даты полностью (даты и начала, и завершения практики)');
+                            return;
+                        }
+
+                        form.getForm()
+                            .submit({
+                                jsonSubmit:true,
+                                url: '@Url.Action("DogovorDsEdit")',
+                                params: {
+                                    dates: dates.dates
+                                },
+                                success: function(form, action) {
+                                    var contract = formContract.getViewModel().getData().contract;
+                                    formContract.getComponent('ContractsDsData').getStore().removeAll();
+                                    formContract.getViewModel().getData().dsContracts.setData(action.result.contractsData);
+                                    formContract.getComponent('ContractsDsData').setValue(contract.contractId);
+
+                                    Ext.Msg.alert('Уведомление', 'Информация сохранена.');
+                                    if (action.result != null) {
+                                        equaldates.setValue(action.result.TakeDatesfromGroup);
+                                        equalsreportdates.setValue(action.result.TakeReportDatesfromGroup);
+                                    }
+                                },
+                                failure: function(form, action) {
+                                    Ext.Msg.alert('Ошибка', 'Информация не сохранена. ' + action.result.message);
+                                }
+                            });
+                    }
+                });
+
+            var formContractKs = Ext.create('Practice.view.ContractKsPanel',
+                {
+                    requires: [
+                        'contractKsPanel'
+                    ],
+
+                    viewModel: {
+                        data: @Html.Raw(Json.Encode(Model.ContractKs)),
+                    },
+
+                    canEdit: '@ViewBag.CanEdit' === 'True',
+
+                    listeners: {
+                        save: '_saveContractKs',
+                        renderDates: '_renderDates'
+                    },
+
+                    _renderDates: function(form) {
+                        setContainerDates(form.config.viewModel.data.Dates, datesContainerKsId);
+                    },
+
+                    _saveContractKs: function(form) {
+                        setFormDisabled(form, false, []);
+                        if (!form.isValid()) {
+                            Ext.Msg.alert('Ошибка', 'Не все поля формы заполнены корректно!');
+                            return;
+                        }
+
+                        var status = form.viewModel.data.status;
+                        var reasonOfDeny = form.viewModel.data.reasonOfDeny;
+                        if (status === 2 && (reasonOfDeny == null || reasonOfDeny.length === 0)) {
+                            Ext.Msg.alert('Ошибка', 'Укажите причину отклонения');
+                            return;
+                        }
+
+                        if (status == null || status === -1) {
+                            Ext.Msg.alert('Ошибка', 'Укажите статус заявки');
+                            return;
+                        }
+
+                        var dates = getDates(form.getComponent(datesContainerKsId).items.items);
+                        if (dates.wrong) {
+                            Ext.MessageBox.alert('Ошибка', 'Укажите даты полностью (даты и начала, и завершения практики)');
+                            return;
+                        }
+                        form.getForm()
+                            .submit({
+                                url: '@Url.Action("SaveDogovorKs")',
+                                params: {
+                                    status: status,
+                                    dates: dates.dates,
+                                    instituteTitle: '@Model.InstituteTitle'
+                                },
+                                success: function(form, action) {
+                                    var status = formContractKs.viewModel.data.status;
+
+                                    if (status === 1) {
+                                        form.setValues({ 'reasonOfDeny': '' });
+                                        setFormDisabled(formContractKs, true, ['StatusDogovorKs']);
+                                        Ext.getCmp('addnewCompany').setDisabled(true);
+                                    } else {
+                                        Ext.getCmp('addnewCompany').setDisabled(false);
+                                    }
+                                    var result = Ext.decode(action.response.responseText);
+
+                                    form.setValues({ 'contractId': result.contractId });
+
+                                    Ext.Msg.alert('Уведомление', 'Информация о краткосрочном договоре сохранена.');
+
+                                    formContractKs.viewModel.set('companyId', result.companyId);
+
+                                    Ext.getCmp('companyNameField').setValue(Ext.create('Company',
+                                        {
+                                            CompanyId: result.companyId,
+                                            Name: formContractKs.viewModel.data.company,
+                                        }));
+
+                                    if (action.result != null) {
+                                        equaldates.setValue(action.result.TakeDatesfromGroup);
+                                        equalsreportdates.setValue(action.result.TakeReportDatesfromGroup);
+                                    }
+                                },
+                                failure: function(form, action) {
+                                    Ext.Msg.alert('Ошибка', 'Информация не сохранена. ' + action.result.message);
+                                }
+                            });
+
+                    }
+                });
+
+            regionCmbx.setDisabled(true);
+            cityCmbx.setDisabled(true);
+
+            if (@(Model.ContractKs.countryId ?? 0) !== 0) {
+
+                reloadRegionStore(@Model.ContractKs.countryId);
+                regionCmbx.setDisabled(false);
+
+                if (@(Model.ContractKs.regionId ?? 0) !== 0) {
+                    reloadCityStore(@Model.ContractKs.regionId);
+                    cityCmbx.setDisabled(false);
+                }
+            }
+
+            var formComment = Ext.create('Practice.view.DeclineDocument', {});
+
+            var saveDocumentStatus = function(action, data, comment, store) {
+                var status = action === 'subbmit' ? 1 : 2;
+
+                Ext.Ajax.request({
+                    method: 'POST',
+                    dataType: 'json',
+                    url: '@Url.Action("AcceptDocument")',
+                    params: {
+                        id: data.DocumentId,
+                        status: status,
+                        comment: comment
+                    },
+                    traditional: true,
+                    success: function(response, opt) {
+                        var result = Ext.decode(response.responseText);
+
+                        store.getById(data.DocumentType).set({
+                            Status: result.statusId,
+                            StatusName: result.statusName,
+                            Comment: comment
+                        });
+                        store.update();
+
+                        Ext.Msg.alert('Уведомление', status === 1 ? 'Подтверждение документа' : 'Документ отклонен');
+                        formComment.hide();
+                    },
+
+                    failure: function(response, opt) {
+                        var result = Ext.decode(response.responseText);
+                        Ext.Msg.alert('Ошибка', 'Информация не сохранена. ' + result.message);
+                    }
+                })
+
+            };
+
+            var removeDocument = function(data, store) {
+                Ext.Ajax.request({
+                    method: 'POST',
+                    dataType: 'json',
+                    url: '@Url.Action("DeleteDocument")',
+                    params: {
+                        practiceId: @Model.Id,
+                        type: data.DocumentType,
+                    },
+                    traditional: true,
+                    success: function(response, opt) {
+                        var result = Ext.decode(response.responseText);
+                        if (result.success === true) {
+                            store.getById(data.DocumentType).set({
+                                DocumentId: 0,
+                                Date: null,
+                                DocumentName: "",
+                                Status: 0,
+                                StatusName: "",
+                                Comment: ""
+                            });
+                            store.update();
+                        }
+                        Ext.Msg.alert('Уведомление', result.message);
+
+                    },
+                    failure: function(response, opt) {
+                        var result = Ext.decode(response.responseText);
+                        Ext.Msg.alert('Ошибка', 'Информация не сохранена. ' + result.message);
+                    }
+                })
+
+            };
+
+            var formScan = Ext.create('Practice.view.DocumentPanel',
+                {
+                    requires: [
+                        'practiceDocumentPanel'
+                    ],
+                    documents: {
+                        before: @Html.Raw(Json.Encode(Model.Before)),
+                        distant: @Html.Raw(Json.Encode(Model.Distant)),
+                        //[
+                        //    { type: 'Договор с предприятием', fileName: 'contract.doc', status: 'согласовано' },
+                        //    { type: 'Резюме', fileName: 'резюме.doc', status: 'согласовано'}
+                        //],
+                        after: @Html.Raw(Json.Encode(Model.After)),
+
+                    },
+
+                    canEdit: '@ViewBag.CanEdit' === 'True',
+
+                    tplDownloadTemplate: '<a href="@Url.Action("DownloadTemplate")?practiceId=@Model.Id&type={DocumentType}">Скачать</a>',
+                    tplDownloadDocument: '<a href="@Url.Action("DownloadDocument")?id={DocumentId}">{DocumentName}</a>',
+
+                    listeners: {
+                        command: 'command'
+                    },
+
+
+                    //тип и строка
+                    upload: function(dt, store) {
+                        formUpload = Ext.create('Practice.view.Upload',
+                            {
+                                url: '@Url.Action("UploadDocument")',
+                                parcticeId: @Model.Id,
+                                documentType: dt,
+                                store: store,
+                                canEdit: '@ViewBag.CanEdit' === 'True'
+                            })
+                        formUpload.show();
+                    },
+
+                    command: function(action, data, store) {
+
+                        if ('@ViewBag.CanEdit' == 'False') {
+                            Ext.Msg.alert('Ошибка', 'У вас нет прав вносить изменения');
+                            return;
+                        }
+
+                        switch (action) {
+                        case 'subbmit':
+                            saveDocumentStatus(action, data, null, store);
+                            break;
+                        case 'deny':
+                            formComment.getViewModel().set('comment', data.Comment);
+                            formComment.record = data;
+                            formComment.store = store;
+                            formComment.saveDocument = saveDocumentStatus;
+                            formComment.show();
+                            break;
+                        case 'remove':
+                            if (data.Status === 1) {
+                                Ext.Msg.alert('Уведомление', 'Невозможно удалить согласованный документ');
+                                break;
+                            };
+                            Ext.MessageBox.show({
+                                title: 'Информационное сообщение',
+                                msg: 'Вы действительно хотите удалить приложенный документ ' + data.DocumentName + ' ?',
+                                buttons: Ext.MessageBox.YESNO,
+                                fn: function(button) {
+                                    if ('yes' === button) {
+                                        removeDocument(data, store);
+                                    }
+                                },
+                                icon: Ext.MessageBox.QUESTION
+                            });
+                            break;
+                        }
+
+                    }
+                });
+
+            var items = [formPractice, formUrfu, formContract, formContractKs, formScan];
+
+            var settings = {
+                tools: [
+                    {
+                        type: 'close',
+                        callback: function() {
+                            window.location = "@Html.Raw(Url.Action("Group", new {GroupId = ViewData["GroupId"], disciplineUID = Model.DisciplineUID, year = Model.Year, semesterId = Model.SemesterID}))";
+                        }
+                    }
+                ],
+                overflowY: 'scroll',
+            }
+            Urfu.createViewport('anchor', items, settings);
+        });
+
+        window.practiceConfig = {
+            currentCompanyId: @Html.Raw(Json.Encode(Model.ContractKs.companyId)),
+            currentCompanyName: @Html.Raw(Json.Encode(Model.ContractKs.company))
+        };
+
+    </script>
+}

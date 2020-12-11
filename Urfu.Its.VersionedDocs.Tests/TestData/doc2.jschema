@@ -1,0 +1,65 @@
+﻿{   
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "Annotation": {      
+      "type": "string"
+    },
+    "Info": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        }
+      }
+    },
+    "Authors": {      
+      "type": "array",
+      "additionalItems": false,
+      "items": {        
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Id": {            
+            "type": "integer"
+          },
+          "Fio": {            
+            "type": "string"
+          },
+          "Post": {            
+            "type": "string"
+          },
+          "Degree": {
+            "type": "string"
+          },
+          "TeacherId": {
+            "type": [ "string", "null" ]
+          },
+          "AuthorId": {
+            "type": [ "integer", "null" ]
+          }          
+        }
+      }
+    },
+    "ArrayWithObjectHierarchy": {      
+      "type": "array",
+      "additionalItems": false,
+      "items": {        
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "InnerObject": {            
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "Property": {                
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

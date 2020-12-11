@@ -1,0 +1,216 @@
+﻿
+@{
+    ViewBag.Title = "Зачисление на траектории";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            Ext.tip.QuickTipManager.init();
+
+            var store = Ext.create("Ext.data.BufferedStore",
+                {
+                    idProperty: 'Id',
+                    fields: ["Id", "DirectionOkso", "Name", "CreateDate", "familirizationType", "familirizationCondition", "qualification", "Year", "StudentsLimit", "Count", "SelectionDeadline"],
+                    autoLoad: true,
+                    pageSize: 300,
+                    remoteSort: true,
+                    remoteFilter: true,
+                    proxy: {
+                        type: 'ajax',
+                        url: '/Admission/Variants',
+                        reader: {
+                            type: 'json',
+                            rootProperty: 'data',
+                            totalProperty: 'total'
+                        }
+                    }
+                });
+
+
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem("VariantsForAdmissionsFilters") || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+
+            }
+
+            var VariantStateStore = [["", "(Не выбрано)"]];
+            VariantStateStore = VariantStateStore.concat(Object.keys(Urfu.VariantState).map(function (key) { return [key, Urfu.VariantState[key]]; }));
+
+
+            var filtersWnd = null;
+            var setFilters = function () {
+                var settings = [
+                                { property: 'DirectionOkso', value: filtersWnd.getComponent("DirectionOksoField").getValue() },
+                                { property: 'Name', value: filtersWnd.getComponent("NameField").getValue() },
+                                { property: 'familirizationType', value: filtersWnd.getComponent("familirizationTypeField").getValue() },
+                                { property: 'familirizationCondition', value: filtersWnd.getComponent("familirizationConditionField").getValue() },
+                                { property: 'qualification', value: filtersWnd.getComponent("qualificationField").getValue() },
+                                { property: 'Year', value: filtersWnd.getComponent("YearField").getValue() }
+                ];
+                store.setFilters(settings);
+                localStorage.setItem("VariantsForAdmissionsFilters", JSON.stringify(settings));
+            };
+
+            filtersWnd = Ext.create('Ext.window.Window', {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "ОКСО", itemId: "DirectionOksoField", value: prevSettings["DirectionOkso"] },
+                    { fieldLabel: "Название траектории", itemId: "NameField", value: prevSettings["Name"] },
+                    { fieldLabel: "Форма освоения", itemId: "familirizationTypeField", value: prevSettings["familirizationType"] },
+                    { fieldLabel: "Условия освоения", itemId: "familirizationConditionField", value: prevSettings["familirizationCondition"] },
+                    { fieldLabel: "Уровень обучения", itemId: "qualificationField", value: prevSettings["qualification"] },
+                    { fieldLabel: "Год", itemId: "YearField", value: prevSettings["Year"] }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function () {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+            setFilters();
+
+
+            var tpl = '<a href="/Admission/VariantStudents/{Id}">Студенты</a>';
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+                {
+                    region: 'center',
+                    store: store,
+                    tbar: [
+                        {
+                            xtype: 'button',
+                            text: 'Фильтры...',
+                            handler: function () { filtersWnd.show(); }
+                        },
+                        {
+                            xtype: 'button',
+                            text: "Отменить фильтры",
+                            handler: function () { store.clearFilter(); }
+                        }
+                    ],
+                    loadMask: true,
+                    columns: [
+                        { xtype: 'rownumberer', width: 50 },
+                        {
+                            header: 'ОКСО',
+                            dataIndex: 'DirectionOkso',
+                            width: 90,
+                            renderer: Ext.util.Format.htmlEncode
+                        },
+                        {
+                            header: 'Название траектории',
+                            dataIndex: 'Name',
+                            width: 400,
+                            renderer: Urfu.renders.htmlEncodeWithToolTip
+                        },
+                       {
+                           header: 'Дата создания',
+                           dataIndex: 'CreateDate',
+                           renderer: Ext.util.Format.dateRenderer('d.m.Y H:i'),
+                           width: 150
+                       },
+                        {
+                            header: 'Форма освоения',
+                            dataIndex: 'familirizationType',
+                            renderer: Ext.util.Format.htmlEncode,
+                            width: 160
+                        },
+                        {
+                            header: 'Условие освоения',
+                            dataIndex: 'familirizationCondition',
+                            renderer: Ext.util.Format.htmlEncode,
+                            width: 170
+                        },
+                        {
+                            header: 'Уровень обучения',
+                            dataIndex: 'qualification',
+                            width: 180
+                        },
+                        {
+                            header: 'Год',
+                            dataIndex: 'Year',
+                            renderer: Ext.util.Format.htmlEncode,
+                            width: 70
+                        },
+                       {
+                           header: 'Лимит',
+                           dataIndex: 'StudentsLimit',
+                           align: 'center',
+                           renderer: Ext.util.Format.htmlEncode,
+                           width: 80
+                       },
+                       {
+                           header: 'Зачислено',
+                           dataIndex: 'Count',
+                           align: 'center',
+                           renderer: Ext.util.Format.htmlEncode,
+                           width: 110
+                       },
+                       {
+                           header: 'Дата окончания выбора',
+                           dataIndex: 'SelectionDeadline',
+                           align: 'center',
+                           renderer: Ext.util.Format.dateRenderer('d.m.Y'),
+                           width: 210
+                       },
+                       {
+                            xtype: 'templatecolumn',
+                            tpl: tpl,
+                            sortable: false,
+                            width: 100
+                       }
+                    ]
+                });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+            gridPanel.getStore().on('load', function (store, records, options) {
+                var focus = '@ViewBag.Focus';
+                if (focus && focus.length > 0) {
+
+                    var focusRow;//= store.findExact('Id', focus);
+                    var row = store.data.find('Id', focus);
+                    if (row)
+                        focusRow = store.data.indexOf(row);
+                    if (focusRow > 0) {
+                        var rowData = store.getAt(focusRow);
+                        gridPanel.getView().focusRow(rowData);
+                        gridPanel.getSelectionModel().select(rowData);
+                    }
+                }
+                return false;
+            });
+        });
+    </script>
+}
+
+
+

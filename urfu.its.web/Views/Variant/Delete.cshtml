@@ -1,0 +1,175 @@
+﻿@using Microsoft.Ajax.Utilities
+@using Urfu.Its.Common
+@using Urfu.Its.Web.DataContext
+@model Urfu.Its.Web.Model.Models.VariantDeleteVM
+
+@{
+    ViewBag.Title = "Удаление варианта";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+
+    <hr/>
+    <h4 class="label-info">На данной версии ОП существуют: </h4>
+    @if (Model.VariantGroups.Any())
+    {
+        <label class="label label-warning" >Группы УП</label>
+        <table class="table table-striped table-hover table-bordered table-condensed"  id ="variantGroups">
+            <tr>
+                <th>Группа</th>
+                <th>Зачетные единицы в группе</th>
+            </tr>
+            @foreach (var modelVariantGroup in Model.VariantGroups)
+            {
+                <tr>
+                    <td>@modelVariantGroup.GroupType.ConvertToName()</td>
+                    <td>@modelVariantGroup.TestUnits</td>
+                </tr>
+            }
+        </table>
+    }
+    
+    @if (Model.VariantSelectionGroups.Any())
+    {
+        <label class="label label-warning">Группы выбора</label>
+        <table class="table table-striped table-hover table-bordered table-condensed" id="variantGroups">
+            <tr>
+                <th>Названия</th>
+                <th>Зачетные единицы в группе</th>
+            </tr>
+            @foreach (var variantSelectionGroup in Model.VariantSelectionGroups)
+            {
+                <tr>
+                    <td>@variantSelectionGroup.Name</td>
+                    <td>@variantSelectionGroup.TestUnits</td>
+                </tr>
+            }
+        </table>
+    }
+    @if (Model.EduProgramLimits.Any())
+    {
+        <label class="label label-warning">Лимиты на версию ОП</label>
+        <table class="table table-striped table-hover table-bordered table-condensed" id="variantGroups">
+            <tr>
+                <th>Название модуля</th>
+                <td>Лимит</td>
+            </tr>
+            @foreach (var eduProgramLimit in Model.EduProgramLimits)
+            {
+                <tr>
+                    <td>@eduProgramLimit.Module.title</td>
+                    <td>@eduProgramLimit.StudentsCount</td>
+                </tr>
+            }
+        </table>
+    }
+    @if (Model.PlanTeachers.Any())
+    {
+        <label class="label label-warning">Преподаватели на дисциплину </label>
+        <table class="table table-striped table-hover table-bordered table-condensed" id="variantGroups">
+            <tr>
+                <th>Название модуля</th>
+                <th>ФИО преподавателя</th>
+                <th>Дисциплины</th>
+            </tr>
+            @foreach (var planTeacher in Model.PlanTeachers.GroupBy(_ => _.Module))
+            {
+                <tr>
+                    <td rowspan="@planTeacher.DistinctBy(_=>_.catalogDisciplineUuid).Count()">@planTeacher.Key.title</td>
+
+                    @foreach (var moduleDiscipline in planTeacher.DistinctBy(_ => _.catalogDisciplineUuid))
+                    {
+
+                        <td> @moduleDiscipline.discipline.title</td>
+                        <td> @moduleDiscipline.Teacher.initials</td>
+                        
+                        @Html.Raw("</tr><tr>")
+
+
+                    }
+
+
+                </tr>
+            }
+            
+        </table>
+    }
+    @if (@Model.VariantAdmissionsCount > 0)
+    {
+        <div class="alert alert-warning" role="alert">
+            Существует @Model.VariantAdmissionsCount <a href="@Url.Action("VariantStudents","Admission", new {id = Model.Variant.Id})">зачисленных студентов</a>
+        </div>
+    }
+    @if (@Model.StudentVariantSelectionsCount > 0)
+    {
+        <div class="alert alert-warning" role="alert">
+            Существует @Model.StudentVariantSelectionsCount приоритета(ов) студента из ЛК на модули траектории 
+        </div>
+    }
+    @if (@Model.StudentSelectionPriorityCount > 0)
+    {
+        <div class="alert alert-warning" role="alert">
+            Существует @Model.StudentSelectionPriorityCount приоритета(ов) студента из ЛК на траекторию 
+        </div>
+    }
+    @*@if (Model.StudentVariantSelectionsCount.Any())
+    {
+        <label class="label label-warning">Лимиты на версию ОП</label>
+        <table class="table table-striped table-hover table-bordered table-condensed" id="variantGroups">
+            <tr>
+                <th>Название модуля</th>
+                <td>Лимит</td>
+            </tr>
+            @foreach (var eduProgramLimit in Model.EduProgramLimits)
+            {
+                <tr>
+                    <td>@eduProgramLimit.Module.title</td>
+                    <td>@eduProgramLimit.StudentsCount</td>
+                </tr>
+            }
+        </table>
+    }*@
+<hr/>
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Variant.Program.Direction.okso)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Variant.Program.Direction.okso)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Variant.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Variant.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Variant.State)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Variant.State)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default"/> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+</div>
+<script>
+    
+</script>

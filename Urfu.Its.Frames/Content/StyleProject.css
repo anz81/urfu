@@ -1,0 +1,186 @@
+﻿input, select, textarea {
+    max-width: initial !important;
+}
+
+.form-control {
+    height: auto;
+    min-height: 34px;
+}
+
+ul.hr {
+    margin: 0; /* Обнуляем значение отступов */
+    padding: 3px; /* Значение полей */
+}
+
+ul.hr li {
+        display: inline; /* Отображать как строчный элемент */
+        margin-right: 0px; /* Отступ справа */
+        /*border: 1px solid #000; /* Рамка вокруг текста */
+        padding: 0px; /* Поля вокруг текста */
+        color: #144182;
+    }
+
+.font-project-name {
+    display: inline;
+    padding: 5px;
+    color: #144182;
+}
+
+.font-project-deadline {
+    padding: 5px;
+    color: #144182;
+}
+
+.rad {
+    background-color: #ffffff;
+    border-radius: 60px !important;
+    border-color: #144182;
+    border: 1px solid #144182;
+    text-align: center !important;
+    display: unset;
+    width: 50px;
+    font-size: 1.4rem !important;
+    height: 25px !important;
+    padding: .0rem 1rem .0rem .5rem !important;
+}
+
+.roles-width {
+    width: 150px;
+}
+
+.radDisabled {
+    background-image: none !important;
+}
+
+.disabled {
+    border-radius: 60px 60px 60px 60px;
+    border-color: #144182 !important;
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+}
+
+
+.alertstyle {
+    border-radius: 60px !important;
+    padding: 3px 10px 3px 10px !important;
+}
+
+.padd {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+
+.fill-div {
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+}
+
+.fill-href {
+    display: block;
+    padding-left: 15px;
+    height: 45px;
+    width: 100%;
+}
+
+.middle {
+    display: table-cell;
+    vertical-align: middle;
+    height: 45px;
+}
+
+.btn-zip {
+    color: #ffffff;
+    background-color: #ffffff;
+    border-color: #ffffff;
+}
+
+.search-padd {
+    padding-top: 0px;
+    padding-bottom: 10px;
+}
+
+.search-nopadd {
+    padding-right: 0px;
+}
+
+.ttp_lnk {
+    display: inline-block;
+    position: relative;
+}
+
+.tooltip {
+    z-index: 999;
+    left: -9999px;
+    top: -9999px;
+    background: #fff;
+    border: 1px solid #ccc;
+    font-size: 11px;
+    color: #323232;
+    padding: 4px 8px;
+    position: absolute;
+    width: 250px;
+}
+
+    .tooltip p {
+        margin: 0px;
+        padding: 0px;
+    }
+
+.status {
+    padding: 8px;
+    font-family: Arial;
+    font-size: 16px;
+    color: #3f8200;
+}
+
+.success {
+    display: flex;
+    align-items: flex-end;
+}
+
+.success-icon {
+    color: green;
+    margin-right: 7px;
+}
+
+.comment {
+    margin-left: 3px;
+    width: 100%;
+    max-width: 500px !important;
+}
+
+.loading {
+    line-height: 20px;
+    width: 50px;
+    height: 20px;
+    font-size: 45px;
+    color: #000000;
+}
+
+    .loading:after {
+        content: ' .';
+        animation: dots 0.4s steps(5, end) infinite;
+    }
+
+@keyframes dots {
+    0%, 20% {
+        color: rgba(0,0,0,0);
+        text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);
+    }
+
+    40% {
+        color: white;
+        text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);
+    }
+
+    60% {
+        text-shadow: .25em 0 0 white, .5em 0 0 rgba(0,0,0,0);
+    }
+
+    80%, 100% {
+        text-shadow: .25em 0 0 #000000, .5em 0 0 #000000;
+    }
+}
+
+
+

@@ -1,0 +1,25 @@
+﻿{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "Collection": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "IntProp": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "IntProp"
+        ] 
+      }
+    }
+  },
+  "required": [
+    "Collection"    
+  ]
+}

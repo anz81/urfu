@@ -1,0 +1,65 @@
+﻿@using Urfu.Its.Web.DataContext
+@model IEnumerable<Urfu.Its.Web.DataContext.PlanTeacher>
+
+<h2>@ViewBag.Title</h2>
+
+<p>
+    @Html.ActionLink("Редактирование варианта", "BasicContentEdit", "Variant", new {variantId = ViewBag.VariantId}, null) |
+    @Html.ActionLink("Учебные планы", "Plans", "Variant", new {variantId = ViewBag.VariantId, moduleId = ViewBag.ModuleId}, null) |
+    @Html.ActionLink("Добавить преподавателя", "AttachTeacher", new { moduleId = ViewBag.ModuleId, ViewBag.eduplanUUID, ViewBag.VariantId, ViewBag.catalogDisciplineUUID })
+</p>
+@*@if (ViewBag.Variant.State != VariantState.Approved)
+{
+    <p>
+        @Html.ActionLink("Добавить преподавателя", "AttachTeacher", new {moduleId = ViewBag.ModuleId, ViewBag.eduplanUUID, ViewBag.VariantId, ViewBag.catalogDisciplineUUID})
+    </p>
+}*@
+
+<table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.load)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Teacher.initials)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Teacher.post)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Selectable)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Teacher.workPlace)
+            </th>
+            <th></th>
+        </tr>
+
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                @Html.HiddenFor(modelItem => item.Id)
+                <td>
+                    @Html.DisplayFor(modelItem => item.load)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Teacher.initials)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Teacher.post)
+                </td>
+                <td>
+                    @Html.EditorFor(modelItem => item.Selectable, new { htmlAttributes = new { onchange = "$.get('SetTeacherSelectable',{id:" + item.Id + ",value:this.checked})" } })
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Teacher.workPlace)
+                </td>
+                <td>
+                    @Html.ActionLink("Удалить", "DetachTeacher", new {id = item.Id})
+                </td>
+            </tr>
+        }
+
+
+    </table>

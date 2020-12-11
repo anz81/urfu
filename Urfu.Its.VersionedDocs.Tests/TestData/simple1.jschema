@@ -1,0 +1,24 @@
+﻿{  
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "StringProp1": {
+      "type": "string"
+    },
+    "BooleanProp1": {
+      "type": "boolean"
+    },
+    "IntegerProp1": {
+      "type": "integer"
+    },
+    "NumberProp1": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "StringProp1",
+    "BooleanProp1",
+    "IntegerProp1",
+    "NumberProp1"
+  ]
+}

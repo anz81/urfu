@@ -1,0 +1,6 @@
+{
+  "StringProp1": "string value",
+  "BooleanProp1": true,
+  "IntegerProp1": 1,
+  "NumberProp1": 1.2
+}

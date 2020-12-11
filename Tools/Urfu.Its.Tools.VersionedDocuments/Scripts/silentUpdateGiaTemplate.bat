@@ -1,0 +1,1 @@
+vdocs --command UpdateTemplate --documentType GiaWorkingProgram -t "..\..\..\..\Urfu.Its.VersionedDocs\Templates\GWP.docx" -f %*

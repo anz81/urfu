@@ -1,0 +1,12 @@
+﻿@model Urfu.Its.Web.Models.SelectRoleEditorViewModel
+
+@Html.HiddenFor(model => model.Id)
+@Html.HiddenFor(model => model.RoleName)
+<tr>
+    <td style="text-align:center">
+        @Html.CheckBoxFor(model => model.Selected)
+    </td>
+    <td>
+        @Html.DisplayFor(model => model.RoleDescription)
+    </td>
+</tr>

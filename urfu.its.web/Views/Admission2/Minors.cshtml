@@ -1,0 +1,392 @@
+﻿@{
+    ViewBag.Title = "Зачисление на майноры";
+    Layout = "~/Views/Shared/_ExtLayout.cshtml";
+}
+@section scripts
+{
+    <script type="text/javascript">
+
+        var filterName = "MinorsForAdmissionsFilters";
+
+        function downloadReport() {
+            var fileUrl = '@Url.Action("DownloadMinorModulesReport")'
+                .concat('?filter=' + encodeURIComponent(localStorage.getItem(filterName) || "[]"));
+            window.location.href = fileUrl;
+            return false;
+        }
+
+        Ext.onReady(function () {
+            Ext.tip.QuickTipManager.init();
+
+            Ext.define('ComboBoxModel', {
+                extend: 'Ext.data.Model',
+                fields:
+                [
+                    { type: 'string', name: 'Id' },
+                    { type: 'string', name: 'Name' }
+                ]
+            });
+
+            var SemestersStore = Ext.create('Ext.data.Store', {
+                model: 'ComboBoxModel',
+                autoLoad: true,
+                proxy:
+                {
+                    type: 'ajax',
+                    url: '/Minors/Semesters',
+                    reader: { type: 'json', rootProperty: 'data' }
+                },
+                listeners: {
+                    load: function () {
+                        Ext.getCmp('semestercomboId1').setValue("1");
+                        Ext.getCmp('semestercomboId2').setValue("1");
+                    }
+                } 
+            });
+
+            var MinorTypesStore = Ext.create('Ext.data.Store', {
+                model: 'ComboBoxModel',
+                autoLoad: false,
+                proxy:
+                {
+                    type: 'ajax',
+                    url: '@Url.Action("MinorTypes","Admission2")',
+                    reader: { type: 'json', rootProperty: 'data' }
+                }
+            });
+
+            var store = Ext.create("Ext.data.BufferedStore",
+            {
+                fields: ["Id", "number", "title","type", "year", "semeseter", "coordinator", "testUnits", "MaxStudentsCount", "selection", "addmission"],
+                autoLoad: true,
+                pageSize: 300,
+                remoteSort: true,
+                remoteFilter: true,
+                proxy: {
+                    type: 'ajax',
+                    url: '/Admission2/Minors',
+                    reader: {
+                        type: 'json',
+                        rootProperty: 'data',
+                        totalProperty: 'total'
+                    }
+                }
+            });
+
+
+            var prevSettings = {};
+            try {
+                var prevSettingString = JSON.parse(localStorage.getItem(filterName) || "[]");
+
+                for (var i = 0; i < prevSettingString.length; i++) {
+                    prevSettings[prevSettingString[i]["property"]] = prevSettingString[i]["value"];
+                }
+            } catch (err) {
+
+            }
+
+            var filtersWnd = null;
+            var setFilters = function () {
+                var settings = [
+                    { property: 'shortTitle', value: filtersWnd.getComponent("title").getValue() },
+                    { property: 'coordinator', value: filtersWnd.getComponent("coordinator").getValue() },
+                    { property: 'year', value: filtersWnd.getComponent("year").getValue() },
+                    { property: 'semesterId', value: filtersWnd.getComponent("semester").getValue() },
+                    { property: 'typeId', value: filtersWnd.getComponent("type").getValue() }
+                ];
+                store.setFilters(settings);
+                localStorage.setItem(filterName, JSON.stringify(settings));
+            };
+
+            filtersWnd = Ext.create('Ext.window.Window', {
+                title: "Фильтры",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "Название модуля", itemId: "title", value: prevSettings["shortTitle"] },
+                    { fieldLabel: "Координатор", itemId: "coordinator", value: prevSettings["coordinator"] },
+                    { fieldLabel: "Учебный год", itemId: "year", value: prevSettings["year"] },
+                    {
+                        fieldLabel: "Семестр", itemId: "semester", value: prevSettings["semesterId"],
+                        xtype: "combobox", store: SemestersStore, valueField: 'Id', displayField: 'Name', queryMode: 'local'
+                    },
+                    {
+                        fieldLabel: "Тип майнора", itemId: "type", value: prevSettings["typeId"],
+                        xtype: "combobox", store: MinorTypesStore, valueField: 'Id', displayField: 'Name', queryMode: 'remote'
+                    }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function () {
+                            setFilters();
+                            filtersWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { filtersWnd.hide(); }
+                    }
+                ]
+            });
+
+            setFilters();
+
+
+            var tpl = '<a href="/Admission2/MinorStudents/{Id}">Студенты</a>';
+
+            var autoAdmWnd = Ext.create('Ext.window.Window', {
+                title: "Перейти к автоматическому зачислению",
+                closeAction: 'hide',
+                resizable: false,
+                autoHeight: true,
+                bodyPadding: 6,
+                defaults: {
+                    xtype: 'textfield',
+                    width: 500
+                },
+                items: [
+                    { fieldLabel: "Учебный год", itemId: "year", value: 2016 },
+                    {
+                        fieldLabel: "Семестр",
+                        itemId: "semester",
+                        id: 'semestercomboId1',
+                        xtype: "combobox",
+                        store: SemestersStore,
+                        valueField: 'Id',
+                        displayField: 'Name',
+                        queryMode: 'local',
+                        allowBlank: false,
+                        anyMatch: true,
+                        forceSelection: true
+                    }
+                ],
+                buttons: [
+                    {
+                        text: "OK",
+                        handler: function () {
+                            var aYear = autoAdmWnd.getComponent("year").getValue();
+                            var aSemester = autoAdmWnd.getComponent("semester").getValue();
+                            window.location = "/Admission2/PrepareAuto?year=" + aYear + "&semester=" + aSemester;
+                            autoAdmWnd.hide();
+                        }
+                    },
+                    {
+                        text: "Отмена",
+                        handler: function () { autoAdmWnd.hide(); }
+                    }
+                ]
+            });
+            
+            var sendButton;
+
+            @if (ViewBag.IsInMassPublishRole) {
+             <text>
+                var publishAdmWnd = Ext.create('Ext.window.Window', {
+                    title: "Отправить зачисления в ЛК",
+                    closeAction: 'hide',
+                    resizable: false,
+                    autoHeight: true,
+                    bodyPadding: 6,
+                    defaults: {
+                        xtype: 'textfield',
+                        width: 500
+                    },
+                    items: [
+                        { fieldLabel: "Учебный год", itemId: "year", value: 2016 },
+                        {
+                            fieldLabel: "Семестр",
+                            itemId: "semester",
+                            id:  'semestercomboId2',
+                            xtype: "combobox",
+                            store: SemestersStore,
+                            valueField: 'Id',
+                            displayField: 'Name',
+                            queryMode: 'local'
+                        }
+                    ],
+                    buttons: [
+                        {
+                            text: "OK",
+                            handler: function () {
+                                Ext.MessageBox.show({
+                                    msg: 'Отправка сообщений, пожалуйста подождите...',
+                                    progressText: 'Отправка...',
+                                    width: 300,
+                                    wait: true,
+                                    waitConfig: { interval: 200 }
+                                });
+
+                                var aYear = publishAdmWnd.getComponent("year").getValue();
+                                var aSemester = publishAdmWnd.getComponent("semester").getValue();
+                                Ext.Ajax.request({
+                                    url: '@Url.Action("PublishMinorAdmissions")' ,
+                                    params: { year: aYear, semester: aSemester },
+                                    success: function (response) {
+                                        if (response.status === 200) {
+                                            Ext.toast({ html: "Сообщения отправлены", align: 't' });
+                                        } else {
+                                            Ext.toast({ html: "Сообщения не отправлены", align: 't' });
+                                        }
+                                        Ext.MessageBox.hide();
+                                    },
+                                    error: function(response) {
+                                        Ext.MessageBox.hide();
+                                    }
+                                    
+                                });
+                            
+                                
+                            
+                                publishAdmWnd.hide();
+                            }
+                        },
+                        {
+                            text: "Отмена",
+                            handler: function () { publishAdmWnd.hide(); }
+                        }
+                    ]
+                });
+
+                sendButton = Ext.create('Ext.Button',
+                {
+                    xtype: 'button',
+                    //disabled: true,
+                    text: 'Отправить зачисления в ЛК',
+                    handler: function() {
+                        publishAdmWnd.show();
+                    }
+                });
+            </text>
+            }
+
+            var gridPanel = Ext.create('Ext.grid.Panel',
+            {
+                region: 'center',
+                store: store,
+                tbar: [
+                    {
+                        xtype: 'button',
+                        text: 'Фильтры...',
+                        handler: function () { filtersWnd.show(); }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Отменить фильтры",
+                        handler: function() {
+                            localStorage.setItem(filterName, []);
+                            store.clearFilter();
+                        }
+                    },
+                    {
+                        xtype: 'button',
+                        text: "Перейти к автоматическому зачислению",
+                        handler: function () { autoAdmWnd.show(); }
+                    },
+                    sendButton ? '-':'',
+                    {
+                        xtype: 'button',
+                        text: "Отчёт зачисление на майноры в Excel",
+                        handler: downloadReport
+                    },
+                    '-',
+                    sendButton
+
+                ],
+                loadMask: true,
+                columns: [
+                    { xtype: 'rownumberer', width: 50 },
+                    {
+                        header: 'Номер',
+                        align: 'left',
+                        dataIndex: 'number',
+                        sortable: false,
+                        width: 150,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Короткое название модуля',
+                        dataIndex: 'shortTitle',
+                        width: 500,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Тип майнора',
+                        dataIndex: 'type',
+                        width: 350,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Год',
+                        dataIndex: 'Year',
+                        width: 150,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    }, {
+                        header: 'Семестр',
+                        dataIndex: 'semester',
+                        width: 200,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Координатор',
+                        align: 'left',
+                        dataIndex: 'coordinator',
+                        width: 500,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Зачетные единицы',
+                        align: 'right',
+                        dataIndex: 'testUnits',
+                        width: 200,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Лимит',
+                        align: 'right',
+                        dataIndex: 'MaxStudentsCount',
+                        width: 150,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Кол-во заявлений',
+                        align: 'right',
+                        dataIndex: 'selection',
+                        width: 150,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        header: 'Зачислено',
+                        align: 'right',
+                        dataIndex: 'addmission',
+                        width: 150,
+                        renderer: Urfu.renders.htmlEncodeWithToolTip
+                    },
+                    {
+                        xtype: 'templatecolumn',
+                        sortable: false,
+                        tpl: tpl,
+                        width: 420
+                    }
+
+                ]
+            });
+
+            var items = [
+                gridPanel
+            ];
+
+            Urfu.createViewport('border', items);
+        });
+    </script>
+}
+
+
+
+
