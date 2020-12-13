@@ -1,6 +1,5 @@
 ﻿@using Urfu.Its.Web.DataContext
 
-
 @model Urfu.Its.Frames.Controllers.ProjectVM
 
 
@@ -16,9 +15,12 @@
     <title>Project</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link  type="text/css" rel="stylesheet" href="../../Content/StyleProject.css" />
+    <link type="text/css" rel="stylesheet" href="../../Content/StyleProject.css" />
 
-    @Styles.Render("~/Content/css")
+   <link rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+    crossorigin="anonymous">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js"></script>
@@ -72,7 +74,7 @@
                 return;
             }
 
-            @{ string url = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, "/frm/project/update"); }
+            @{ string url = string.Format("{0}://{1}{2}", Context.Request.Scheme, Context.Request.QueryString, "/frm/project/update"); }
 
 
             $.get("@url",
@@ -182,12 +184,14 @@
             if (Model.TeamProjectAddress != null)
             {
                 <div class="font-project-deadline" style="margin-bottom:10px; background-color: #dff0d8; color: darkgreen !important;">
-                    Вы зачислены на проект "<u><b><a href="@Model.TeamProjectAddress" target="_parent" style="color: darkgreen !important;">@Model.AdmissionProjectName</a></b></u>"</div>
+                    Вы зачислены на проект "<u><b><a href="@Model.TeamProjectAddress" target="_parent" style="color: darkgreen !important;">@Model.AdmissionProjectName</a></b></u>"
+                </div>
             }
             else
             {
                 <div class="font-project-deadline" style="margin-bottom:10px; background-color: #dff0d8; color: darkgreen !important;">
-                    Вы зачислены на проект "<b>@Model.AdmissionProjectName</b>"</div>
+                    Вы зачислены на проект "<b>@Model.AdmissionProjectName</b>"
+                </div>
             }
         }
         <div>
@@ -242,27 +246,27 @@
                                                             }
 
                                                             <select @disabledselection class="custom-select rad" onchange="priorityChanged('@p.Id', this)" id="@string.Concat("priority", @p.Id)" autocomplete="off">
-                                                                <option value='' @(!p.Priority.HasValue ? "selected=\"selected\"" : "")>&mdash;</option>
+                                                                <!option value='' @(!p.Priority.HasValue ? "selected=\" selected\"" : "" )>&mdash;</!option>
                                                                 @for (int i = 1; i <= Model.MaxPriority; i++)
                                                                 {
                                                                     if (!Model.UsedPriorities.Contains(i) || i == p.Priority)
                                                                     {
-                                                                        <option value="@i" @(i == p.Priority ? "selected=\"selected\"" : "")>@i</option>
+                                                                        @:<option value="@i" @(i==p.Priority ? "selected=\" selected\"" : "" )>@i</option>
                                                                     }
                                                                 }
                                                             </select>
                                                             <select @disabledselection class="custom-select rad roles-width" onchange="priorityChanged('@p.Id', this)" id="@string.Concat("role", @p.Id)" autocomplete="off">
-                                                                <option value='' @(p.Role == null ? "selected=\"selected\"" : "")>&mdash;</option>
+                                                                <!option value='' @(p.Role==null ? "selected=\" selected\"" : "" )>&mdash;</!option>
                                                                 @foreach (var role in p.Roles)
                                                                 {
-                                                                    <option value="@role.Id" @(role.Id == p.Role?.Id ? "selected=\"selected\"" : "")>@role.Title</option>
+                                                                    @: <option value="@role.Id" @(role.Id==p.Role?.Id ? "selected=\" selected\"" : "" )>@role.Title</option>
                                                                 }
                                                             </select>
 
                                                         }
-                                                      
+
                                                         <div class="ttp_lnk">
-                                                            <img src="~/explanation.png" title='@p.RolesInfo'/>
+                                                            <img src="~/explanation.png" title='@p.RolesInfo' />
                                                         </div>
 
                                                     </li>
@@ -317,14 +321,14 @@
                                                             }
 
                                                         }
-                                                             <div class="form-group">
-                                                                 <li><b>  <label for="comment-@p.Id">Комментарий: </label></b></li>
-                                                                 <li>
-                                                                    <textarea @disabled class="form-control comment" id="comment-@p.Id" data-project-id="@p.Id" rows="3" maxlength="500" >@p.Comment</textarea>
-                                                                 
-                                                                 <div class="status"></div>
-                                                                 </li>
-                                                                 </div>
+                                                        <div class="form-group">
+                                                            <li><b>  <label for="comment-@p.Id">Комментарий: </label></b></li>
+                                                            <li>
+                                                                <textarea @disabled class="form-control comment" id="comment-@p.Id" data-project-id="@p.Id" rows="3" maxlength="500">@p.Comment</textarea>
+
+                                                                <div class="status"></div>
+                                                            </li>
+                                                        </div>
                                                     }
                                                 </ul>
                                             </div>
@@ -404,11 +408,11 @@
         l_tooltip(".ttp_lnk img", "tooltip");
         var commentStatusTimerIdMap = {};
         var eventHolder = document.getElementById("event-holder");
-      
+
         var eventHandler = function (event) {
             var projectId = event.target.getAttribute('data-project-id');
             var elementId = "comment-" + projectId;
-          
+
             if (projectId === null || event.target.id !== elementId)
                 return;
             var comment = event.target.value;
@@ -441,7 +445,7 @@
         eventHolder.addEventListener("input", (event => {
             var projectId = event.target.getAttribute('data-project-id');
             var elementId = "comment-" + projectId;
-          
+
             if (projectId === null || event.target.id !== elementId)
                 return;
 

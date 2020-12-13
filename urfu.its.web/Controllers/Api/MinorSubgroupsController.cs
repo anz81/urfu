@@ -383,7 +383,8 @@ namespace Urfu.Its.Web.Controllers.Api
             public string GroupId { get; set; }
             public string ForeignLanguageLevel { get; set; }
         }
-        
+
+        Mapper mapper;
 
         internal static Func<SubgroupMembers, MinorSubgroupWithMemebersApiDto> Selector = g =>
             new MinorSubgroupWithMemebersApiDto
@@ -404,7 +405,10 @@ namespace Urfu.Its.Web.Controllers.Api
                 groupCount = g.groupCount,
                 studentCount = g.studentCount,
                 students = g.students.ToArray(),
-                divisions = g.divisions.Select(Mapper.Map<DivisionApiDto>).ToArray(),
+                divisions = g.divisions.Select(new Mapper(new MapperConfiguration(cfg =>
+                {
+                    cfg.AddProfile<AutoMapperConfig>();
+                })).Map<DivisionApiDto>).ToArray(),
                 combinedKey = ApiDtoFunctions.ToSubgroupKey(g.innerNumber, g.moduleId, g.disciplineKey, g.kmer, g.term, g.eduyear),
                 combinedKey2 = g.type == ModuleTypeParam.Minor
                                     ? ApiDtoFunctions.ToSubgroupKey(g.innerNumber, g.moduleId, g.disciplineKey, g.kmer, g.term, g.eduyear)

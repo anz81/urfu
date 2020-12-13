@@ -19,6 +19,11 @@ namespace Urfu.Its.Web.Controllers
     {
         public List<StudentAdmissionDto> Get()
         {
+            var me = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             using (var db = new ApplicationDbContext())
             {
                 return
@@ -37,8 +42,8 @@ namespace Urfu.Its.Web.Controllers
                         .Select(o => new StudentAdmissionDto
                         {
                             studentId = o.id,
-                            modules = o.ma.Select(Mapper.Map<ModuleAdmissionDto>).ToList(),
-                            variants = o.va.Select(Mapper.Map<VariantAdmissionDto>).ToList()
+                            modules = o.ma.Select(mapper.Map<ModuleAdmissionDto>).ToList(),
+                            variants = o.va.Select(mapper.Map<VariantAdmissionDto>).ToList()
                             .Concat(o.progsVariants.ToList().Select(pv => new VariantAdmissionDto
                             {
                                 variantId = pv,
@@ -57,16 +62,21 @@ namespace Urfu.Its.Web.Controllers
                     db.VariantAdmissions.Where(
                         vax => vax.studentId == studentId && vax.Published && vax.Status == AdmissionStatus.Admitted)
                         .Select(v => v.Variant.Program.Variant.Id).ToList();
+                var me = new MapperConfiguration(cfg =>
+                {
+                    cfg.AddProfile<AutoMapperConfig>();
+                });
+                var mapper = me.CreateMapper();
                 var dto = new StudentAdmissionDto
                 {
                     studentId = studentId,
                     modules =
                         db.ModuleAdmissions.Where(ma => ma.studentId == studentId && ma.Published)
-                            .Select(Mapper.Map<ModuleAdmissionDto>)
+                            .Select(mapper.Map<ModuleAdmissionDto>)
                             .ToList(),
                     variants =
                         db.VariantAdmissions.Where(ma => ma.studentId == studentId && ma.Published)
-                            .Select(Mapper.Map<VariantAdmissionDto>).ToList()
+                            .Select(mapper.Map<VariantAdmissionDto>).ToList()
                             .Concat(progsVariants.Select(pv => new VariantAdmissionDto
                             {
                                 variantId = pv,

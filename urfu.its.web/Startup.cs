@@ -2,14 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.Internal;
 using Urfu.Its.Web.App_Start;
 using Urfu.Its.Web.DataContext;
 using Urfu.Its.Web.Models;
@@ -18,30 +22,46 @@ namespace Urfu.Its.Web
 {
     public partial class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(HostingEnvironment env)
         {
-            Configuration = configuration;
+           // Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+            this.Configuration = builder.Build();
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; private set; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        public ILifetimeScope AutofacContainer { get; private set; }
+
         public void ConfigureServices(IServiceCollection services)
         {
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-
-            IMapper mapper = mapperConfig.CreateMapper();
-            services.AddSingleton(mapper);
+            string connection = Configuration.GetConnectionString("DefaultConnection");
+            services.AddOptions();
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection));
+            
             services.AddControllersWithViews();
             services.AddMvc();
-            //Mapper.Initialize(cfg => cfg.AddProfile<AutoMapperConfig>());
+            
             services.AddAutoMapper(typeof(Startup));
+            var config = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = config.CreateMapper();
+            services.AddSingleton(mapper);
             services.AddTransient<AuthorizeAttribute>();
             services.AddDataProtection();
-            
+            services.AddAuthentication()
+              .AddCookie(options =>
+              {
+                  options.AccessDeniedPath = new PathString("/Security/Access");
+                  options.LoginPath = new PathString("/Security/Login");
+              });
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -66,7 +86,7 @@ namespace Urfu.Its.Web
 
             app.UseAuthentication();
             app.UseAuthorization();
-
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

@@ -18,6 +18,7 @@ using Urfu.Its.Web.Models;
 using System.Linq.Expressions;
 using Urfu.Its.Web.Model.Models.CompetencePassportModels;
 using Urfu.Its.Web.Model.Models.SharedDocumentModels;
+using Ext.Utilities.Linq;
 
 namespace Urfu.Its.Web.Controllers
 {

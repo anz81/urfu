@@ -271,7 +271,12 @@ namespace Urfu.Its.Web.DataContext
             project.roles = project.roles ?? new List<ProjectRoleApiDto>();
             foreach (var roleDto in project.roles)
             {
-                var projectRole = Mapper.Map<ProjectRole>(roleDto);
+                var mc = new MapperConfiguration(cfg =>
+                {
+                    cfg.AddProfile<AutoMapperConfig>();
+                });
+                var mapper = new Mapper(mc);
+                var projectRole = mapper.Map<ProjectRole>(roleDto);
                 projectRole.ProjectId = projectDB.ModuleId;
                 db.ProjectRoles.Add(projectRole);
             }
@@ -561,9 +566,14 @@ namespace Urfu.Its.Web.DataContext
             {
                 var role = projectDB.Roles.FirstOrDefault(r => r.EmployersId == roleDto.id);
                 if (role == null)
-                { 
+                {
                     // добавляем новую роль
-                    var projectRole = Mapper.Map<ProjectRole>(roleDto);
+                    var mc = new MapperConfiguration(cfg =>
+                    {
+                        cfg.AddProfile<AutoMapperConfig>();
+                    });
+                    var mapper = new Mapper(mc);
+                    var projectRole = mapper.Map<ProjectRole>(roleDto);
                     projectRole.ProjectId = projectDB.ModuleId;
                     db.ProjectRoles.Add(projectRole);
                 }

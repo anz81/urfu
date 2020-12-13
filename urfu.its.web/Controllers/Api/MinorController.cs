@@ -34,11 +34,15 @@ namespace Urfu.Its.Web.Controllers
                     )
                     .OrderBy(m=>m.title)
                     .ToList();
-
-                var dtos = minors.Select(Mapper.Map<MinorApiDto>).ToList();
+                var me = new MapperConfiguration(cfg =>
+                {
+                    cfg.AddProfile<AutoMapperConfig>();
+                });
+                var mapper = me.CreateMapper();
+                var dtos = minors.Select(mapper.Map<MinorApiDto>).ToList();
                 foreach (var m in dtos)
                 {
-                    m.period = Mapper.Map<PeriodApiDto>(minors.First(f => f.uuid == m.uuid).Minor.Periods.First(p => p.Year == year && p.SemesterId == semester));
+                    m.period = mapper.Map<PeriodApiDto>(minors.First(f => f.uuid == m.uuid).Minor.Periods.First(p => p.Year == year && p.SemesterId == semester));
                     m.file = ChangeExtension(m.file);
                     
                     if (m.disciplines?.Count() > 0)
@@ -48,7 +52,7 @@ namespace Urfu.Its.Web.Controllers
                             d.file = ChangeExtension(d.file);
                         }
                         var disciplineUUID = m.disciplines[0].uid;
-                        var agreement = Mapper.Map<ModuleAgreementApiDto>(db.ModuleAgreements.FirstOrDefault(a => a.EduYear == year && a.SemesterId == semester
+                        var agreement = mapper.Map<ModuleAgreementApiDto>(db.ModuleAgreements.FirstOrDefault(a => a.EduYear == year && a.SemesterId == semester
                             && a.ModuleUUID == m.uuid && disciplineUUID.Contains(a.DisciplineUUID)));
 
                         m.agreement = agreement;

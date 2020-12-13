@@ -62,7 +62,7 @@
         @*@{ string url = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, "/frm/fk/update"); }*@
 
         @{
-                string url = string.Format("{0}://{1}", Request.Url.Scheme, Request.Url.Authority);
+                string url = string.Format("{0}://{1}", Context.Request.Scheme, Context.Request.QueryString);
                 string updateURL = string.Format("{0}{1}", url, "/frm/fk/update");
                 
         }
@@ -196,7 +196,7 @@
                         <select onchange="changeYear(value,globalparams.currentSemester);" autocomplete="off">
                             @foreach (var y in Model.Semesters.Select(s => s.Year).Distinct().OrderBy(s => s))
                             {
-                            <option value="@y" @(y == currentYear ? "selected=\" selected\"" : "" )>@y</option>
+                            @:<option value="@y" @(y == currentYear ? "selected=\" selected\"" : "" )>@y</option>
                             }
                         </select>
                         Семестр
@@ -204,7 +204,7 @@
                         <select onchange="changeYear(globalparams.currentYear,value);" autocomplete="off">
                             @foreach (var y in Model.Semesters.Select(s => s.SemesterName).Distinct().OrderBy(s => s))
                             {
-                                <option @(y= =currentSemester ? "selected=\" selected\"" : "" )>@y</option>
+                                @:<option @(y==currentSemester ? "selected=\" selected\"" : "" )>@y</option>
                             }
                         </select>
                     </p>
@@ -264,12 +264,12 @@
                                         @if (row.Editable && !row.WithoutPriorities && (row.PlacesAvailable > 0 || row.Priority.HasValue))
                                         {
                                             <select onchange="priorityChanged(value, '@row.ModuleId', @semester.Id, this, @semester.MinimumPriorities, @semester.MaxPrioroty);" class="cg@(semester.Id)" id="@(globalCounter)" autocomplete="off">
-                                                <option value='' @(!row.Priority.HasValue ? "selected=\" selected\"" : "" )>&mdash;</option>
+                                                <!option value='' @(!row.Priority.HasValue ? "selected=\" selected\"" : "" )>&mdash;</!option>
                                                 @for (int i = 1; i <= semester.MaxPrioroty; i++)
                                                 {
                                                     if (!usedPriorities.Contains(i) || i == row.Priority)
                                                     {
-                                                        <option @(i= =row.Priority ? "selected=\" selected\"" : "" )>@i</option>
+                                                        <!option @(i==row.Priority ? "selected=\" selected\"" : "" )>@i</!option>
                                                     }
                                                 }
                                             </select>

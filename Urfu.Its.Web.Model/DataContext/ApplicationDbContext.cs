@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Urfu.Its.Web.Models;
+using static AutoMapper.QueryableExtensions.LetPropertyMaps;
 
 // ReSharper disable InconsistentNaming
 
@@ -1947,4 +1948,29 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
         public Int32 Semester { get; set; }
         public Int32 TestUnits { get; set; }
     }
+    public static class ContextExtensions
+    {
+        public static void AddOrUpdate(this ApplicationDbContext ctx, object entity)
+        {
+            var entry = ctx.Entry(entity);
+            switch (entry.State)
+            {
+                case EntityState.Detached:
+                    ctx.Add(entity);
+                    break;
+                case EntityState.Modified:
+                    ctx.Update(entity);
+                    break;
+                case EntityState.Added:
+                    ctx.Add(entity);
+                    break;
+                case EntityState.Unchanged:
+                    //item already in db no need to do anything  
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }    
 }

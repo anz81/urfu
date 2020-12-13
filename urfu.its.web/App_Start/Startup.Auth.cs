@@ -18,7 +18,7 @@ using Urfu.Its.Web.Models;
 
 namespace Urfu.Its.Web
 {
-    public partial class Startup
+    /*public partial class Startup
     {
         // For more information on configuring authentication, please visit http://go.microsoft.com/fwlink/?LinkId=301864
         public void ConfigureAuth(IServiceCollection services)
@@ -67,5 +67,5 @@ namespace Urfu.Its.Web
             //    ClientSecret = ""
             //});
         }
-    }
+    }*/
 }

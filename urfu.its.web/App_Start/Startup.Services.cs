@@ -10,17 +10,25 @@ using Urfu.Its.VersionedDocs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Autofac.Extensions.DependencyInjection;
+using System;
 
 namespace Urfu.Its.Web
 {
-    public partial class Startup
+  /*  public partial class Startup
     {
-        private void ConfigureServices(IApplicationBuilder app)
+        private IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            var builder = new ContainerBuilder();
+            var containerBuilder = new ContainerBuilder();
+            containerBuilder.Populate(services);
+            containerBuilder.RegisterType<AuthorRepository>().
+            As<IAuthorRepository>();
+            var container = containerBuilder.Build();
+            return container.Resolve<IServiceProvider>();
 
-            var executingAssembly = Assembly.GetExecutingAssembly();
 
+            
             builder.RegisterControllers(executingAssembly);
             builder.RegisterModelBinders(executingAssembly);
             builder.RegisterModelBinderProvider();
@@ -47,5 +55,5 @@ namespace Urfu.Its.Web
 
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));            
         }
-    }
+    }*/
 }

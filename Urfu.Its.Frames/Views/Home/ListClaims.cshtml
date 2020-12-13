@@ -28,7 +28,7 @@
         @foreach (var c in Model.Cookies)
         {
             <br>
-              @String.Format("Name [{0}] Domain [{1}] Path [{2}] shared [{3}]",c.Name,c.Domain, c.Path, c.Shareable)
+              @String.Format("Name [{0}] Domain [{1}] Path [{2}]",c.Name,c.Domain, c.Path)
             <br>
             @c.Value
         }

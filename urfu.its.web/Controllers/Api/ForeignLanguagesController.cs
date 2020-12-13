@@ -33,11 +33,15 @@ namespace Urfu.Its.Web.Controllers
                     )
                     .OrderBy(m=>m.title)
                     .ToList();
-
-                var dtos = modules.Select(Mapper.Map<ModuleApiDto>).ToList();
+                var me = new MapperConfiguration(cfg =>
+                {
+                    cfg.AddProfile<AutoMapperConfig>();
+                });
+                var mapper = me.CreateMapper();
+                var dtos = modules.Select(mapper.Map<ModuleApiDto>).ToList();
                 foreach (var m in dtos)
                 {
-                    m.period = Mapper.Map<PeriodApiDto>(modules.First(f => f.uuid == m.uuid).ForeignLanguage.Periods.First(p => p.Year == year && p.SemesterId == semester));
+                    m.period = mapper.Map<PeriodApiDto>(modules.First(f => f.uuid == m.uuid).ForeignLanguage.Periods.First(p => p.Year == year && p.SemesterId == semester));
                     m.file = ChangeExtension(m.file);
                     
                     if (m.disciplines != null)

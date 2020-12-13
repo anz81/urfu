@@ -24,10 +24,15 @@ namespace Urfu.Its.Web.Controllers
     {
         public List<VariantApiDto> Get()
         {
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
+
             using (var db = new ApplicationDbContext())
             {
                 var variants = VarinatApiHelper.VariantsQueryForApi(db).ToList();
-                var dtos = variants.Select(Mapper.Map<VariantApiDto>).ToList();
+                var dtos = variants.Select(mapper.Map<VariantApiDto>).ToList();
                 EduProgram.FillTeachers(db, dtos);
                 return dtos; 
             }
@@ -35,10 +40,15 @@ namespace Urfu.Its.Web.Controllers
 
         public List<VariantApiDto> Get(string okso)
         {
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
+
             using (var db = new ApplicationDbContext())
             {
                 List<Variant> variants = VarinatApiHelper.VariantsQueryForApi(db).Where(v => v.Program.Direction.okso == okso).ToList();
-                var dtos = variants.Select(Mapper.Map<VariantApiDto>).ToList();
+                var dtos = variants.Select(mapper.Map<VariantApiDto>).ToList();
                 EduProgram.FillTeachers(db, dtos);
                 return dtos;
             }

@@ -113,14 +113,15 @@ namespace Urfu.Its.Web.Controllers
             try
             {
                 orders = orders ?? new List<AreaEducationOrder>();
-                try
-                {
-                    db.AreaEducationOrders.Update(a => a.Id, orders.ToArray());
-                }
-                catch
-                {
-                    db.AreaEducationOrders.Add(a => a.Id, orders.ToArray());
-                }
+                foreach (var p in orders)
+                    if (!db.AreaEducationOrders.Any(d => d.Id == p.Id))
+                    {
+                        var d = new AreaEducationOrder();
+                        d.Id = p.Id;
+                        db.AreaEducationOrders.Add(d);
+                    }
+               // db.AreaEducationOrders.AddOrUpdate(a => a.Id, orders.ToArray());
+               
                 db.SaveChanges();
 
                 var ids = orders.Select(o => o.Id);

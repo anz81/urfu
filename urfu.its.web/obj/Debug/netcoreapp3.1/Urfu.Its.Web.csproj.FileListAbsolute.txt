@@ -415,3 +415,5 @@ D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web\bin\Debug\netcoreapp3.1\Ext.Utilities.dll
 D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web\bin\Debug\netcoreapp3.1\Ext.Utilities.pdb
 D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web\bin\Debug\netcoreapp3.1\Urfu.Its.Practice.dll
 D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web\bin\Debug\netcoreapp3.1\Urfu.Its.Practice.pdb
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web\obj\Debug\netcoreapp3.1\Urfu.Its.Web.dll
+D:\-urfu\its\Urfu.Its.Web\Urfu.Its.Web\obj\Debug\netcoreapp3.1\Urfu.Its.Web.pdb

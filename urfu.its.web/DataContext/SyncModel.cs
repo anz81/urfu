@@ -98,8 +98,11 @@ namespace Urfu.Its.Web.Models
                     {
                         groupIds.Add(dto.Id);
                     }
-
-                    var op = db.Upsert(groupsXml.Select(Mapper.Map<Group>));
+                    var me = new MapperConfiguration(cfg => {
+                        cfg.AddProfile<AutoMapperConfig>();
+                    });
+                    var mapper = me.CreateMapper();
+                    var op = db.Upsert(groupsXml.Select(mapper.Map<Group>));
                     op.Key(student => student.Id);
                     op.ExcludeField(s => s.Profile);
                     op.ExcludeField(s => s.ForeignLanguageCompetitionGroups);
@@ -136,8 +139,11 @@ namespace Urfu.Its.Web.Models
                     var restService = new UniRestService();
                     var personsXml =
                         restService.GetPersonsXml();
-
-                    var op = db.Upsert(personsXml.Select(Mapper.Map<Person>));
+                    var me = new MapperConfiguration(cfg => {
+                        cfg.AddProfile<AutoMapperConfig>();
+                    });
+                    var mapper = me.CreateMapper();
+                    var op = db.Upsert(personsXml.Select(mapper.Map<Person>));
                     op.Key(person => person.Id);
                     op.Execute();
 
@@ -166,8 +172,11 @@ namespace Urfu.Its.Web.Models
                     var restService = new UniRestService();
                     var studentsXml =
                         restService.GetStudentsXml().Where(s => groupIds.Contains(s.GroupId));
-
-                    var op = db.Upsert(studentsXml.Select(Mapper.Map<Student>));
+                    var me = new MapperConfiguration(cfg => {
+                        cfg.AddProfile<AutoMapperConfig>();
+                    });
+                    var mapper = me.CreateMapper();
+                    var op = db.Upsert(studentsXml.Select(mapper.Map<Student>));
                     op.Key(student => student.Id);
                     op.ExcludeField(student => student.Rating);
                     op.ExcludeField(student => student.Sportsman);
@@ -226,8 +235,11 @@ namespace Urfu.Its.Web.Models
                         restService.GetDirectorsDto();
 
                     directorsDto = directorsDto.Where(d => db.Divisions.Select(_ => _.uuid).Contains(d.divisionUUID)).ToList();
-
-                    var op = db.Upsert(directorsDto.Select(Mapper.Map<Director>));
+                    var me = new MapperConfiguration(cfg => {
+                        cfg.AddProfile<AutoMapperConfig>();
+                    });
+                    var mapper = me.CreateMapper();
+                    var op = db.Upsert(directorsDto.Select(mapper.Map<Director>));
                     op.Key(director => director.DivisionUuid);
                     op.ExcludeField(director => director.Division);
                     op.Execute();
@@ -248,6 +260,10 @@ namespace Urfu.Its.Web.Models
         public static void SyncApploads(int year, int term)
         {
             var sw = Stopwatch.StartNew();
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             Logger.Info("Синхронизация нагрузок года " + year + " семестра " + term);
             try
             {
@@ -257,7 +273,7 @@ namespace Urfu.Its.Web.Models
 
                     var restService = new ApploadService();
                     var groups =
-                        restService.GetApploads(year, term, true).Select(Mapper.Map<Appload>).ToList();
+                        restService.GetApploads(year, term, true).Select(mapper.Map<Appload>).ToList();
                     SetYearTermFApploads(year, term, DisciplineType.Other, groups);
 
                     var notItsApploads = restService.GetApploads(year, term, false);
@@ -266,28 +282,28 @@ namespace Urfu.Its.Web.Models
                             .Where(
                                 a =>
                                     a.disciplineTitle == "Физическая культура" ||
-                                    a.disciplineTitle == "Прикладная физическая культура").Select(Mapper.Map<Appload>).ToList();
+                                    a.disciplineTitle == "Прикладная физическая культура").Select(mapper.Map<Appload>).ToList();
                     SetYearTermFApploads(year, term, DisciplineType.SectionFK, sectionFKs);
 
                     var foreignLanguages = notItsApploads
                             .Where(
                                 a =>
                                     a.disciplineTitle == "Иностранный язык" ||
-                                    a.disciplineTitle == "иностранный язык").Select(Mapper.Map<Appload>).ToList();
+                                    a.disciplineTitle == "иностранный язык").Select(mapper.Map<Appload>).ToList();
                     SetYearTermFApploads(year, term, DisciplineType.ForeignLanguage, foreignLanguages);
 
                     var minors = notItsApploads
                            .Where(
                                a =>
-                                   a.disciplineTitle.StartsWith("Майнор ")).Select(Mapper.Map<Appload>).ToList();
+                                   a.disciplineTitle.StartsWith("Майнор ")).Select(mapper.Map<Appload>).ToList();
                     SetYearTermFApploads(year, term, DisciplineType.Minor, minors);
 
                     var projects = notItsApploads
-                        .Where(a => a.modtypeUNI == "Проектное обучение").Select(Mapper.Map<Appload>).ToList();
+                        .Where(a => a.modtypeUNI == "Проектное обучение").Select(mapper.Map<Appload>).ToList();
                     SetYearTermFApploads(year, term, DisciplineType.Project, projects);
 
                     var pairedModule = notItsApploads
-                        .Where(a => a.modtypeUNI == "Парный модуль").Select(Mapper.Map<Appload>).ToList();
+                        .Where(a => a.modtypeUNI == "Парный модуль").Select(mapper.Map<Appload>).ToList();
                     SetYearTermFApploads(year, term, DisciplineType.PairedModule, pairedModule);
 
 
@@ -306,7 +322,7 @@ namespace Urfu.Its.Web.Models
                                                                     && !a.disciplineTitle.StartsWith("Майнор ")
                                                                     && a.modtypeUNI != "Проектное обучение"
                                                                     && a.modtypeUNI != "Парный модуль"
-                                            ).Select(Mapper.Map<Appload>).ToList();
+                                            ).Select(mapper.Map<Appload>).ToList();
 
                     SetYearTermFApploads(year, term, DisciplineType.MUP, others);
 
@@ -330,6 +346,10 @@ namespace Urfu.Its.Web.Models
         public static void SyncGroupHistory(int year)
         {
             var sw = Stopwatch.StartNew();
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             Logger.Info("Синхронизация исторические группы года " + year);
             try
             {
@@ -339,7 +359,7 @@ namespace Urfu.Its.Web.Models
 
                     var restService = new GroupHistoryService();
                     var groupsHistories =
-                        restService.GetGroupHistories(year).Select(Mapper.Map<GroupsHistory>).ToList();
+                        restService.GetGroupHistories(year).Select(mapper.Map<GroupsHistory>).ToList();
                     
                     var isCurrentEduYear = DateTime.Now.Month < 7 
                         ? year == DateTime.Now.Year - 1 
@@ -430,6 +450,10 @@ namespace Urfu.Its.Web.Models
         {
             var sw = Stopwatch.StartNew();
             Logger.Info("Синхронизация контрольных мероприятий");
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             try
             {
                 using (var db = new ApplicationDbContext())
@@ -437,7 +461,7 @@ namespace Urfu.Its.Web.Models
                 {
                     var restService = new TmerService();
                     var objects = restService.GetTmers();
-                    var tmers = objects.Select(Mapper.Map<Tmer>).ToList();
+                    var tmers = objects.Select(mapper.Map<Tmer>).ToList();
 
                     Regex regex = new Regex(@"[uk]\d{3}");
                     for (int i = 0; i < tmers.Count(); i++)
@@ -465,6 +489,10 @@ namespace Urfu.Its.Web.Models
         internal static void SyncDirections()
         {
             HashSet<string> directionsIds = new HashSet<string>();
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             Logger.Info("Синхронизация направлений");
             var sw = Stopwatch.StartNew();
             try
@@ -486,7 +514,7 @@ namespace Urfu.Its.Web.Models
                                                                             && a.Title == directionDto.areaEducation.title);
                         if (areaEdu == null)
                         {
-                            areaEdu = Mapper.Map<AreaEducation>(directionDto.areaEducation);
+                            areaEdu = mapper.Map<AreaEducation>(directionDto.areaEducation);
                             db.AreaEducations.Add(areaEdu);
                             db.SaveChanges();
                         }
@@ -494,7 +522,14 @@ namespace Urfu.Its.Web.Models
                     }
 
                     directionsIds = new HashSet<string>(directionsFromService.Select(d => d.uid));
-                    db.Directions.AddOrUpdate(d => d.uid, directionsFromService.Select(Mapper.Map<Direction>).ToArray());
+                    foreach (var p in directionsFromService.Select(mapper.Map<Direction>))
+                        if (!db.Directions.Any(d => d.uid == p.uid))
+                        {
+                            var d = new Direction();
+                            d.uid = p.uid;
+                            db.Directions.Add(d);
+                        }
+                    //db.Directions.AddOrUpdate(d => d.uid, directionsFromService.Select(mapper.Map<Direction>).ToArray());
                     db.SaveChanges();
                 }
                 Logger.Info("Направления синхронизованы " + sw.Elapsed);
@@ -553,10 +588,17 @@ namespace Urfu.Its.Web.Models
                             db.Entry(profile).State = EntityState.Modified;
                         }
                         db.SaveChanges();
-                      
+
                         // сохранение профилей
-                        db.Profiles.AddOrUpdate(d => d.ID,
-                            removedDuplicats.Values.Select(Mapper.Map<DataContext.Profile>).ToArray());
+                        foreach (var p in removedDuplicats.Values.Select(mapper.Map<DataContext.Profile>))
+                            if (!db.Profiles.Any(d => d.ID == p.ID))
+                            {
+                                var d = new Profile();
+                                d.ID = p.ID;
+                                db.Profiles.Add(d);
+                            }
+                        /*db.Profiles.AddOrUpdate(d => d.ID,
+                            removedDuplicats.Values.Select(mapper.Map<DataContext.Profile>).ToArray());*/
                         db.SaveChanges();
                         dbcxtransaction.Commit();
                     }
@@ -678,20 +720,38 @@ namespace Urfu.Its.Web.Models
         {
             var restService = UniModulesService.Create();
             var modulesForDirection = restService.GetModulesForDirection(direction);
-            var modules = modulesForDirection.Select(Mapper.Map<Module>).ToArray();
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
+            var modules = modulesForDirection.Select(mapper.Map<Module>).ToArray();
             var disciplines = modules.SelectMany(m => m.disciplines)
                 .Select(d => new { d.uid, d })
                 .GroupBy(o => o.uid)
                 .Select(g => g.First().d)
                 .ToArray(); //получение уникальных дисциплин
-            db.Disciplines.AddOrUpdate(d => d.uid, disciplines);
+            foreach (var p in disciplines)
+                if (!db.Disciplines.Any(d => d.uid == p.uid))
+                {
+                    var d = new Discipline();
+                    d.uid = p.uid;
+                    db.Disciplines.Add(d);
+                }
+            //db.Disciplines.AddOrUpdate(d => d.uid, disciplines);
             db.SaveChanges();
             var disciplinesDictionary = db.Disciplines.Include(d => d.Modules).ToDictionary(d => d.uid);
             foreach (var module in modules)
             {
                 module.disciplines = module.disciplines.Select(d => disciplinesDictionary[d.uid]).ToList();
             }
-            db.Modules.AddOrUpdate(m => m.uuid, modules);
+            foreach (var p in modules)
+                if (!db.Modules.Any(d => d.uuid == p.uuid))
+                {
+                    var d = new Module();
+                    d.uuid = p.uuid;
+                    db.Modules.Add(d);
+                }
+            //db.Modules.AddOrUpdate(m => m.uuid, modules);
             db.SaveChanges();
 
             var tech = db.ModuleTeches.First();
@@ -782,15 +842,25 @@ namespace Urfu.Its.Web.Models
             Dictionary<string, DivisionDto> divisions)
         {
             var restService = UniModulesService.Create();
-            
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             var plans = restService.GetPlansForDirection(direction);
             var planDivision =
                 plans.Select(p => p.faculty)
                     .Distinct()
                     .Select(id => divisions[id])
-                    .Select(Mapper.Map<Division>)
+                    .Select(mapper.Map<Division>)
                     .ToArray();
-            db.Divisions.AddOrUpdate(d => d.uuid, planDivision);
+            foreach (var p in planDivision)
+                if (!db.Divisions.Any(d => d.uuid == p.uuid))
+                {
+                    var d = new Division();
+                    d.uuid = p.uuid;
+                    db.Divisions.Add(d);
+                }
+            //db.Divisions.AddOrUpdate(d => d.uuid, planDivision);
 
             var existedPlans = db.Plans.Where(p => p.directionId == direction);
             foreach (var plan in existedPlans)
@@ -802,26 +872,56 @@ namespace Urfu.Its.Web.Models
             
 
             var correctPlans = plans.Where(p => db.Modules.Any(m => m.uuid == p.moduleUUID)).ToList();
-            
-            db.Plans.AddOrUpdate(p => new { p.moduleUUID, p.eduplanUUID, p.disciplineUUID, p.versionUUID }, correctPlans.Select(
+            foreach (var p in correctPlans.Select(
                 delegate (PlanDto dto)
                 {
-                    var plan = Mapper.Map<Plan>(dto);
+                    var plan = mapper.Map<Plan>(dto);
                     plan.directionId = direction;
                     plan.remove = false;
                     return plan;
-                }).ToArray());
+                }))
+                if (!db.Plans.Any(d => d.disciplineUUID == p.disciplineUUID & d.versionUUID == p.versionUUID &
+                    d.moduleUUID == p.moduleUUID & d.eduplanUUID == p.eduplanUUID))
+                {
+                    var d = new Plan();
+                    d.versionUUID = p.versionUUID;
+                    d.disciplineUUID = p.disciplineUUID;
+                    d.moduleUUID = p.moduleUUID;
+                    d.eduplanUUID = p.eduplanUUID;
+                    db.Plans.Add(d);
+                }
+           /* db.Plans.AddOrUpdate(p => new { p.moduleUUID, p.eduplanUUID, p.disciplineUUID, p.versionUUID }, correctPlans.Select(
+                delegate (PlanDto dto)
+                {
+                    var plan = mapper.Map<Plan>(dto);
+                    plan.directionId = direction;
+                    plan.remove = false;
+                    return plan;
+                }).ToArray());*/
             db.SaveChanges();
 
             var plansAdd = new UniRestService().GetPlanAdditionalsForDirection(direction);
 
 
-            db.PlanAdditionals.AddOrUpdate(p => new { disciplineUUID = p.disciplineUUID, p.versionUUID }, plansAdd.Select(
+            foreach (var p in plansAdd.Select(
                     delegate (PlanAdditionalDto dto)
                     {
-                        var plan = Mapper.Map<PlanAdditional>(dto);
+                        var plan = mapper.Map<PlanAdditional>(dto);
                         return plan;
-                    }).ToArray());
+                    }))
+                if (!db.PlanAdditionals.Any(d => d.disciplineUUID == p.disciplineUUID & d.versionUUID == p.versionUUID))
+                {
+                    var d = new PlanAdditional();
+                    d.versionUUID = p.versionUUID;
+                    d.disciplineUUID = p.disciplineUUID;
+                    db.PlanAdditionals.Add(d);
+                }
+            /*db.PlanAdditionals.AddOrUpdate(p => new { disciplineUUID = p.disciplineUUID, p.versionUUID }, plansAdd.Select(
+                    delegate (PlanAdditionalDto dto)
+                    {
+                        var plan = mapper.Map<PlanAdditional>(dto);
+                        return plan;
+                    }).ToArray());*/
             db.SaveChanges();
 
 
@@ -849,28 +949,63 @@ namespace Urfu.Its.Web.Models
                         }
 
                         db.SaveChanges();*/
-
-            db.FamilirizationConditions.AddOrUpdate(c => c.Name,
+            foreach (var p in plans.Select(p => p.familirizationCondition)
+                    .Distinct()
+                    .Select(n => new FamilirizationCondition() { Name = n }))
+                if (!db.FamilirizationConditions.Any(d => d.Name == p.Name))
+                {
+                    var d = new FamilirizationCondition();
+                    d.Name = p.Name;
+                    db.FamilirizationConditions.Add(d);
+                }
+           /* db.FamilirizationConditions.AddOrUpdate(c => c.Name,
                 plans.Select(p => p.familirizationCondition)
                     .Distinct()
                     .Select(n => new FamilirizationCondition() { Name = n })
-                    .ToArray());
-            db.FamilirizationTechs.AddOrUpdate(c => c.Name,
+                    .ToArray());*/
+            foreach (var p in plans.Select(p => p.familirizationTech)
+                    .Distinct()
+                    .Select(n => new FamilirizationTech() { Name = n }))
+                if (!db.FamilirizationTechs.Any(d => d.Name == p.Name))
+                {
+                    var d = new FamilirizationTech();
+                    d.Name = p.Name;
+                    db.FamilirizationTechs.Add(d);
+                }
+           /* db.FamilirizationTechs.AddOrUpdate(c => c.Name,
                 plans.Select(p => p.familirizationTech)
                     .Distinct()
                     .Select(n => new FamilirizationTech() { Name = n })
-                    .ToArray());
-            db.Qualifications.AddOrUpdate(c => c.Name,
+                    .ToArray());*/
+            foreach (var p in plans.Select(p => p.qualification)
+                    .Distinct()
+                    .Select(n => new Qualification() { Name = n }))
+                if (!db.Qualifications.Any(d => d.Name == p.Name))
+                {
+                    var d = new Qualification();
+                    d.Name = p.Name;
+                    db.Qualifications.Add(d);
+                }
+            /*db.Qualifications.AddOrUpdate(c => c.Name,
                 plans.Select(p => p.qualification)
                     .Distinct()
                     .Select(n => new Qualification() { Name = n })
-                    .ToArray());
-            db.FamilirizationTypes.AddOrUpdate(c => c.Name,
+                    .ToArray());*/
+            foreach (var p in plans.Select(p => p.familirizationType)
+                    .Distinct()
+                    .Select(n => new FamilirizationType() { Name = n }))
+                if (!db.FamilirizationTypes.Any(d => d.Name == p.Name))
+                {
+                    var d = new FamilirizationType();
+                    d.Name = p.Name;
+                    db.FamilirizationTypes.Add(d);
+                }
+            /*db.FamilirizationTypes.AddOrUpdate(c => c.Name,
                 plans.Select(p => p.familirizationType)
                     .Distinct()
                     .Select(n => new FamilirizationType() { Name = n })
                     .ToArray());
-
+            */
             db.SaveChanges();
         }
 
@@ -953,17 +1088,27 @@ namespace Urfu.Its.Web.Models
         private static void SyncPlanTerms(ApplicationDbContext db)
         {
             var service = new UniPlanTermsService();
-
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             var plans = service.GetPlanTerms();
 
-            var planTerms = Mapper.Map<List<PlanTerm>>(plans);
-            try
+            var planTerms = mapper.Map<List<PlanTerm>>(plans);
+            foreach (var pt in planTerms)
             {
-                db.PlanTerms.Update(p => new { p.eduplanUUID, p.Year }, planTerms.ToArray());
-            }
-            catch
-            {
-                db.PlanTerms.Add(p => new { p.eduplanUUID, p.Year }, planTerms.ToArray());
+                var p = new PlanTerm();
+                p.eduplanUUID = pt.eduplanUUID;
+                p.Year = pt.Year;
+                // db.PlanTerms.AddOrUpdate(p);
+                try
+                {
+                    db.PlanTerms.Update(p);
+                }
+                catch
+                {
+                    db.PlanTerms.Add(p);
+                }
             }
             db.SaveChanges();
         }
@@ -986,8 +1131,15 @@ namespace Urfu.Its.Web.Models
                 var terms = planTerms.Where(p => p.eduplanUUID == d.eduplanUUID);
                 planDisciplieTerms.AddRange(CreatePlanDisciplieTerms(d.disciplineUUID, d.allTermsExtracted, terms));
             }
-
-            db.PlanDisciplineTerms.AddOrUpdate(p => new { p.DisciplineUUID, p.Term }, planDisciplieTerms.ToArray());
+            foreach (var p in planDisciplieTerms)
+                if (!db.PlanDisciplineTerms.Any(d => d.DisciplineUUID == p.DisciplineUUID & d.Term == p.Term))
+                {
+                    var d = new PlanDisciplineTerm();
+                    d.DisciplineUUID = p.DisciplineUUID;
+                    d.Term = p.Term;
+                    db.PlanDisciplineTerms.Add(d);
+                }
+           // db.PlanDisciplineTerms.AddOrUpdate(p => new { p.DisciplineUUID, p.Term }, planDisciplieTerms.ToArray());
 
             db.SaveChanges();
         }
@@ -1038,8 +1190,15 @@ namespace Urfu.Its.Web.Models
                     planTermWeeks.Add(new PlanTermWeek { eduplanUUID = planTermsWeeksDto.eduplanUUID, Term = w.Term, WeeksCount = w.WeeksCount });
                 }
             }
-
-            db.PlanTermWeeks.AddOrUpdate(p => new { p.eduplanUUID, p.Term }, planTermWeeks.ToArray());
+            foreach (var p in planTermWeeks)
+                if (!db.PlanTermWeeks.Any(d => d.eduplanUUID == p.eduplanUUID & d.Term == p.Term))
+                {
+                    var d = new PlanTermWeek();
+                    d.eduplanUUID = p.eduplanUUID;
+                    d.Term = p.Term;
+                    db.PlanTermWeeks.Add(d);
+                }
+            //db.PlanTermWeeks.AddOrUpdate(p => new { p.eduplanUUID, p.Term }, planTermWeeks.ToArray());
 
             db.SaveChanges();
         }
@@ -1709,6 +1868,10 @@ namespace Urfu.Its.Web.Models
         public static void SyncModuleAgreements()
         {
             Logger.Info("Синхронизация соглашений");
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             try
             {
                 using (var db = new ApplicationDbContext())
@@ -1722,7 +1885,7 @@ namespace Urfu.Its.Web.Models
                         dto.Terms = dto.Terms ?? new int[0];
                         foreach (var term in dto.Terms)
                         {
-                            var agreement = Mapper.Map<ModuleAgreement>(dto);
+                            var agreement = mapper.Map<ModuleAgreement>(dto);
                             agreement.SemesterId = term;
                             agreements.Add(agreement);
                         }
@@ -1793,12 +1956,12 @@ namespace Urfu.Its.Web.Models
                             var roles = db.RoleSets.FirstOrDefault(r => r.Name == "Руководитель ОП")?.Contents?.Select(r => r.Role) ?? new List<IdentityRole>();
 
                             var um = new ApplicationUserManager(new UserStore<ApplicationUser>(db));
-                            var currentRoles = um.GetRolesAsync(user);
+                            var currentRoles = um.GetRolesAsync(user).Result;
 
                             var rolesToAdd = roles.Where(r => !currentRoles.Any(cr => cr == r.Name));
                             foreach (var role in rolesToAdd)
                             {
-                                um.AddToRolesAsync(user, role.Name);
+                                um.AddToRoleAsync(user, role.Name);
                             }
 
                             // связь пользователя и преподавателя
@@ -1827,14 +1990,24 @@ namespace Urfu.Its.Web.Models
         public static void SyncTrajectories()
         {
             Logger.Info("Синхронизация траекторий");
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             try
             {
                 using (var db = new ApplicationDbContext())
                 using (var dbcxtransaction = db.Database.BeginTransaction())
                 {
                     var trajectoryDtos = new TrajectoryService().GetTrajectories();
-                    
-                    db.VariantUni.AddOrUpdate(v => v.TrajectoryUuid, trajectoryDtos.Select(Mapper.Map<VariantsUni>).ToArray());
+                    foreach (var p in trajectoryDtos.Select(mapper.Map<VariantsUni>))
+                        if (!db.VariantUni.Any(d => d.TrajectoryUuid == p.TrajectoryUuid))
+                        {
+                            var d = new VariantsUni();
+                            d.TrajectoryUuid = p.TrajectoryUuid;
+                            db.VariantUni.Add(d);
+                        }
+                   // db.VariantUni.AddOrUpdate(v => v.TrajectoryUuid, trajectoryDtos.Select(mapper.Map<VariantsUni>).ToArray());
 
                     db.SaveChanges();
                     dbcxtransaction.Commit();
@@ -1856,10 +2029,14 @@ namespace Urfu.Its.Web.Models
 
         public static void WriteTeachersToDb(IEnumerable<TeacherDto> teacherDtos)
         {
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             using (var db = new ApplicationDbContext())
             using (var dbcxtransaction = db.Database.BeginTransaction())
             {
-                var teachers = teacherDtos.Select(Mapper.Map<Teacher>).Where(_ => !string.IsNullOrEmpty(_.pkey));
+                var teachers = teacherDtos.Select(mapper.Map<Teacher>).Where(_ => !string.IsNullOrEmpty(_.pkey));
                 var op = db.Upsert(teachers);
                 op.ExcludeField(t => t.SectionFKProperties);
                 op.ExcludeField(t => t.ForeignLanguageProperties);
@@ -1885,7 +2062,10 @@ namespace Urfu.Its.Web.Models
         public static void CreateEduProgramms(int year)
         {
             var divisions = new UniDivisionsService().GetDivisions();
-
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             using (var db = new ApplicationDbContext())
             using (var dbcxtransaction = db.Database.BeginTransaction())
             {
@@ -1960,9 +2140,15 @@ namespace Urfu.Its.Web.Models
                         .Union(deptIds)
                         .Distinct()
                         .Select(id => divisions[id])
-                        .Select(Mapper.Map<Division>)
+                        .Select(mapper.Map<Division>)
                         .ToArray();
-                db.Divisions.AddOrUpdate(d => d.uuid, planDivision);
+                foreach (var p in planDivision) if (!db.Divisions.Any(d => d.uuid == p.uuid))
+                    {
+                        var d = new Division();
+                        d.uuid = p.uuid;
+                        db.Divisions.Add(d);
+                    }
+            //    db.Divisions.AddOrUpdate(d => d.uuid, planDivision);
                 db.SaveChanges();
 
                 foreach (var key in profilKeys)
@@ -2035,6 +2221,10 @@ namespace Urfu.Its.Web.Models
         public static void UpdateDivision(DivisionDto[] divisionDtos, Dictionary<string, DivisionDto> allDivisions)
         {
             HashSet<string> ids = new HashSet<string>();
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             foreach (var dto in divisionDtos)
             {
                 var w = dto;
@@ -2052,16 +2242,13 @@ namespace Urfu.Its.Web.Models
             {
                 db.ChangeTracker.AutoDetectChangesEnabled = false;
 
-                var planDivision = ids.Select(id => allDivisions[id]).Select(Mapper.Map<Division>).ToArray();
-                try
-                {
-                    db.Divisions.Update(d => d.uuid, planDivision);
-                }
-                catch
-                {
-                    db.Divisions.Add(d => d.uuid, planDivision);
-                }
-                
+                var planDivision = ids.Select(id => allDivisions[id]).Select(mapper.Map<Division>).ToArray();
+                foreach(var p in planDivision) if (!db.Divisions.Any(d => d.uuid == p.uuid))
+                    {
+                        var d = new Division();
+                        d.uuid = p.uuid;
+                        db.Divisions.Add(d);
+                    }
                 db.SaveChanges();
                 Logger.Info($"Синхронизированы подразделения: {string.Join(", ", ids)}");
             }

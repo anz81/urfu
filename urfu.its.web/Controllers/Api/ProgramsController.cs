@@ -16,12 +16,16 @@ namespace Urfu.Its.Web.Controllers
     {
         public List<ProgramApiDto> Get()
         {
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             using (var db = new ApplicationDbContext())
             {
                 db.Database.SetCommandTimeout(300);
                 //((IObjectContextAdapter)db).ObjectContext.CommandTimeout = 300;
                 var variants = VarinatApiHelper.ProgramsQueryForApi(db).ToList();
-                var dtos = variants.Select(Mapper.Map<ProgramApiDto>).ToList();
+                var dtos = variants.Select(mapper.Map<ProgramApiDto>).ToList();
                 EduProgram.FillTeachers(db, dtos.SelectMany(d=>d.variants).ToList());
                 return dtos;
             }
@@ -29,12 +33,16 @@ namespace Urfu.Its.Web.Controllers
 
         public List<ProgramApiDto> Get(string okso)
         {
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             using (var db = new ApplicationDbContext())
             {
                 db.Database.SetCommandTimeout(300);
                 //((IObjectContextAdapter)db).ObjectContext.CommandTimeout = 300;
                 List<EduProgram> variants = VarinatApiHelper.ProgramsQueryForApi(db).Where(v => v.Direction.okso == okso).ToList();
-                var dtos = variants.Select(Mapper.Map<ProgramApiDto>).ToList();
+                var dtos = variants.Select(mapper.Map<ProgramApiDto>).ToList();
                 EduProgram.FillTeachers(db, dtos.SelectMany(d => d.variants).ToList());
                 return dtos;
             }
@@ -42,12 +50,16 @@ namespace Urfu.Its.Web.Controllers
 
         public List<ProgramApiDto> Get(int id)
         {
+            var me = new MapperConfiguration(cfg => {
+                cfg.AddProfile<AutoMapperConfig>();
+            });
+            var mapper = me.CreateMapper();
             using (var db = new ApplicationDbContext())
             {
                 db.Database.SetCommandTimeout(300);
                 //((IObjectContextAdapter)db).ObjectContext.CommandTimeout = 300;
                 List<EduProgram> variants = VarinatApiHelper.ProgramsQueryForApi(db).Where(v => v.Id == id).ToList();
-                var dtos = variants.Select(Mapper.Map<ProgramApiDto>).ToList();
+                var dtos = variants.Select(mapper.Map<ProgramApiDto>).ToList();
                 EduProgram.FillTeachers(db, dtos.SelectMany(d => d.variants).ToList());
                 return dtos;
             }
