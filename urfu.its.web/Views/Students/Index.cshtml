@@ -76,7 +76,7 @@
                         store: Ext.create('Ext.data.Store',
                         {
                             fields: ['status'],
-                            data: @Html.Raw(Json.Encode(ViewBag.statusTypes)),
+                            data: @Html.Raw(Json.Serialize(ViewBag.statusTypes)),
                         }),
                         displayField: 'status',
                         value: prevSettings["status"],

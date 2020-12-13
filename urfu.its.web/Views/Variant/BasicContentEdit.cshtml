@@ -437,11 +437,11 @@
                 },
                 //autosync: true
             });
-            var variantSelectionGroups = @Html.Raw(Json.Encode(@ViewBag.VariantSelectionGroups));
-            var programVariantSelectionGroups = @Html.Raw(Json.Encode(@ViewBag.ProgramVariantSelectionGroups));
+            var variantSelectionGroups = @Html.Raw(Json.Serialize(@ViewBag.VariantSelectionGroups));
+            var programVariantSelectionGroups = @Html.Raw(Json.Serialize(@ViewBag.ProgramVariantSelectionGroups));
 
-            var moduleTypes = @Html.Raw(Json.Encode(@ViewBag.ModuleTypes));
-            var groupTypes = {};//'@(Html.Raw(Json.Encode(EnumHelper<VariantGroupType>.GetDisplayValuesDict())))';
+            var moduleTypes = @Html.Raw(Json.Serialize(@ViewBag.ModuleTypes));
+            var groupTypes = {};//'@(Html.Raw(Json.Serialize(EnumHelper<VariantGroupType>.GetDisplayValuesDict())))';
             @{
                 foreach (var keyValuePair in EnumHelper<VariantGroupType>.GetDisplayValuesDict())
                 {

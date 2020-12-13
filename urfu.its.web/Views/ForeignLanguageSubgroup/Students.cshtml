@@ -139,7 +139,7 @@
                         }
                     }
                 });
-            levelStore.loadData(@Html.Raw(Json.Encode(ViewBag.Levels)));
+            levelStore.loadData(@Html.Raw(Json.Serialize(ViewBag.Levels)));
         
             
             var filtersWnd = Ext.create('Ext.window.Window',

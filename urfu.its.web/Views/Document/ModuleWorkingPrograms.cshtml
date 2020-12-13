@@ -26,7 +26,7 @@
         Ext.tip.QuickTipManager.init();
 
         var documentTypes =
-            @Html.Raw(Json.Encode(EnumHelper<VersionedDocumentType>.GetValues(VersionedDocumentType.ModuleWorkingProgram).Select(m => new {Value = m, Text = EnumHelper<VersionedDocumentType>.GetDisplayValue(m)}).ToList()));
+            @Html.Raw(Json.Serialize(EnumHelper<VersionedDocumentType>.GetValues(VersionedDocumentType.ModuleWorkingProgram).Select(m => new {Value = m, Text = EnumHelper<VersionedDocumentType>.GetDisplayValue(m)}).ToList()));
         var getTypeName = function (value) {
             for (var i = 0; i < documentTypes.length; i++) {
                 if (documentTypes[i].Value === value) {

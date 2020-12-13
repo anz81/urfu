@@ -86,20 +86,20 @@
             var teachers = Ext.create("Ext.data.Store",
                 {
                     model: 'Teacher',
-                    data: @Html.Raw(Json.Encode(Model.Teachers.Select(t => new {Id = t.pkey, Name = t.BigName})))
+                    data: @Html.Raw(Json.Serialize(Model.Teachers.Select(t => new {Id = t.pkey, Name = t.BigName})))
                 });
 
             var teachers2 = Ext.create("Ext.data.Store",
                 {
                     model: 'Teacher',
-                    data: @Html.Raw(Json.Encode(Model.Teachers.Select(t => new {Id = t.pkey, Name = t.BigName})))
+                    data: @Html.Raw(Json.Serialize(Model.Teachers.Select(t => new {Id = t.pkey, Name = t.BigName})))
                 });
             teachers2.insert(0, { Id: null, Name: 'Не указано' });
 
             var themes = Ext.create("Ext.data.Store",
                 {
                     model: 'Theme',
-                    data: @Html.Raw(Json.Encode(Model.Themes.Select(t => new {t.Id, t.Theme})))
+                    data: @Html.Raw(Json.Serialize(Model.Themes.Select(t => new {t.Id, t.Theme})))
                     @*[
                     @foreach (var t in Model.Themes)
                     {
@@ -430,7 +430,7 @@
                     frame: false,
 
                     viewModel: {
-                        data: @Html.Raw(Json.Encode(Model.Urfu)),
+                        data: @Html.Raw(Json.Serialize(Model.Urfu)),
                     },
 
                     defaults: {
@@ -647,11 +647,11 @@
 
                     viewModel: {
                         data: {
-                            contract: @Html.Raw(Json.Encode(Model.ContractDs)),
+                            contract: @Html.Raw(Json.Serialize(Model.ContractDs)),
                         },
                         stores: {
                             dsContracts: {
-                                data: @Html.Raw(Json.Encode(Model.Contracts))
+                                data: @Html.Raw(Json.Serialize(Model.Contracts))
                             }
                         },
                         formulas: {
@@ -729,7 +729,7 @@
                     ],
 
                     viewModel: {
-                        data: @Html.Raw(Json.Encode(Model.ContractKs)),
+                        data: @Html.Raw(Json.Serialize(Model.ContractKs)),
                     },
 
                     canEdit: '@ViewBag.CanEdit' === 'True',
@@ -903,13 +903,13 @@
                         'practiceDocumentPanel'
                     ],
                     documents: {
-                        before: @Html.Raw(Json.Encode(Model.Before)),
-                        distant: @Html.Raw(Json.Encode(Model.Distant)),
+                        before: @Html.Raw(Json.Serialize(Model.Before)),
+                        distant: @Html.Raw(Json.Serialize(Model.Distant)),
                         //[
                         //    { type: 'Договор с предприятием', fileName: 'contract.doc', status: 'согласовано' },
                         //    { type: 'Резюме', fileName: 'резюме.doc', status: 'согласовано'}
                         //],
-                        after: @Html.Raw(Json.Encode(Model.After)),
+                        after: @Html.Raw(Json.Serialize(Model.After)),
 
                     },
 
@@ -993,8 +993,8 @@
         });
 
         window.practiceConfig = {
-            currentCompanyId: @Html.Raw(Json.Encode(Model.ContractKs.companyId)),
-            currentCompanyName: @Html.Raw(Json.Encode(Model.ContractKs.company))
+            currentCompanyId: @Html.Raw(Json.Serialize(Model.ContractKs.companyId)),
+            currentCompanyName: @Html.Raw(Json.Serialize(Model.ContractKs.company))
         };
 
     </script>

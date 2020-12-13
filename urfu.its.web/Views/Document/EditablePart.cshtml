@@ -1,4 +1,5 @@
 ﻿@using Newtonsoft.Json
+@using System.IO
 @using Urfu.Its.VersionedDocs.ViewModels
 @using Urfu.Its.Web.Models
 @model Urfu.Its.VersionedDocs.ViewModels.DocumentPartViewModel
@@ -105,7 +106,7 @@
 
         var path = string.Join("/", chain.Select(c => c.SystemName));
         
-        if (!File.Exists(Server.MapPath("~/Scripts/VersionedDocs/" + path + ".js")))
+        if (!File.Exists(ContentResult("~/Scripts/VersionedDocs/" + path + ".js")))
         {
             // Если файл не найден, считаем, что он должен быть в shared папке
             path = "Shared/" + model.SystemName;
@@ -168,7 +169,7 @@
             }
 
             var goToSections = function () {
-                window.location.assign('@Url.Action("Index", new {id = Model.DocumentId, moduleId = Request.QueryString["moduleId"]})');
+                window.location.assign('@Url.Action("Index", new {id = Model.DocumentId, moduleId = Context.Request.Query["moduleId"]})');
             }
 
             var root = Ext.merge({

@@ -31,6 +31,7 @@ using SortDirection = Ext.Utilities.SortDirection;
 using Microsoft.AspNetCore.Authentication;
 using System.Text;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http;
 
 namespace Urfu.Its.Web.Controllers
 {
@@ -1224,7 +1225,7 @@ namespace Urfu.Its.Web.Controllers
         [Authorize(Roles = ItsRoles.Admin)]
         public ActionResult Sessions()
         {
-            var protectedText = HttpContext.Request.Cookies[".AspNetCore.Session"];
+           /* var protectedText = HttpContext.Request.Cookies[".AspNetCore.Session"];
 
             var sessionKey = "";
             var protectedData = Convert.FromBase64String(protectedText);
@@ -1241,8 +1242,8 @@ namespace Urfu.Its.Web.Controllers
 
             sessionKey = Encoding.UTF8.GetString(userData);
 
-            return Content(sessionKey);
-            //return View(MvcApplication.SessionKeys.ToArray().Select(sk => sk.Value).Where(s => s.UserName != null));
+            return Content(sessionKey);*/
+            return View(Startup.SessionKeys.ToArray().Select(sk => sk.Value).Where(s => s.UserName != null));
         }
 
         private class ChallengeResult : UnauthorizedResult

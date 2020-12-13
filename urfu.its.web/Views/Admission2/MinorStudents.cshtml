@@ -15,7 +15,7 @@
             window.location.href = fileUrl;
             return false;
         }
-        var statuses = @Html.Raw(Json.Encode(EnumHelper<AdmissionStatus>.GetValues(AdmissionStatus.Admitted).Select(m=>new {Value = m, Text = EnumHelper<AdmissionStatus>.GetDisplayValue(m)}).ToList()));
+        var statuses = @Html.Raw(Json.Serialize(EnumHelper<AdmissionStatus>.GetValues(AdmissionStatus.Admitted).Select(m=>new {Value = m, Text = EnumHelper<AdmissionStatus>.GetDisplayValue(m)}).ToList()));
         var statesStore = Ext.create('Ext.data.Store', {
             fields: ['Value', 'Text'],
             data : statuses

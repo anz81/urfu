@@ -1,5 +1,7 @@
 ﻿@using Urfu.Its.Web.DataContext
+@using Microsoft.AspNetCore;
 @model Urfu.Its.Web.Controllers.PersonalInfoVM
+
 @{
     ViewBag.Title = "ИТС студента";
     bool wasFirstProgram = false;
@@ -115,7 +117,7 @@
                     <td>
                         @if (item.Admission != AdmissionStatus.Admitted)
                         {
-                            @Html.EnumDropDownListFor(model => Model.Selections[variantIndex].Admission, htmlAttributes: new { @class = "form-control enumDropDown", onchange = "setVariantAdmissionStatus(this,'" + @Model.Student.Id + "'," + @item.VariantId + "); ", autocomplete = "off" })
+                            @Html.DropDownListFor(model => Model.Selections[variantIndex].Admission, Html.GetEnumSelectList(typeof(AdmissionStatus)))
                         }
                         else
                         {
@@ -164,7 +166,7 @@
                                     <td>
                                         @if (module.ShouldHaveStatus)
                                         {
-                                            @Html.EnumDropDownListFor(model => Model.Selections[variantIndex].Modules[moduleIndex].Admission, htmlAttributes: new {@class = "form-control enumDropDown", hack = DateTime.Now.Ticks, onchange = "setModuleAdmissionStatus(this,'" + @Model.Student.Id + "','" + @module.ModuleUuid + "'); ", autocomplete = "off"})
+                                            @Html.DropDownListFor(model => Model.Selections[variantIndex].Modules[moduleIndex].Admission, Html.GetEnumSelectList(typeof(AdmissionStatus)))
                                         }
                                         else
                                         {
@@ -273,7 +275,7 @@
 @section scripts{
     <script>
         allSelectableModules =
-            @Html.Raw(Json.Encode(Model.Selections.Where(_=>_.Admission == AdmissionStatus.Admitted || _.IsBase).SelectMany(_=>_.Modules.Where(m=>m.ShouldHaveStatus).Select(m=>m.ModuleUuid))));
+            @Html.Raw(Json.Serialize(Model.Selections.Where(_=>_.Admission == AdmissionStatus.Admitted || _.IsBase).SelectMany(_=>_.Modules.Where(m=>m.ShouldHaveStatus).Select(m=>m.ModuleUuid))));
 
         publishAllModules = function (button, studentId) {
             $.post('@Url.Action("PublishModuleAdmission", "Admission")', { studentId: studentId, moduleId: allSelectableModules }, function () {

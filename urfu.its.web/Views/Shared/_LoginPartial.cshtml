@@ -1,5 +1,5 @@
-﻿@using Microsoft.AspNet.Identity
-@if (Request.IsAuthenticated)
+﻿@using Microsoft.AspNetCore.Identity
+@if (User.Identity.IsAuthenticated)
 {
     using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
     {
@@ -9,12 +9,12 @@
         <li>
             @if (User.IsInRole(Urfu.Its.Web.Models.ItsRoles.Admin))
             {
-                @Html.ActionLink("Пользователь " + User.Identity.GetUserName(), "Manage", "Account", routeValues: null, htmlAttributes: new {title = "Manage",@class="contrast-text"})
+                @Html.ActionLink("Пользователь " + User.Identity.Name, "Manage", "Account", routeValues: null, htmlAttributes: new {title = "Manage",@class="contrast-text"})
             }
             else
             {
                 <text>
-                    <a>Пользователь @User.Identity.GetUserName()</a>
+                    <a>Пользователь @User.Identity.Name</a>
                 </text>
             }
         </li>

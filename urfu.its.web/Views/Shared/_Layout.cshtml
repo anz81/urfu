@@ -4,13 +4,13 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - ИТС</title>
-    @Styles.Render("~/Content/css")
-    @Styles.Render("~/Content/themes/base/css")
-    @Scripts.Render("~/bundles/modernizr")
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/jqueryui")
-    @Scripts.Render("~/bundles/bootstrap")
-    @Scripts.Render("~/bundles/datatables")
+    <script src="~/Content/css"></script>
+    <script src="~ /Content/themes/base/css"></script>
+    <script src="~ /bundles/modernizr"></script>
+    <script src="~ /bundles/jquery"></script>
+    <script src="~ /bundles/jqueryui"></script>
+    <script src="~ /bundles/bootstrap"></script>
+    <script src="~ /bundles/datatables"></script>
 </head>
 <body>
 @Html.Partial("_Navbar")
@@ -22,7 +22,7 @@
     </footer>
 </div>
 
-@Scripts.Render("~/bundles/otf")
+<script src="~/bundles/otf"></script>
 <script>
     $.datepicker.setDefaults($.datepicker.regional['ru']);
 </script>
@@ -30,4 +30,4 @@
 
 </body>
 </html>
-@{MvcApplication.Touch();}
+@{Startup.Touch(Context);}

@@ -47,6 +47,7 @@
 
   <ItemGroup>
     <Folder Include="Ext\resources\" />
+    <Folder Include="Port\" />
   </ItemGroup>
 
   <ItemGroup>

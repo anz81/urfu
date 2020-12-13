@@ -538,7 +538,7 @@ namespace Urfu.Its.Web.Models
             {
                 Logger.Error(ex);
             }
-
+            
             Logger.Info("Синхронизация профилей");
             sw = Stopwatch.StartNew();
 

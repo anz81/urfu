@@ -72,7 +72,7 @@
                         store: Ext.create('Ext.data.Store',
                         {
                             fields: ['post'],
-                            data: @Html.Raw(Json.Encode(ViewBag.post)),
+                            data: @Html.Raw(Json.Serialize(ViewBag.post)),
                         }),
                         displayField: 'post',
                         value: prevSettings["post"],

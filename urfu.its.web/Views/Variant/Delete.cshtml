@@ -1,5 +1,4 @@
-﻿@using Microsoft.Ajax.Utilities
-@using Urfu.Its.Common
+﻿@using Urfu.Its.Common
 @using Urfu.Its.Web.DataContext
 @model Urfu.Its.Web.Model.Models.VariantDeleteVM
 
@@ -78,9 +77,9 @@
             @foreach (var planTeacher in Model.PlanTeachers.GroupBy(_ => _.Module))
             {
                 <tr>
-                    <td rowspan="@planTeacher.DistinctBy(_=>_.catalogDisciplineUuid).Count()">@planTeacher.Key.title</td>
+                    <td rowspan="@planTeacher.GroupBy(a => a.catalogDisciplineUuid).Select(_=>_.First()).Count()">@planTeacher.Key.title</td>
 
-                    @foreach (var moduleDiscipline in planTeacher.DistinctBy(_ => _.catalogDisciplineUuid))
+                    @foreach (var moduleDiscipline in planTeacher.GroupBy(a => a.catalogDisciplineUuid).Select(_ => _.First()))
                     {
 
                         <td> @moduleDiscipline.discipline.title</td>

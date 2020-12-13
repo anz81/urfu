@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -110,5 +111,48 @@ namespace Urfu.Its.Web
                 }
             });
         }
+
+        public static ConcurrentDictionary<string, UserSessionInfo> SessionKeys { get; } = new ConcurrentDictionary<string, UserSessionInfo>();
+
+        protected void Session_Start(HttpContext context, EventArgs e)
+        {
+            SessionKeys.TryAdd(context.Session.Id, new UserSessionInfo());
+        }
+        protected void Session_End(HttpContext context, EventArgs e)
+        {
+            UserSessionInfo value;
+            SessionKeys.TryRemove(context.Session.Id, out value);
+        }
+
+        public static void UpdateSession(string sessionId, string userName)
+        {
+            UserSessionInfo info;
+            SessionKeys.TryGetValue(sessionId, out info);
+            if (info == null)
+            {
+                info = new UserSessionInfo();
+                SessionKeys[sessionId] = info;
+            }
+            if (userName != null)
+                info.UserName = userName;
+            info.LastSeen = DateTime.Now;
+        }
+
+        public static void Touch(HttpContext context)
+        {
+            string userName = null;
+            if (context != null)
+            {
+                if (context.User != null)
+                    if (context.User.Identity != null && context.User.Identity.IsAuthenticated) userName = context.User.Identity.Name;
+                UpdateSession(context.Session.Id, userName);
+            }
+        }
+    }
+
+    public class UserSessionInfo
+    {
+        public string UserName { get; set; }
+        public DateTime LastSeen { get; set; }
     }
 }

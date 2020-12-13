@@ -5,34 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - ИТС</title>
 
-    @Scripts.Render("~/Scripts/_TreePanel.js")
-
-
-    @Styles.Render("~/Content/bootstrap.css")
-    @Styles.Render("~/Content/ExtSite.css")
-    @Styles.Render("~/Content/bootstrapsnippets.css")
-
-    @Scripts.Render("~/bundles/modernizr")
-
-    @Scripts.Render("~/Scripts/jquery-2.1.4.js")
-    @Scripts.Render("~/bundles/bootstrap")
-
-    @Styles.Render("~/Ext/classic/theme-neptune-touch/resources/theme-neptune-touch-all-debug.css")
-
-    @Scripts.Render("~/Ext/ext-all-debug.js")
-    @Scripts.Render("~/Ext/classic/theme-neptune-touch/theme-neptune-touch-debug.js")
-
-    @Scripts.Render("~/Ext/classic/locale/locale-ru-debug.js")
+    <script src="~/Scripts/_TreePanel.js"></script>
+    <script src="~/Content/bootstrap.css"></script>
+    <script src="~ /Content/ExtSite.css"></script>
+    <script src="~ /Content/bootstrapsnippets.css"></script>
+    <script src="~ /bundles/modernizr"></script>
+    <script src="~ /Scripts/jquery-2.1.4.js"></script>
+    <script src="~ /bundles/bootstrap"></script>
+    <script src="~ /Ext/classic/theme-neptune-touch/resources/theme-neptune-touch-all-debug.css"></script>
+    <script src="~ /Ext/ext-all-debug.js"></script>
+    <script src="~ /Ext/classic/theme-neptune-touch/theme-neptune-touch-debug.js"></script>
+    <script src="~ /Ext/classic/locale/locale-ru-debug.js"></script>
 
     <script type="text/javascript">
-        
+
         window.appSettings = {
-            "title": @Html.Raw(Json.Encode(@ViewBag.Title))
+            "title": @Html.Raw(Json.Serialize(@ViewBag.Title))
         };
 
     </script>
 
-    @Scripts.Render("~/Scripts/Ext/app.js")
+    <script src="~/Scripts/Ext/app.js"></script>
 </head>
 <body>
     @Html.Partial("_Navbar")
