@@ -26,8 +26,8 @@ namespace Urfu.Its.Web
         public Startup()
         {
             // Configuration = configuration;
-            var env = new HostingEnvironment();
-            _enviroment = env;
+           /* var env = new HostingEnvironment();
+            _enviroment = env;*/
             var builder = new ConfigurationBuilder();/*
                 .SetBasePath(_enviroment.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -47,8 +47,8 @@ namespace Urfu.Its.Web
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection));
             
             services.AddControllersWithViews();
-            services.AddMvc();
-            
+            services.AddMvc(options => options.EnableEndpointRouting = false);
+
             services.AddAutoMapper(typeof(Startup));
             var config = new MapperConfiguration(cfg => {
                 cfg.AddProfile<AutoMapperConfig>();
@@ -80,9 +80,9 @@ namespace Urfu.Its.Web
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseMvc();
+           // app.UseMvc();
             /*var mvcOptions = new MvcOptions();
-            mvcOptions.EnableEndpointRouting = false;*/
+            MvcOptions.EnableEndpointRouting = false;*/
             app.UseRouting();
 
             app.UseAuthentication();
@@ -93,9 +93,9 @@ namespace Urfu.Its.Web
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
-                endpoints.MapControllerRoute(
-                    name: "frm",
-                    pattern: "frm");
+                //endpoints.MapControllerRoute(
+                //    name: "frm",
+                //    pattern: "frm");
             });
             app.Use(async (httpContext, next) =>
             {

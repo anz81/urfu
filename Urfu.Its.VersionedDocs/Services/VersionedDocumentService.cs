@@ -116,7 +116,7 @@ namespace Urfu.Its.VersionedDocs.Services
                 {
                     var model = (BasicCharacteristicOPSchemaModel)CreateModel(document);
                     var fileRelativePathsToConcat = new List<string>();
-                    var he = Urfu.Its.Web.Startup._enviroment;
+                    var he = new HostingEnvironment();//Urfu.Its.Web.Startup._enviroment;
                     var app2FileIds = model.ApprovalActs.Where(a => a.FileId.HasValue).Select(a => a.FileId.Value).ToList();
                     if (app2FileIds.Count == 0) // если приложенных файлов нет, то добавляем страницу Приложение 2 по умолчанию в основной документ
                         fileRelativePathsToConcat.Add(Path.Combine(he.ContentRootPath, @"OHOP App2.docx"));
